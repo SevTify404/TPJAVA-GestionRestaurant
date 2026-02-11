@@ -19,8 +19,6 @@ import javax.swing.JOptionPane;
         Connection ma_connexion;
         
         try {
-            System.out.println(USER);
-            System.out.println(PASSWORD);
             ma_connexion = DriverManager.getConnection(URL, USER, PASSWORD);
             return ma_connexion;
         } catch (SQLException ex) {
