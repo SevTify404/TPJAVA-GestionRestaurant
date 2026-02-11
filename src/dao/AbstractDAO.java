@@ -35,4 +35,6 @@ public abstract class AbstractDAO<TypeDesEntity> implements InterfaceDAO<TypeDes
         }
         return connection;
     }
+    
+    // Si y'a des codes dupliqués partout on pourra juste ramener çà ici 
 }
