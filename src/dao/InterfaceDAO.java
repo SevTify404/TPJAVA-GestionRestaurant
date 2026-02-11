@@ -4,6 +4,8 @@
  */
 package dao;
 
+import java.util.List;
+
 /**
  *
  * @author sevtify
@@ -18,24 +20,27 @@ public interface InterfaceDAO<TypeDesEntity> {
     // les trucs ont bien marché
     
     // Pour sauvegarder les entity comme on a fait en classe
-    boolean enregistrer(TypeDesEntity objetRelieeAuDao);
+    CrudResult<TypeDesEntity> enregistrer(TypeDesEntity objetRelieeAuDao);
     
     // Pour lire les entity à travers leur ID
-    TypeDesEntity lire(int id);
+    CrudResult<TypeDesEntity> lire(int id);
     
     // Pour gerer les changements
-    boolean mettreAJour(TypeDesEntity entiteAMettreAJour);
+    CrudResult<TypeDesEntity> mettreAJour(TypeDesEntity entiteAMettreAJour);
     
     // Pour suppression définitive des entity
     // mais on va pas tropp utiliser çà hein
-    boolean suppressionDefinitive(TypeDesEntity entiteASupprimer);
+    CrudResult<Boolean> suppressionDefinitive(TypeDesEntity entiteASupprimer);
     
     // Pour suppression logique des entity
-    boolean suppressionLogique(TypeDesEntity entiteASupprimer);
+    CrudResult<Boolean> suppressionLogique(TypeDesEntity entiteASupprimer);
     
     // Pour vérifier si une entité est valide
-    boolean estValide(TypeDesEntity entiteAValider);
+    CrudResult<Boolean> estValide(TypeDesEntity entiteAValider);
     
     // Apres on va voir si on va ajouter d'autres trucs, pour le moment
     // c'est tout ce que j'ai en tete
+    
+    CrudResult<List<TypeDesEntity>> recupererTout();
+    
 }
