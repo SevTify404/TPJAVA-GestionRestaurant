@@ -20,6 +20,10 @@ public final class Messages {
     public final static String ERROR_OCCURED = "Une erreur est survenue lors "
         + "du traitement, veuillez réessayer";
     
+    public final static String ERROR_OCCURED_WITH_ERROR = "Une erreur est "
+        + "survenue lors "
+        + "du traitement : \n %s";
+    
     // Ainsi de suite
     
     

@@ -17,6 +17,15 @@ public class Audit {
     private String message;
     private Instant tempsAction;
 
+    public Audit(int idAudit, int idUser, ActionType action, String message, Instant tempsAction) {
+        this.idAudit = idAudit;
+        this.idUser = idUser;
+        this.action = action;
+        this.message = message;
+        this.tempsAction = tempsAction;
+    }
+
+    
     public ActionType getAction() {
         return action;
     }
