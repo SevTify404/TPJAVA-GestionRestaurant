@@ -5,6 +5,7 @@
 package entity;
 import entity.enums.ActionType;
 import java.time.Instant;
+import java.util.Date;
 
 /**
  *
@@ -66,6 +67,17 @@ public class Audit {
         this.tempsAction = tempsAction;
     }
     
+    public String afficher(){
+
+        String aRetourner = "Id : " + idAudit;
+        aRetourner += "\nUtilisateur : " + idUser;
+        aRetourner += "\nMessage : " + message;
+        aRetourner += "\nAction : " + action;
+        aRetourner += "\nTemps de l'action : " + Date.from(tempsAction);
+        
+        return aRetourner;
+    
+    }
     
     
     

@@ -6,7 +6,6 @@ package dao;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import javax.swing.JOptionPane;
 /**
  *
  * @author sevtify
@@ -21,20 +20,9 @@ public abstract class AbstractDAO<TypeDesEntity> implements InterfaceDAO<TypeDes
     private final static String URL = "jdbc:mysql://127.0.0.1:3306/gestionResto";
     private final static  String USER = System.getProperty("db.utilisateur");
     private final static String PASSWORD = System.getProperty("db.mdp");
-    
-    private static Connection connection;
 
-    protected Connection toConnect() {
-       Connection ma_connexion = null;
-        
-        try {
-            ma_connexion = DriverManager.getConnection(URL, USER, PASSWORD);
-            return ma_connexion;
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
-        }
-        return connection;
+    protected Connection toConnect() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
-    
     // Si y'a des codes dupliqués partout on pourra juste ramener çà ici 
 }

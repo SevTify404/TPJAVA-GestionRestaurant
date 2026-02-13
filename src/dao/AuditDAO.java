@@ -10,15 +10,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import javax.swing.JOptionPane;
 import utilitaires.Messages;
-import java.time.Instant;
+import java.util.ArrayList;
 /**
  *
  * @author sevtify
  */
 public class AuditDAO extends AbstractDAO<Audit>{
-
+    
+    public static AuditDAO getInstance(){
+        return new AuditDAO();
+    }
+    
     @Override
     public CrudResult<Boolean> enregistrer(Audit auditAEnregistrer) {
         
@@ -53,10 +56,10 @@ public class AuditDAO extends AbstractDAO<Audit>{
             conn.close();
             
         } catch (SQLException ex) {
-            return CrudResult.failure(String.format(Messages.ERROR_OCCURED_WITH_ERROR, ex.getMessage()));
+            return CrudResult.failure(Messages.messageAvecErreur(ex.getMessage()));
         }
         
-        if (inter == 1) {
+        if (inter == 0) {
             return CrudResult.failure(Messages.ERROR_OCCURED);
         }
         
@@ -66,7 +69,7 @@ public class AuditDAO extends AbstractDAO<Audit>{
     @Override
     public CrudResult<Audit> lire(int id) {
         //1-Initialisation de la requete 
-        String requete = "SELECT * FROM Audit WHERE `id`=?";
+        String requete = "SELECT * FROM Audit WHERE `idAudit`=?";
 
         //2-Initialisation d'un objet SQL précompilé
         PreparedStatement ps = null;
@@ -93,8 +96,9 @@ public class AuditDAO extends AbstractDAO<Audit>{
             
             if (rs.next()){
                 auditALire = new Audit(
-                    rs.getInt(1), rs.getInt(2), rs.getObject(3, ActionType.class),
-                    rs.getString(4), rs.getObject(5, Instant.class)
+                    rs.getInt(1), rs.getInt(2),
+                    ActionType.valueOf(rs.getString(3)),
+                    rs.getString(4), rs.getTimestamp(5).toInstant()
                 );
             }
             
@@ -108,7 +112,7 @@ public class AuditDAO extends AbstractDAO<Audit>{
             conn.close();
             
         } catch (SQLException ex) {
-            return CrudResult.failure(String.format(Messages.ERROR_OCCURED_WITH_ERROR, ex.getMessage()));
+            return CrudResult.failure(Messages.messageAvecErreur(ex.getMessage()));
         }
         
         if (auditALire == null) {
@@ -119,18 +123,18 @@ public class AuditDAO extends AbstractDAO<Audit>{
     }
 
     @Override
-    public CrudResult<Audit> mettreAJour(Audit entiteAMettreAJour) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public CrudResult<Audit> mettreAJour(Audit auditAMettreAJour) {
+        return CrudResult.failure(Messages.CANNOT_MODIFY_AUDIT);
     }
 
     @Override
-    public CrudResult<Boolean> suppressionDefinitive(Audit entiteASupprimer) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public CrudResult<Boolean> suppressionDefinitive(Audit auditASupprimer) {
+        return CrudResult.failure(Messages.CANNOT_DELETE_AUDIT);
     }
 
     @Override
     public CrudResult<Boolean> suppressionLogique(Audit entiteASupprimer) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return CrudResult.failure(Messages.CANNOT_DELETE_AUDIT);
     }
 
     @Override
@@ -140,7 +144,52 @@ public class AuditDAO extends AbstractDAO<Audit>{
 
     @Override
     public CrudResult<List<Audit>> recupererTout() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        //1-Initialisation de la requete 
+        String requete = "SELECT * FROM Audit";
+
+        //2-Initialisation d'un objet SQL précompilé
+        PreparedStatement ps = null;
+        
+
+        List<Audit> listeDesAudits = new ArrayList<>();
+        try {
+            
+            //3-Ouverture de la connexion
+            Connection conn = toConnect();
+            
+            //4-Préparation de la requete
+            ps = conn.prepareStatement(requete);
+            
+            //6-Initialisation d'une table de donnée
+            ResultSet rs = null;
+            
+            //7-Execution de la requete    
+            rs = ps.executeQuery();
+            
+            while (rs.next()){                
+                listeDesAudits.add(
+                    new Audit(
+                        rs.getInt(1), rs.getInt(2),
+                        ActionType.valueOf(rs.getString(3)),
+                        rs.getString(4), rs.getTimestamp(5).toInstant()
+                    )
+                );
+            }
+            
+            rs.close();
+
+            
+            //8- Fermeture de l'objet SQL précompilé
+            ps.close();
+            
+            //9-Fermeture de la connexion
+            conn.close();
+            
+        } catch (SQLException ex) {
+            return CrudResult.failure(Messages.messageAvecErreur(ex.getMessage()));
+        }
+        
+        return CrudResult.success(listeDesAudits);
     }
     
 }

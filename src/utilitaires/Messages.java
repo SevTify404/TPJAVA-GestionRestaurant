@@ -20,9 +20,13 @@ public final class Messages {
     public final static String ERROR_OCCURED = "Une erreur est survenue lors "
         + "du traitement, veuillez réessayer";
     
-    public final static String ERROR_OCCURED_WITH_ERROR = "Une erreur est "
-        + "survenue lors "
-        + "du traitement : \n %s";
+    public final static String CANNOT_MODIFY_AUDIT = "Vous ne pouvez pas modifier un Audit";
+    
+    public final static String CANNOT_DELETE_AUDIT = "Vous ne pouvez pas supprimer un Audit";
+    
+    public static String messageAvecErreur(String message){
+        return "Une erreur est survenue lors du traitement : \n" + message;
+    }
     
     // Ainsi de suite
     
