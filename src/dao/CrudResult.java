@@ -42,4 +42,13 @@ public class CrudResult<T> {
     public boolean estUneErreur() {
         return erreur != null;
     }
+    
+    @Override
+    public String toString(){
+        if (estUnSucces()) {
+            return "Succes : " + donnes.toString();
+        } else {
+            return "Erreur : " + erreur;
+        }
+    }
 }

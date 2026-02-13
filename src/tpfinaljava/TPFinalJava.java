@@ -5,6 +5,12 @@
 package tpfinaljava;
 
 
+import dao.AuditDAO;
+import dao.CrudResult;
+import entity.Audit;
+
+import java.util.List;
+
 /**
  *
  * @author sevtify
@@ -15,7 +21,11 @@ public class TPFinalJava {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.out.println("Pfffff");
+        CrudResult<List<Audit>> ee = AuditDAO.getInstance().recupererTout();
+        System.out.println(ee);
+        if (ee.estUnSucces()) {
+            System.out.println(ee.getDonnes());
+        }
     }
     
 }
