@@ -4,6 +4,8 @@
  */
 package tpfinaljava;
 
+import entity.Produit;
+
 
 /**
  *
@@ -16,6 +18,7 @@ public class TPFinalJava {
      */
     public static void main(String[] args) {
         System.out.println("Pfffff");
+        Produit unProduit = new Produit(1,"riz" , 1, 1, 10000,100, 10);
     }
     
 }
