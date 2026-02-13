@@ -13,9 +13,14 @@ import javax.swing.JOptionPane;
  */
 public class VariablesEnvirennement {
     
+    public static Dotenv variables; 
     public static Dotenv recupererVariables(){
         try {
-            return Dotenv.load();
+            if (variables == null) {
+                variables = Dotenv.load();
+            }
+            
+            return variables;
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Allez ajouter le fichier .env à la racine du projet avec vos informations de connexion à la bd svp", "Erreur De Variable d'envirennement", JOptionPane.ERROR_MESSAGE);

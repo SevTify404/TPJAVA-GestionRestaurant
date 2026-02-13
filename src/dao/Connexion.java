@@ -25,7 +25,6 @@ public class Connexion {
     }
     
     protected static Connection getConnection() throws SQLException{
-        System.out.println((VariablesEnvirennement.recupererVariables().get("UTILISATEUR_DB")));
         return ds.getConnection();
     
     }
