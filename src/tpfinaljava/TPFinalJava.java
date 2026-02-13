@@ -4,6 +4,8 @@
  */
 package tpfinaljava;
 
+import entity.Produit;
+
 
 import dao.AuditDAO;
 import dao.CrudResult;
