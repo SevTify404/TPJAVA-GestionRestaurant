@@ -8,7 +8,7 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.Component;
 import java.util.Arrays;
-
+import utilitaires.ApplicationColors;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
