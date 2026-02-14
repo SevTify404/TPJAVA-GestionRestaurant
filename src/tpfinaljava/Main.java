@@ -5,8 +5,6 @@
 package tpfinaljava;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import formulaires.MenuPrincipalFrame;
-import formulaires.LoginFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import utilitaires.AuthentificationManager;
@@ -16,7 +14,7 @@ import utilitaires.VariablesEnvirennement;
  *
  * @author sevtify
  */
-public class TPFinalJava {
+public class Main {
 
     /**
      * @param args the command line arguments
@@ -33,6 +31,7 @@ public class TPFinalJava {
         } catch (UnsupportedLookAndFeelException ex) {
             System.err.println("Échec de l'installation de FlatLaf");
         }
+        
         AuthentificationManager app = AuthentificationManager.getInstance();
         
         app.lancerApp();
