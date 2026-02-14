@@ -26,15 +26,7 @@ public class LoginFrame extends javax.swing.JFrame {
     public LoginFrame() {
         initComponents();
         
-        setSize(620, 520);
-
-        
-        setLocationRelativeTo(null);
-        
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int x = (screenSize.width - this.getWidth()) / 2;
-        int y = (screenSize.height - this.getHeight()) / 2;
-        this.setLocation(x, y);
+        Utils.configurationDeBaseDeFenetre(this, 620, 520);
         
         DocumentListener ecouteur = new DocumentListener() {
             @Override
@@ -184,9 +176,9 @@ public class LoginFrame extends javax.swing.JFrame {
                 .addGap(32, 32, 32)
                 .addComponent(jlLabelMDP1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jpfMotDePasse, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jlMdpPhoto, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jlMdpPhoto, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jpfMotDePasse, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 63, Short.MAX_VALUE)
                 .addComponent(jbConnexion, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(21, 21, 21))

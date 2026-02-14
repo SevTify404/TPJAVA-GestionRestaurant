@@ -21,4 +21,7 @@ public class ApplicationColors {
     public static final Color TEXT_SECONDARY = new Color(117, 117, 117);
     public static final Color SUCCESS = new Color(76, 175, 80);
     public static final Color ERROR = new Color(211, 47, 47);
+    public static final Color SIDEBAR_BG = Color.decode("#0369a1");
+    public static final Color SIDEBAR_HOVER = new Color(52, 73, 94);
+    public static final Color SIDEBAR_SELECTION = new Color(52, 152, 219);
 }

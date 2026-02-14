@@ -5,6 +5,7 @@
 package tpfinaljava;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import formulaires.MenuPrincipalFrame;
 import formulaires.LoginFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -34,7 +35,7 @@ public class TPFinalJava {
         
         // Lancement de l'app
         java.awt.EventQueue.invokeLater(() -> {
-            new LoginFrame().setVisible(true);
+            new MenuPrincipalFrame().setVisible(true);
         });
     }
 }
