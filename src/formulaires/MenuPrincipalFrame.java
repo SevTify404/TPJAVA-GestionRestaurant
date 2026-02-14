@@ -22,7 +22,9 @@ public class MenuPrincipalFrame extends JFrame {
     private final int FRAME_WIDTH = 1700;
     private final int FRAME_HEIGHT = 1000;
     private final int SIDEBAR_WIDTH = 320; // Ratio équilibré pour 1700px
-
+    
+    private JButton boutonSelectionne = null;
+    
     public MenuPrincipalFrame() {
         initComponents();
         configureFrame();
@@ -48,7 +50,7 @@ public class MenuPrincipalFrame extends JFrame {
         // Menu Central
         JPanel menuContainer = new JPanel();
         menuContainer.setOpaque(false);
-        menuContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 5));
+        menuContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 18));
 
         addNavigationButton(menuContainer, "Tableau de Bord", "DASHBOARD");
         addNavigationButton(menuContainer, "Produits", "INVENTORY");
@@ -76,19 +78,22 @@ public class MenuPrincipalFrame extends JFrame {
         mainContent.add(createViewPlaceholder("SETTINGS - Configuration système"), "SETTINGS");
 
         // --- 3. TOP BAR (FERMETURE) ---
-        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        topBar.setBackground(ApplicationColors.BACKGROUND);
-        topBar.setPreferredSize(new Dimension(FRAME_WIDTH - SIDEBAR_WIDTH, 50));
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.setBackground(ApplicationColors.SIDEBAR_BG);
+        topBar.setOpaque(false);
+        topBar.setBorder(new EmptyBorder(20, 20, 20, 20));
+        topBar.setPreferredSize(new Dimension(FRAME_WIDTH - SIDEBAR_WIDTH, 70));
 
-        JButton btnClose = new JButton("✕");
-        btnClose.setFont(new Font("Arial", Font.BOLD, 20));
-        btnClose.setForeground(ApplicationColors.TEXT_SECONDARY);
-        btnClose.setBorder(null);
-        btnClose.setContentAreaFilled(false);
+        JButton btnClose = new JButton("Fermer L'application ✕");
+        btnClose.setBackground(ApplicationColors.ERROR);
+        btnClose.setForeground(ApplicationColors.BACKGROUND);
+        btnClose.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnClose.setFocusPainted(false);
+        btnClose.setBorderPainted(false);
         btnClose.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnClose.addActionListener(e -> System.exit(0));
 
-        topBar.add(btnClose);
+        topBar.add(btnClose, BorderLayout.EAST);
 
         // --- ASSEMBLAGE ---
         JPanel rightPanel = new JPanel(new BorderLayout());
@@ -101,19 +106,17 @@ public class MenuPrincipalFrame extends JFrame {
 
     private JPanel createSidebarHeader() {
         JPanel header = new JPanel();
-        header.setPreferredSize(new Dimension(SIDEBAR_WIDTH, 180));
+        header.setPreferredSize(new Dimension(SIDEBAR_WIDTH, 250));
         header.setOpaque(false);
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
         header.setBorder(new EmptyBorder(30, 20, 20, 20));
 
         JLabel lblAvatar = new JLabel("👤"); // Remplacer par une icône image plus tard
-        lblAvatar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/user.png")));
-        lblAvatar.setFont(new Font("Segoe UI", Font.PLAIN, 50));
-        lblAvatar.setForeground(Color.WHITE);
+        lblAvatar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/woman.png")));
         lblAvatar.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel lblUser = new JLabel("Admin User");
-        lblUser.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblUser.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblUser.setForeground(Color.WHITE);
         lblUser.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -121,7 +124,7 @@ public class MenuPrincipalFrame extends JFrame {
         lblRole.setOpaque(true);
         lblRole.setBackground(ApplicationColors.SUCCESS);
         lblRole.setForeground(Color.WHITE);
-        lblRole.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblRole.setFont(new Font("Segoe UI", Font.BOLD, 15));
         lblRole.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         header.add(lblAvatar);
@@ -137,8 +140,8 @@ public class MenuPrincipalFrame extends JFrame {
         JButton btn = new JButton("   " + text);
         btn.setPreferredSize(new Dimension(SIDEBAR_WIDTH - 20, 50));
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        btn.setForeground(new Color(200, 200, 200));
-        btn.setBackground(new Color(44, 62, 80));
+        btn.setForeground(ApplicationColors.TEXT_PRIMARY);
+        btn.setBackground(ApplicationColors.BACKGROUND);
         btn.setBorder(new EmptyBorder(0, 20, 0, 0));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setHorizontalAlignment(SwingConstants.LEFT);
@@ -146,16 +149,37 @@ public class MenuPrincipalFrame extends JFrame {
         btn.setBorderPainted(false);
 
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn.setBackground(new Color(52, 73, 94));
-                btn.setForeground(Color.WHITE);
+                if (btn != boutonSelectionne) {
+                    btn.setBackground(new Color(52, 73, 94));
+                    btn.setForeground(Color.WHITE);
+                }
             }
 
+            @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setBackground(new Color(44, 62, 80));
-                btn.setForeground(new Color(200, 200, 200));
+                if (btn != boutonSelectionne) {
+                    btn.setForeground(ApplicationColors.TEXT_PRIMARY);
+                    btn.setBackground(ApplicationColors.BACKGROUND);
+                }
             }
+            
         });
+        // Pour voir ce qui est cliquer et mettr a jour la sidebar
+    btn.addActionListener(e -> {
+        if (boutonSelectionne != null) {
+            boutonSelectionne.setForeground(ApplicationColors.TEXT_PRIMARY);
+            boutonSelectionne.setBackground(ApplicationColors.BACKGROUND);
+        }
+
+        
+        boutonSelectionne = btn;
+        btn.setBackground(ApplicationColors.PRIMARY);
+        btn.setForeground(Color.WHITE);
+        
+        cardLayout.show(mainContent, cardName);
+    });
 
         btn.addActionListener(e -> cardLayout.show(mainContent, cardName));
         parent.add(btn);
@@ -167,10 +191,10 @@ public class MenuPrincipalFrame extends JFrame {
         footer.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         JButton btnLogout = new JButton("Logout");
-        btnLogout.setPreferredSize(new Dimension(120, 40));
-        btnLogout.setBackground(ApplicationColors.ERROR);
-        btnLogout.setForeground(Color.WHITE);
-        btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnLogout.setPreferredSize(new Dimension(280, 40));
+        btnLogout.setBackground(ApplicationColors.SUCCESS);
+        btnLogout.setForeground(ApplicationColors.BACKGROUND);
+        btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 17));
         btnLogout.setFocusPainted(false);
         btnLogout.setBorderPainted(false);
         btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -188,7 +212,7 @@ public class MenuPrincipalFrame extends JFrame {
 
     private JPanel createViewPlaceholder(String title) {
         JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(ApplicationColors.BACKGROUND);
+        p.setBackground(ApplicationColors.PANEL_BG);
         JLabel l = new JLabel(title, SwingConstants.CENTER);
         l.setFont(new Font("Segoe UI", Font.BOLD, 24));
         l.setForeground(ApplicationColors.TEXT_SECONDARY);

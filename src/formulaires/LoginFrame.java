@@ -106,7 +106,7 @@ public class LoginFrame extends javax.swing.JFrame {
         jtfLogin.addActionListener(this::jtfLoginActionPerformed);
 
         jlLogo.setBackground(utilitaires.ApplicationColors.PRIMARY);
-        jlLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/fast-food (1).png"))); // NOI18N
+        jlLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/fast-food.png"))); // NOI18N
         jlLogo.setText("");
         jlLogo.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         jlLogo.setAlignmentX(0.5F);
