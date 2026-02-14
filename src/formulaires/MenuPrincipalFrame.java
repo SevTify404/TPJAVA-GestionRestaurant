@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package formulaires;
 
 import javax.swing.*;
@@ -10,9 +14,8 @@ import utilitaires.ApplicationColors;
 import utilitaires.AuthentificationManager;
 
 /**
- * Menu Principal - Architecture dynamique avec CardLayout
  *
- * @author Gemini
+ * @author sevtify
  */
 public class MenuPrincipalFrame extends JFrame {
 
