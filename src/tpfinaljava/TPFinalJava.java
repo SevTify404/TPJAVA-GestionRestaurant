@@ -4,12 +4,13 @@
  */
 package tpfinaljava;
 
-
-import dao.AuditDAO;
-import dao.CrudResult;
-import entity.Audit;
-
-import java.util.List;
+import com.formdev.flatlaf.FlatLightLaf;
+import formulaires.MenuPrincipalFrame;
+import formulaires.LoginFrame;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import utilitaires.AuthentificationManager;
+import utilitaires.VariablesEnvirennement;
 
 /**
  *
@@ -21,11 +22,19 @@ public class TPFinalJava {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        CrudResult<List<Audit>> ee = AuditDAO.getInstance().recupererTout();
-        System.out.println(ee);
-        if (ee.estUnSucces()) {
-            System.out.println(ee.getDonnes());
+        
+        // Je verifie si le fiechier .env existe
+        VariablesEnvirennement.checkVariablesEnvironnement();
+        
+        // ici j'active un thème moderne
+        try {
+            UIManager.setLookAndFeel(new FlatLightLaf());
+            System.out.println("Installation de flatlad réussie");
+        } catch (UnsupportedLookAndFeelException ex) {
+            System.err.println("Échec de l'installation de FlatLaf");
         }
+        AuthentificationManager app = AuthentificationManager.getInstance();
+        
+        app.lancerApp();
     }
-    
 }
