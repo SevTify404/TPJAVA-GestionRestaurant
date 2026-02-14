@@ -4,7 +4,10 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.HashMap;
+import java.util.Map;
 import utilitaires.ApplicationColors;
+import utilitaires.AuthentificationManager;
 
 /**
  * Menu Principal - Architecture dynamique avec CardLayout
@@ -25,6 +28,12 @@ public class MenuPrincipalFrame extends JFrame {
     
     private JButton boutonSelectionne = null;
     
+    private String utislisateurConnecte = AuthentificationManager.getInstance().recupererUtilisateurConnecte();
+    
+    private final Map<String, ImageIcon> navigationIcons = new HashMap<>();
+    
+    private JLabel labelSectionCourante = new JLabel("", SwingConstants.CENTER);
+
     public MenuPrincipalFrame() {
         initComponents();
         configureFrame();
@@ -36,6 +45,40 @@ public class MenuPrincipalFrame extends JFrame {
     }
 
     private void initComponents() {
+        
+        navigationIcons.put(
+            "DASHBOARD",
+            new ImageIcon(getClass().getResource("/images/dashboard.png"))
+        );
+        navigationIcons.put(
+            "INVENTORY",
+            new ImageIcon(getClass().getResource("/images/store.png"))
+        );
+        navigationIcons.put(
+            "STOCKS",
+            new ImageIcon(getClass().getResource("/images/stock.png"))
+        );
+        navigationIcons.put(
+            "ORDERS",
+            new ImageIcon(getClass().getResource("/images/shopping.png"))
+        );
+        navigationIcons.put(
+            "USERS",
+            new ImageIcon(getClass().getResource("/images/user.png"))
+        );
+        navigationIcons.put(
+            "STATS", 
+            new ImageIcon(getClass().getResource("/images/stats.png"))
+        );
+        navigationIcons.put(
+            "LOGS", 
+            new ImageIcon(getClass().getResource("/images/logs.png"))
+        );
+        navigationIcons.put(
+            "SETTINGS", 
+            new ImageIcon(getClass().getResource("/images/settings.png"))
+        );
+
         setLayout(new BorderLayout());
 
         // --- 1. SIDEBAR (GAUCHE) ---
@@ -59,6 +102,7 @@ public class MenuPrincipalFrame extends JFrame {
         addNavigationButton(menuContainer, "Utilisateurs", "USERS");
         addNavigationButton(menuContainer, "Statistiques", "STATS");
         addNavigationButton(menuContainer, "Audit & Logs", "LOGS");
+        addNavigationButton(menuContainer, "Paramètres Personnels", "SETTINGS");
 
         sideBar.add(menuContainer, BorderLayout.CENTER);
 
@@ -91,9 +135,21 @@ public class MenuPrincipalFrame extends JFrame {
         btnClose.setFocusPainted(false);
         btnClose.setBorderPainted(false);
         btnClose.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnClose.addActionListener(e -> System.exit(0));
+        btnClose.addActionListener(e -> {
+            int res = JOptionPane.showConfirmDialog(this, "Etes vous sur de vous fermer cette superbe Application ?", "Fermeture", JOptionPane.YES_NO_OPTION);
+            if (res == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
+        });
+        
+        
+        
+        labelSectionCourante.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        labelSectionCourante.setForeground(ApplicationColors.PRIMARY);
+        labelSectionCourante.setText("TABLEAU DE BORD");
 
         topBar.add(btnClose, BorderLayout.EAST);
+        topBar.add(labelSectionCourante, BorderLayout.CENTER);
 
         // --- ASSEMBLAGE ---
         JPanel rightPanel = new JPanel(new BorderLayout());
@@ -111,11 +167,12 @@ public class MenuPrincipalFrame extends JFrame {
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
         header.setBorder(new EmptyBorder(30, 20, 20, 20));
 
-        JLabel lblAvatar = new JLabel("👤"); // Remplacer par une icône image plus tard
-        lblAvatar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/woman.png")));
+        JLabel lblAvatar = new JLabel(new ImageIcon(getClass().getResource("/images/woman.png"))); // Remplacer par une icône image plus tard
+        
         lblAvatar.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel lblUser = new JLabel("Admin User");
+        JLabel lblUser = new JLabel(utislisateurConnecte);
+        
         lblUser.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblUser.setForeground(Color.WHITE);
         lblUser.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -138,6 +195,7 @@ public class MenuPrincipalFrame extends JFrame {
 
     private void addNavigationButton(JPanel parent, String text, String cardName) {
         JButton btn = new JButton("   " + text);
+        btn.setIcon(navigationIcons.get(cardName));
         btn.setPreferredSize(new Dimension(SIDEBAR_WIDTH - 20, 50));
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         btn.setForeground(ApplicationColors.TEXT_PRIMARY);
@@ -167,19 +225,20 @@ public class MenuPrincipalFrame extends JFrame {
             
         });
         // Pour voir ce qui est cliquer et mettr a jour la sidebar
-    btn.addActionListener(e -> {
-        if (boutonSelectionne != null) {
-            boutonSelectionne.setForeground(ApplicationColors.TEXT_PRIMARY);
-            boutonSelectionne.setBackground(ApplicationColors.BACKGROUND);
-        }
+        btn.addActionListener(e -> {
+            if (boutonSelectionne != null) {
+                boutonSelectionne.setForeground(ApplicationColors.TEXT_PRIMARY);
+                boutonSelectionne.setBackground(ApplicationColors.BACKGROUND);
+            }
 
-        
-        boutonSelectionne = btn;
-        btn.setBackground(ApplicationColors.PRIMARY);
-        btn.setForeground(Color.WHITE);
-        
-        cardLayout.show(mainContent, cardName);
-    });
+
+            boutonSelectionne = btn;
+            btn.setBackground(ApplicationColors.PRIMARY);
+            btn.setForeground(Color.WHITE);
+            labelSectionCourante.setText(btn.getText().strip().toUpperCase());
+
+            cardLayout.show(mainContent, cardName);
+        });
 
         btn.addActionListener(e -> cardLayout.show(mainContent, cardName));
         parent.add(btn);
@@ -190,7 +249,7 @@ public class MenuPrincipalFrame extends JFrame {
         footer.setOpaque(false);
         footer.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JButton btnLogout = new JButton("Logout");
+        JButton btnLogout = new JButton("Déconnexion");
         btnLogout.setPreferredSize(new Dimension(280, 40));
         btnLogout.setBackground(ApplicationColors.SUCCESS);
         btnLogout.setForeground(ApplicationColors.BACKGROUND);
@@ -200,9 +259,9 @@ public class MenuPrincipalFrame extends JFrame {
         btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btnLogout.addActionListener(e -> {
-            int res = JOptionPane.showConfirmDialog(this, "Quitter la session ?", "Logout", JOptionPane.YES_NO_OPTION);
+            int res = JOptionPane.showConfirmDialog(this, "Etes vous sur de vous deconnecter ?", "Déconnexion", JOptionPane.YES_NO_OPTION);
             if (res == JOptionPane.YES_OPTION) {
-                System.exit(0);
+                AuthentificationManager.getInstance().deconnecterUtilisateurActuel();
             }
         });
 

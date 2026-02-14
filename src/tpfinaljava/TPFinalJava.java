@@ -9,6 +9,7 @@ import formulaires.MenuPrincipalFrame;
 import formulaires.LoginFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import utilitaires.AuthentificationManager;
 import utilitaires.VariablesEnvirennement;
 
 /**
@@ -32,10 +33,8 @@ public class TPFinalJava {
         } catch (UnsupportedLookAndFeelException ex) {
             System.err.println("Échec de l'installation de FlatLaf");
         }
+        AuthentificationManager app = AuthentificationManager.getInstance();
         
-        // Lancement de l'app
-        java.awt.EventQueue.invokeLater(() -> {
-            new MenuPrincipalFrame().setVisible(true);
-        });
+        app.lancerApp();
     }
 }

@@ -11,6 +11,7 @@ import java.util.Arrays;
 import utilitaires.ApplicationColors;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import utilitaires.AuthentificationManager;
 
 /**
  *
@@ -194,6 +195,7 @@ public class LoginFrame extends javax.swing.JFrame {
         String loginSaisi = jtfLogin.getText();
         char[] mdpSaisi = jpfMotDePasse.getPassword();
         System.out.println("Login : " + loginSaisi + " MDP : "+ Arrays.toString(mdpSaisi));
+        AuthentificationManager.getInstance().connecterUnUtilisateur(loginSaisi);
     }//GEN-LAST:event_jbConnexionActionPerformed
 
     private void jtfLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtfLoginActionPerformed
