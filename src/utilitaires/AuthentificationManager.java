@@ -4,9 +4,6 @@
  */
 package utilitaires;
 
-import formulaires.LoginFrame;
-import formulaires.MenuPrincipalFrame;
-
 /**
  *
  * @author sevtify
@@ -17,12 +14,7 @@ public class AuthentificationManager {
     // J'utilise le pattern Singleton pour éviter les bugs bizzar
     
     private static AuthentificationManager instanceUnique = null;
-    
     private String personneActuellementConnecte = null;
-    
-    private LoginFrame formulaireDeConnexion = null;
-    
-    private MenuPrincipalFrame notreMenuPrincipal = null;
     
     private AuthentificationManager(){}
     
@@ -31,36 +23,15 @@ public class AuthentificationManager {
         return instanceUnique;
     }
     
-    public void lancerApp(){
-        if (formulaireDeConnexion == null) formulaireDeConnexion = new LoginFrame();
-        
-        formulaireDeConnexion.setVisible(true);
-    }
-    
-    public void connecterUnUtilisateur(String utilisateur){
-        
-        formulaireDeConnexion.dispose();
-        formulaireDeConnexion = null;
-        
-        personneActuellementConnecte = utilisateur;
-        notreMenuPrincipal = new MenuPrincipalFrame();
-        System.out.println("Utilisatier " + utilisateur + " est conn");
-        
-        notreMenuPrincipal.setVisible(true);
+    public void connecterUnUtilisateur(String user){
+        this.personneActuellementConnecte = user;
     }
     
     public void deconnecterUtilisateurActuel(){
-        
-        
-        notreMenuPrincipal.dispose();
-        notreMenuPrincipal = null;
-        
-        System.out.println("Utilisaateur" + personneActuellementConnecte + " déconnecté");
-        personneActuellementConnecte = null;
-        
-        lancerApp();
+        this.personneActuellementConnecte = null;
     }
     
+
     public String recupererUtilisateurConnecte(){
         return personneActuellementConnecte;
     }

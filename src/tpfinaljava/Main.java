@@ -4,10 +4,7 @@
  */
 package tpfinaljava;
 
-import com.formdev.flatlaf.FlatLightLaf;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import utilitaires.AuthentificationManager;
+import formulaires.App;
 import utilitaires.VariablesEnvirennement;
 
 /**
@@ -24,16 +21,8 @@ public class Main {
         // Je verifie si le fiechier .env existe
         VariablesEnvirennement.checkVariablesEnvironnement();
         
-        // ici j'active un thème moderne
-        try {
-            UIManager.setLookAndFeel(new FlatLightLaf());
-            System.out.println("Installation de flatlad réussie");
-        } catch (UnsupportedLookAndFeelException ex) {
-            System.err.println("Échec de l'installation de FlatLaf");
-        }
+        App application = App.getInstance();
         
-        AuthentificationManager app = AuthentificationManager.getInstance();
-        
-        app.lancerApp();
+        application.lancerApplication();
     }
 }

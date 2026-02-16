@@ -192,7 +192,7 @@ public class LoginFrame extends javax.swing.JFrame {
         String loginSaisi = jtfLogin.getText();
         char[] mdpSaisi = jpfMotDePasse.getPassword();
         System.out.println("Login : " + loginSaisi + " MDP : "+ Arrays.toString(mdpSaisi));
-        AuthentificationManager.getInstance().connecterUnUtilisateur(loginSaisi);
+        App.getInstance().lancerMenuPrincipal(loginSaisi);
     }//GEN-LAST:event_jbConnexionActionPerformed
 
     private void jtfLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtfLoginActionPerformed

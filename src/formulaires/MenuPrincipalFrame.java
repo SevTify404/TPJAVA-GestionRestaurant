@@ -141,7 +141,7 @@ public class MenuPrincipalFrame extends JFrame {
         btnClose.addActionListener(e -> {
             int res = JOptionPane.showConfirmDialog(this, "Etes vous sur de vous fermer cette superbe Application ?", "Fermeture", JOptionPane.YES_NO_OPTION);
             if (res == JOptionPane.YES_OPTION) {
-                System.exit(0);
+                App.getInstance().fermerApp();
             }
         });
         
@@ -264,7 +264,7 @@ public class MenuPrincipalFrame extends JFrame {
         btnLogout.addActionListener(e -> {
             int res = JOptionPane.showConfirmDialog(this, "Etes vous sur de vous deconnecter ?", "Déconnexion", JOptionPane.YES_NO_OPTION);
             if (res == JOptionPane.YES_OPTION) {
-                AuthentificationManager.getInstance().deconnecterUtilisateurActuel();
+                App.getInstance().fermerSessionUtilisateur();
             }
         });
 
