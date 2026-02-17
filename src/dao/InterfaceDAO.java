@@ -20,7 +20,7 @@ public interface InterfaceDAO<TypeDesEntity> {
     // les trucs ont bien marché
     
     // Pour sauvegarder les entity comme on a fait en classe
-    CrudResult<Boolean> enregistrer(TypeDesEntity objetRelieeAuDao);
+    CrudResult<TypeDesEntity> enregistrer(TypeDesEntity objetRelieeAuDao);
     
     // Pour lire les entity à travers leur ID
     CrudResult<TypeDesEntity> lire(int id);
