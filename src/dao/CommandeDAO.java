@@ -20,6 +20,10 @@ import java.util.ArrayList;
 
 public class CommandeDAO extends AbstractDAO<Commande> {
 
+    public static Object getInstance() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
    @Override
 public CrudResult<Boolean> enregistrer(Commande commande) {
 
@@ -161,7 +165,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
             ps.setInt(1, etreValide.getIdCommande());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                valide = rs.getInt(1) > 0; // mise à jour de la variable correcte
+                valide = rs.getInt(1) > 0; // mise à jour de la variable 
             }
             }
             return CrudResult.success(valide);
@@ -175,7 +179,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
 public CrudResult<List<Commande>> recupererTout() {
     String sql = "SELECT idCommande, dateCommande, etat, total, deletedAt FROM Commande WHERE deletedAt IS NULL";
 
-    List<Commande> commandes = new ArrayList<>(); // initialisation correcte
+    List<Commande> commandes = new ArrayList<>(); 
 
     try (Connection conn = toConnect(); 
          PreparedStatement ps = conn.prepareStatement(sql); 

@@ -55,29 +55,22 @@ public class Commande {
     public double getTotal() {
         return total;
     }
-
     public LocalDateTime getDeletedAt() {
         return deletedAt;
     }
-
     public void setIdCommande(int idCommande) {
         this.idCommande = idCommande;
     }
-
     public void setDateCommande(LocalDateTime dateCommande) {
         this.dateCommande = dateCommande;
     }
-
     public void setEtat(EtatCommande etat) {
         this.etat = etat;
     }
-
     public void setTotal(double total) {
         this.total = total;
     }
-
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
     }
-
 }

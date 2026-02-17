@@ -78,13 +78,10 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
     @Override
     public CrudResult<LigneCommande> mettreAJour(LigneCommande AMettreAJour) {
         String sql = "UPDATE LigneCommande SET idCommande = ?, idProduit = ?, quantite = ?, prixUnitaire = ?, montantLigne = ?, deletedAt = ? WHERE idLC = ?";
-
         try (Connection conn = toConnect(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             // recalculer le montant avant update
             AMettreAJour.setMontantLigne(AMettreAJour.getQuantite() * AMettreAJour.getPrixUnitaire());
-
             ps.setInt(1, AMettreAJour.getIdCommande());
             ps.setInt(2, AMettreAJour.getIdProduit());
             ps.setInt(3, AMettreAJour.getQuantite());
