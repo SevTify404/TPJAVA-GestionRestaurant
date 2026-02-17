@@ -38,7 +38,8 @@ public class LoginFrame extends javax.swing.JFrame {
                 // Un tout petit peu d'algo hihihihihi
                 boolean pffff = jtfLogin.getText().trim().isEmpty()
                                ||
-                               (jpfMotDePasse.getPassword().length == 0);
+                               (String.copyValueOf(jpfMotDePasse.getPassword()).trim().isEmpty());
+                
                 jbConnexion.setEnabled(!pffff);
             }
         };
