@@ -12,7 +12,24 @@ import javax.swing.JFrame;
  *
  * @author sevtify
  */
-public class Utils {
+public class FormsUtils {
+    
+    // Centralisation de toute les dimensions de l'application ici pour plus de
+    // facilité lors des modifications
+    
+    protected static final int MENU_PRINCIPAL_WIDTH = 1800;
+    protected static final int MENU_PRINCIPAL_HEIGHT = 1000;
+    protected static final int MENU_PRINCIPAL_SIDEBAR_WIDTH = 320;
+    protected static final int MENU_PRINCIPAL_TOPBAR_HEIGHT = 60;
+    protected static final int LOGIN_WIDTH = 620;
+    protected static final int LOGIN_HEIGHT = 520;
+    
+    // Tous les Jpannel devront forcément avoir cette dimension vu qu'ils seront
+    // dans un conteneur qui aura exactement cette taille
+    protected static Dimension JPANNEL_DIMENSION = new Dimension(
+        MENU_PRINCIPAL_WIDTH - MENU_PRINCIPAL_SIDEBAR_WIDTH,
+        MENU_PRINCIPAL_HEIGHT - MENU_PRINCIPAL_TOPBAR_HEIGHT
+    );
     
     protected static void configurationDeBaseDeFenetre(JFrame laFenetre, int largeur, int longueur){
         

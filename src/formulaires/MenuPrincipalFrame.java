@@ -7,7 +7,6 @@ package formulaires;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.HashMap;
 import java.util.Map;
 import utilitaires.ApplicationColors;
@@ -21,21 +20,21 @@ public class MenuPrincipalFrame extends JFrame {
 
     // Composants principaux
     private JPanel sideBar;
-    private JPanel mainContent; // Le panel dynamique (CardLayout)
+    private JPanel mainContent; // Le panel dynamique CardLayout
     private CardLayout cardLayout;
 
     // Dimensions imposées
-    private final int FRAME_WIDTH = 1700;
-    private final int FRAME_HEIGHT = 1000;
-    private final int SIDEBAR_WIDTH = 320; // Ratio équilibré pour 1700px
+    private final int FRAME_WIDTH = FormsUtils.MENU_PRINCIPAL_WIDTH;
+    private final int FRAME_HEIGHT = FormsUtils.MENU_PRINCIPAL_HEIGHT;
+    private final int SIDEBAR_WIDTH = FormsUtils.MENU_PRINCIPAL_SIDEBAR_WIDTH; 
     
     private JButton boutonSelectionne = null;
     
-    private String utislisateurConnecte = AuthentificationManager.getInstance().recupererUtilisateurConnecte();
+    private final String utislisateurConnecte = AuthentificationManager.getInstance().recupererUtilisateurConnecte();
     
-    private final Map<String, ImageIcon> navigationIcons = new HashMap<>();
+    private final Map<String, ImageIcon> iconesDeTousLesBoutons = new HashMap<>();
     
-    private JLabel labelSectionCourante = new JLabel("", SwingConstants.CENTER);
+    private final JLabel labelSectionCourante = new JLabel("", SwingConstants.CENTER);
 
     public MenuPrincipalFrame() {
         initComponents();
@@ -43,54 +42,61 @@ public class MenuPrincipalFrame extends JFrame {
     }
 
     private void configureFrame() {
-        Utils.configurationDeBaseDeFenetre(this, FRAME_WIDTH, FRAME_HEIGHT);
+        FormsUtils.configurationDeBaseDeFenetre(this, FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     }
 
     private void initComponents() {
         
-        navigationIcons.put(
+        iconesDeTousLesBoutons.put(
             "DASHBOARD",
             new ImageIcon(getClass().getResource("/images/dashboard.png"))
         );
-        navigationIcons.put(
+        
+        iconesDeTousLesBoutons.put(
             "INVENTORY",
             new ImageIcon(getClass().getResource("/images/store.png"))
         );
-        navigationIcons.put(
+        
+        iconesDeTousLesBoutons.put(
             "STOCKS",
             new ImageIcon(getClass().getResource("/images/stock.png"))
         );
-        navigationIcons.put(
+        
+        iconesDeTousLesBoutons.put(
             "ORDERS",
             new ImageIcon(getClass().getResource("/images/shopping.png"))
         );
-        navigationIcons.put(
+        
+        iconesDeTousLesBoutons.put(
             "USERS",
             new ImageIcon(getClass().getResource("/images/user.png"))
         );
-        navigationIcons.put(
+        
+        iconesDeTousLesBoutons.put(
             "STATS", 
             new ImageIcon(getClass().getResource("/images/stats.png"))
         );
-        navigationIcons.put(
+        
+        iconesDeTousLesBoutons.put(
             "LOGS", 
             new ImageIcon(getClass().getResource("/images/logs.png"))
         );
-        navigationIcons.put(
+        
+        iconesDeTousLesBoutons.put(
             "SETTINGS", 
             new ImageIcon(getClass().getResource("/images/settings.png"))
         );
 
         setLayout(new BorderLayout());
 
-        // --- 1. SIDEBAR (GAUCHE) ---
+        // Sidebar Gauche 
         sideBar = new JPanel();
         sideBar.setPreferredSize(new Dimension(SIDEBAR_WIDTH, FRAME_HEIGHT));
         sideBar.setBackground(ApplicationColors.SIDEBAR_BG);
         sideBar.setLayout(new BorderLayout());
 
-        // Header Sidebar (Profil Utilisateur)
+        // Header Sidebar, là où y'aura les bails de Profil Utilisateur
         sideBar.add(createSidebarHeader(), BorderLayout.NORTH);
 
         // Menu Central
@@ -109,27 +115,29 @@ public class MenuPrincipalFrame extends JFrame {
 
         sideBar.add(menuContainer, BorderLayout.CENTER);
 
-        // Footer Sidebar (Logout)
+        // Footer Sidebar là où y'aur le bouton de déconnexion
         sideBar.add(createSidebarFooter(), BorderLayout.SOUTH);
 
-        // --- 2. CONTENU DYNAMIQUE (DROITE) ---
+        // Contenu dynamique selon le bouton selectionné dans la sidebar
+        // grace à CardLayout
         cardLayout = new CardLayout();
         mainContent = new JPanel(cardLayout);
         mainContent.setBackground(ApplicationColors.PANEL_BG);
 
-        // Simulation des sections (À remplacer par vos JPanels définitifs)
+        // Simulation des sections
         mainContent.add(createViewPlaceholder("DASHBOARD - Aperçu général"), "DASHBOARD");
         mainContent.add(createViewPlaceholder("INVENTORY - Gestion des stocks"), "INVENTORY");
         mainContent.add(createViewPlaceholder("ORDERS - Gestion des commandes"), "ORDERS");
         mainContent.add(createViewPlaceholder("STATS - Rapports d'activité"), "STATS");
         mainContent.add(createViewPlaceholder("SETTINGS - Configuration système"), "SETTINGS");
 
-        // --- 3. TOP BAR (FERMETURE) ---
+        // TOp Bar là où y'aura un bouton de fermeture de l'application et le 
+        // titre de la section courante
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBackground(ApplicationColors.SIDEBAR_BG);
         topBar.setOpaque(false);
-        topBar.setBorder(new EmptyBorder(20, 20, 20, 20));
-        topBar.setPreferredSize(new Dimension(FRAME_WIDTH - SIDEBAR_WIDTH, 70));
+        topBar.setBorder(new EmptyBorder(10, 10, 10, 10));      // un peu comme Margin marge extérieur css
+        topBar.setPreferredSize(new Dimension(FRAME_WIDTH - SIDEBAR_WIDTH, FormsUtils.MENU_PRINCIPAL_TOPBAR_HEIGHT));
 
         JButton btnClose = new JButton("Fermer L'application ✕");
         btnClose.setBackground(ApplicationColors.ERROR);
@@ -138,30 +146,42 @@ public class MenuPrincipalFrame extends JFrame {
         btnClose.setFocusPainted(false);
         btnClose.setBorderPainted(false);
         btnClose.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnClose.addActionListener(e -> {
-            int res = JOptionPane.showConfirmDialog(this, "Etes vous sur de vous fermer cette superbe Application ?", "Fermeture", JOptionPane.YES_NO_OPTION);
-            if (res == JOptionPane.YES_OPTION) {
-                App.getInstance().fermerApp();
-            }
-        });
+        
+        // reference vers la func callback du bouton
+        btnClose.addActionListener(this::btnCloseActionPerformed);
         
         
         
         labelSectionCourante.setFont(new Font("Segoe UI", Font.BOLD, 22));
         labelSectionCourante.setForeground(ApplicationColors.PRIMARY);
         labelSectionCourante.setText("TABLEAU DE BORD");
-
+        
         topBar.add(btnClose, BorderLayout.EAST);
+        
         topBar.add(labelSectionCourante, BorderLayout.CENTER);
 
-        // --- ASSEMBLAGE ---
+        // Assemblage final des deux Panel dans celui de droite
         JPanel rightPanel = new JPanel(new BorderLayout());
         rightPanel.add(topBar, BorderLayout.NORTH);
         rightPanel.add(mainContent, BorderLayout.CENTER);
 
+        // Assemblage de la sidebar et le truc central dans la JFrame meme
         add(sideBar, BorderLayout.WEST);
         add(rightPanel, BorderLayout.CENTER);
     }
+    
+    private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {
+        int res = JOptionPane.showConfirmDialog(
+            this,
+            "Etes vous sur de vous fermer cette superbe Application ?",
+            "Fermeture",
+            JOptionPane.YES_NO_OPTION
+        );
+        
+        if (res == JOptionPane.YES_OPTION) {
+            App.getInstance().fermerApp();
+        }
+    } 
 
     private JPanel createSidebarHeader() {
         JPanel header = new JPanel();
@@ -170,7 +190,7 @@ public class MenuPrincipalFrame extends JFrame {
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
         header.setBorder(new EmptyBorder(30, 20, 20, 20));
 
-        JLabel lblAvatar = new JLabel(new ImageIcon(getClass().getResource("/images/woman.png"))); // Remplacer par une icône image plus tard
+        JLabel lblAvatar = new JLabel(new ImageIcon(getClass().getResource("/images/woman.png")));
         
         lblAvatar.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -198,7 +218,7 @@ public class MenuPrincipalFrame extends JFrame {
 
     private void addNavigationButton(JPanel parent, String text, String cardName) {
         JButton btn = new JButton("   " + text);
-        btn.setIcon(navigationIcons.get(cardName));
+        btn.setIcon(iconesDeTousLesBoutons.get(cardName));
         btn.setPreferredSize(new Dimension(SIDEBAR_WIDTH - 20, 50));
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         btn.setForeground(ApplicationColors.TEXT_PRIMARY);
@@ -246,6 +266,7 @@ public class MenuPrincipalFrame extends JFrame {
         btn.addActionListener(e -> cardLayout.show(mainContent, cardName));
         parent.add(btn);
     }
+    
 
     private JPanel createSidebarFooter() {
         JPanel footer = new JPanel(new BorderLayout());
@@ -261,16 +282,24 @@ public class MenuPrincipalFrame extends JFrame {
         btnLogout.setBorderPainted(false);
         btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        btnLogout.addActionListener(e -> {
-            int res = JOptionPane.showConfirmDialog(this, "Etes vous sur de vous deconnecter ?", "Déconnexion", JOptionPane.YES_NO_OPTION);
-            if (res == JOptionPane.YES_OPTION) {
-                App.getInstance().fermerSessionUtilisateur();
-            }
-        });
+        btnLogout.addActionListener(this::boutonDeconnexioonActionPerformed);
 
         footer.add(btnLogout, BorderLayout.WEST);
         return footer;
     }
+    
+    private void boutonDeconnexioonActionPerformed(java.awt.event.ActionEvent evt) {                                            
+        int res = JOptionPane.showConfirmDialog(
+            this,
+            "Etes vous sur de vous deconnecter ?",
+            "Déconnexion",
+            JOptionPane.YES_NO_OPTION
+        );
+        
+        if (res == JOptionPane.YES_OPTION) {
+            App.getInstance().fermerSessionUtilisateur();
+        }
+    } 
 
     private JPanel createViewPlaceholder(String title) {
         JPanel p = new JPanel(new BorderLayout());

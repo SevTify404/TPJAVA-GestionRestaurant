@@ -8,7 +8,6 @@ import java.awt.Component;
 import java.util.Arrays;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import utilitaires.AuthentificationManager;
 
 /**
  *
@@ -24,7 +23,7 @@ public class LoginFrame extends javax.swing.JFrame {
     public LoginFrame() {
         initComponents();
         
-        Utils.configurationDeBaseDeFenetre(this, 620, 520);
+        FormsUtils.configurationDeBaseDeFenetre(this, FormsUtils.LOGIN_WIDTH, FormsUtils.LOGIN_HEIGHT);
         
         DocumentListener ecouteur = new DocumentListener() {
             @Override
