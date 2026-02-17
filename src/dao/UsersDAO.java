@@ -20,48 +20,56 @@ import java.util.ArrayList;
  * @author Rose
  */
 public class UsersDAO extends AbstractDAO<Users> {
+    
+    public static UsersDAO getInstance(){
+        return new UsersDAO();
+    }
 
     @Override 
     public CrudResult<Boolean> enregistrer(Users unUser) {
         int inter = 0;
-        String requete = "INSERT INTO users idUser,login, motDePasse, isAdmin VALUES (?,?,?,?) ";
+        CrudResult<Boolean> validation = estValide(unUser);
+        String requete = "INSERT INTO Users(login, motDePasse, isAdmin, sexe) VALUES (?,?,?,?) ";
         
         PreparedStatement ps = null;
         
-        if (!estValide(unUser).getDonnes()){
-            CrudResult.failure("Login déjà pris");
-        } 
-        try {
-            Connection conn =  toConnect();
-            ps = conn.prepareStatement(requete);
-            
-            ps.setInt(1, unUser.getIdUser());
-            ps.setString(2, unUser.getLogin());
-            ps.setString(3, unUser.getMotDePasse());
-            ps.setBoolean(4, unUser.getIsAdmin());
-            
-            inter = ps.executeUpdate();
-            
-            ps.close();
-            conn.close();
-            
-        } catch (SQLException ex) {
-            return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+        if(validation.estUneErreur()) {
+            return CrudResult.failure(validation.getErreur()); // erreur BD
         }
-        
-        if (inter == 0) {
-            return CrudResult.failure("Une erreur est survenue");
-        }
-        
-        return CrudResult.success(true);
-        
-        
+        if (!validation.getDonnes()){
+            return CrudResult.failure("Login déjà pris");
+        }else{
+            try {
+                Connection conn =  toConnect();
+                ps = conn.prepareStatement(requete);
+
+
+                ps.setString(1, unUser.getLogin());
+                ps.setString(2, unUser.getMotDePasse());
+                ps.setBoolean(3, unUser.getIsAdmin());
+                ps.setString(4, unUser.getSexe());
+                inter = ps.executeUpdate();
+
+                ps.close();
+                conn.close();
+
+            } catch (SQLException ex) {
+                return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+            }
+
+            if (inter == 0) {
+                return CrudResult.failure("Une erreur est survenue");
+            }
+
+            return CrudResult.success(true);
+
+        }    
     }
 
     @Override
     public CrudResult<Users> lire(int idUser) {
         Users inter = new Users();
-        String requete = "SELECT(idUser, login, isAdmin) from users where id = ? and deletedAt is NULL";
+        String requete = "SELECT idUser, login, isAdmin, sexe from Users where idUser = ? and deletedAt is NULL";
         PreparedStatement ps = null;
         
         try {
@@ -75,7 +83,8 @@ public class UsersDAO extends AbstractDAO<Users> {
            if(rs.next()){
                inter.setIdUser(rs.getInt(1));
                inter.setLogin(rs.getString(2));
-               inter.setIsAdmin(rs.getBoolean(4));
+               inter.setIsAdmin(rs.getBoolean(3));
+               inter.setSexe(rs.getString(4));
            }
            rs.close();
            ps.close();
@@ -98,7 +107,7 @@ public class UsersDAO extends AbstractDAO<Users> {
     @Override
     public CrudResult<Users> mettreAJour(Users unUser) {
         int inter = 0;
-        String requete= "UPDATE users set login =?, motDePasse =?, isAdmin =? where idUsers = ?";
+        String requete= "UPDATE Users set login =?, motDePasse =?, isAdmin =?, sexe =? where idUser = ?";
         
         PreparedStatement ps = null;
         
@@ -108,10 +117,12 @@ public class UsersDAO extends AbstractDAO<Users> {
         
             ps = conn.prepareStatement(requete);
             
-            ps.setInt(1, unUser.getIdUser());
-            ps.setString(2, unUser.getLogin());
-            ps.setString(3, unUser.getMotDePasse());
-            ps.setBoolean(4, unUser.getIsAdmin());
+            
+            ps.setString(1, unUser.getLogin());
+            ps.setString(2, unUser.getMotDePasse());
+            ps.setBoolean(3, unUser.getIsAdmin());
+            ps.setString(4, unUser.getSexe());
+            ps.setInt(5, unUser.getIdUser());
             
             inter = ps.executeUpdate();
             
@@ -131,11 +142,11 @@ public class UsersDAO extends AbstractDAO<Users> {
     @Override
     public CrudResult<Boolean> suppressionDefinitive(Users unUser) {
         int inter = 0;
-        String requete ="DELETE from users where idUser=?";
+        String requete ="DELETE from Users where idUser=?";
         
         PreparedStatement ps = null;
         if(unUser.getIsAdmin()== false){
-            CrudResult.failure("Vous devez être un Administrateur pour effectuer cette suppression");
+            return CrudResult.failure("Vous devez être un Administrateur pour effectuer cette suppression");
         }else{
         
             try {
@@ -159,9 +170,9 @@ public class UsersDAO extends AbstractDAO<Users> {
     }
 
     @Override
-    public CrudResult<Boolean> suppressionLogique(Users entiteASupprimer) {
-        String requete = "UPDATE users SET deletedAt = NOW() WHERE idUser = ?";
-        Users unUser = new Users();
+    public CrudResult<Boolean> suppressionLogique(Users unUser) {
+        String requete = "UPDATE Users SET deletedAt = NOW() WHERE idUser = ?";
+        
 
         try {
 
@@ -187,17 +198,19 @@ public class UsersDAO extends AbstractDAO<Users> {
     @Override
     public CrudResult<Boolean> estValide(Users unUser) {
         boolean valide = true;
-        String requete = "SELECT * from users where login =? AND deletedAt is null ";
+        String sexe = unUser.getSexe();
+        String requete = "SELECT * from Users where login =? AND deletedAt is null ";
         try (
             Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(requete)) {
 
             
             ps.setString(1, unUser.getLogin());
-            
-            
 
             ResultSet rs = ps.executeQuery();
+            if(!"F".equals(sexe) && !"M".equals(sexe) ){
+                return CrudResult.failure("Vous devez entrer M pour masculin et F pour Féminin");
+            }
 
             if (rs.next()) {
                 valide = false;
@@ -205,6 +218,10 @@ public class UsersDAO extends AbstractDAO<Users> {
 
         } catch (SQLException ex) {
             return CrudResult.failure("Erreur de bd"+ ex.getMessage());
+        }
+        
+        if (!valide) {
+            return CrudResult.failure("Utilisateur existe déja");
         }
 
         return CrudResult.success(valide);
@@ -215,7 +232,7 @@ public class UsersDAO extends AbstractDAO<Users> {
     public CrudResult<List<Users>> recupererTout() {
         List<Users> listeUsers = new ArrayList<>();
 
-        String requete = "SELECT * FROM users" ;
+        String requete = "SELECT * FROM Users where deletedAt is null" ;
         PreparedStatement ps = null;
 
         try {
@@ -247,7 +264,7 @@ public class UsersDAO extends AbstractDAO<Users> {
     
     public CrudResult<Users> seConnecter(String login, String motDePasse){
         Users inter = null;
-        String requete = "SELECT * from Users where login =? and motDePasse =?";
+        String requete = "SELECT * from Users where login =? and motDePasse =? and deletedAt is null";
         PreparedStatement ps = null;
        
         try {

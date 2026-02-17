@@ -13,15 +13,16 @@ import java.security.Timestamp;
 public class Users {
     private int idUser;
     private boolean isAdmin;
-    private String login, motDePasse;
+    private String login, motDePasse, sexe;
     private Timestamp deletedAt;
     
     public Users(){}
-    public Users(int idUser , String login, String motDePasse,boolean isAdmin){
+    public Users(int idUser , String login, String motDePasse,boolean isAdmin, String sexe){
         this.idUser = idUser;
         this.login= login;
         this.motDePasse = motDePasse;
         this.isAdmin = isAdmin;
+        this.sexe = sexe;
     }
     
     public int getIdUser(){
@@ -43,6 +44,10 @@ public class Users {
     public Timestamp getDeletedAt() {
         return deletedAt;
     }
+    
+    public String getSexe(){
+        return this.sexe;
+    }
 
 
     public void setIdUser(int idUser){
@@ -63,8 +68,13 @@ public class Users {
     public void setDeletedAt(Timestamp deletedAt) {
         this.deletedAt = deletedAt;
     }
+    
+    public void setSexe(String sexe) {
+        this.sexe = sexe;
+    }
+    
     public String Afficher(){
-        return "Id de l'utilisateur: " + idUser + "\nLogin: " + login ;
+        return "Id de l'utilisateur: " + idUser + "\nLogin: " + login + "\nSexe: " + sexe ;
     }
     
     

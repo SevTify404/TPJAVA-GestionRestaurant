@@ -18,49 +18,54 @@ import java.util.ArrayList;
  * @author Rose
  */
 public class ProduitDAO extends AbstractDAO<Produit> {
+    
+    public static ProduitDAO getInstance(){
+        return new ProduitDAO();
+    }
 
     @Override
     public CrudResult<Boolean> enregistrer(Produit unProduit) {
-        String requete = "INSERT INTO produit(idProduit, nom, idCategorie, idUser, prixDeVente, stockActuel, SeuilAlerte) VALUES (?,?,?,?,?,?,?)";
+        CrudResult<Boolean> validation = estValide(unProduit);
+        String requete = "INSERT INTO Produit(idProduit, nom, idCategorie, idUser, prixDeVente, stockActuel, seuilAlerte) VALUES (?,?,?,?,?,?,?)";
         PreparedStatement ps = null;
         int inter = 0;
-        if (!estValide(unProduit).getDonnes()){
-            CrudResult.failure("Login déjà pris");
-            
-        } 
+        if (validation.estUneErreur()){
+            return validation;
         
-        try{
-            Connection conn = toConnect();
-            ps = conn.prepareStatement(requete);
-            
-            ps.setInt(1, unProduit.getIdProduit());
-            ps.setString(2, unProduit.getNom());
-            ps.setInt(3, unProduit.getIdcategorie());
-            ps.setInt(4, unProduit.getIdUser());
-            ps.setDouble(5, unProduit.getPrixDeVente());
-            ps.setInt(6, unProduit.getStockActuel());
-            ps.setInt(7, unProduit.getSeuilAlerte());
-            
-            inter = ps.executeUpdate();
-            
-            ps.close();
-            conn.close();
-        } catch (SQLException ex) {
-            return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+        }else{
+        
+            try{
+                Connection conn = toConnect();
+                ps = conn.prepareStatement(requete);
+
+                ps.setInt(1, unProduit.getIdProduit());
+                ps.setString(2, unProduit.getNom());
+                ps.setInt(3, unProduit.getIdcategorie());
+                ps.setInt(4, unProduit.getIdUser());
+                ps.setDouble(5, unProduit.getPrixDeVente());
+                ps.setInt(6, unProduit.getStockActuel());
+                ps.setInt(7, unProduit.getSeuilAlerte());
+
+                inter = ps.executeUpdate();
+
+                ps.close();
+                conn.close();
+            } catch (SQLException ex) {
+                return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+            }
+
+            if (inter == 0) {
+                return CrudResult.failure("Une erreur est survenue");
+            }
+
+            return CrudResult.success(true);
         }
-        
-        if (inter == 0) {
-            return CrudResult.failure("Une erreur est survenue");
-        }
-        
-        return CrudResult.success(true);
-            
     }
 
     @Override
     public CrudResult<Produit> lire(int idProduit) {
         Produit inter = new Produit();
-        String requete = "SELECT (idProduit, nom,idCategorie, idUser, prixDeVente, seuilAlerte) from PRODUIT where idProduit = ? and deletedAt =null";
+        String requete = "SELECT * from Produit where idProduit = ? and deletedAt is null";
         PreparedStatement ps = null;
         
         try{
@@ -104,7 +109,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     @Override
     public CrudResult<Produit> mettreAJour(Produit unProduit) {
         int inter = 0;
-        String requete = "UPADATE produit set nom=? idCategorie=?, idUser=?, prixDeVente=?, stockActuel=?, seuilAlerte=? where idProduit=? ";
+        String requete = "UPDATE Produit set nom=?, idCategorie=?, idUser=?, prixDeVente=?, stockActuel=?, seuilAlerte=? where idProduit=? AND deletedAt is null";
         PreparedStatement ps = null ;
         
         
@@ -112,13 +117,14 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             Connection conn = toConnect();
             ps = conn.prepareStatement(requete);
             
-            ps.setInt(1, unProduit.getIdProduit());
-            ps.setString(2,unProduit.getNom());
-            ps.setInt(3, unProduit.getIdcategorie());
-            ps.setInt(4, unProduit.getIdUser());
-            ps.setDouble(5, unProduit.getPrixDeVente());
-            ps.setInt(6, unProduit.getStockActuel());
-            ps.setInt(7, unProduit.getSeuilAlerte());
+            
+            ps.setString(1,unProduit.getNom());
+            ps.setInt(2, unProduit.getIdcategorie());
+            ps.setInt(3, unProduit.getIdUser());
+            ps.setDouble(4, unProduit.getPrixDeVente());
+            ps.setInt(5, unProduit.getStockActuel());
+            ps.setInt(6, unProduit.getSeuilAlerte());
+            ps.setInt(7, unProduit.getIdProduit());
             
             inter = ps.executeUpdate();
             
@@ -140,7 +146,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     @Override
     public CrudResult<Boolean> suppressionDefinitive(Produit unProduit) {
         int inter = 0;
-        String requete = "delete from produit where id = ?";
+        String requete = "delete from Produit where idProduit = ?";
         PreparedStatement ps = null;
         
         try {
@@ -166,9 +172,9 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     }
 
     @Override
-    public CrudResult<Boolean> suppressionLogique(Produit entiteASupprimer) {
-         String requete = "UPDATE users SET deletedAt = NOW() WHERE idUser = ?";
-        Produit unProduit = new Produit();
+    public CrudResult<Boolean> suppressionLogique(Produit unProduit) {
+         String requete = "UPDATE Produit SET deletedAt = NOW() WHERE idProduit = ?";
+       
 
         try {
 
@@ -195,17 +201,18 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     @Override
     
     public CrudResult<Boolean> estValide(Produit unProduit) {
-        boolean valide = true;
         if(unProduit.getPrixDeVente() <= 0){
             return CrudResult.failure("Le prix de vente doit être strictement positif");
             
         }
         if(unProduit.getStockActuel() < 0){
             return CrudResult.failure("Le stock ne peut pas être négatif");
-            
+        }
+        if(unProduit.getSeuilAlerte()< 0){
+            return CrudResult.failure("Le seuil d'alerte  ne peut pas être négatif");
         }
         
-        return CrudResult.success(valide);
+        return CrudResult.success(true);
           
     }
     
@@ -214,7 +221,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     public CrudResult<List<Produit>> recupererTout() {
         List<Produit> listeProduit = new ArrayList<>();
 
-        String requete = "SELECT * FROM users";
+        String requete = "SELECT * FROM Produit where deleteddAt is null ";
         PreparedStatement ps = null;
 
         try {
