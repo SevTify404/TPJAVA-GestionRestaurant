@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class CategorieDAO extends AbstractDAO <Categorie>{
    @Override
-    public CrudResult<Categorie> enregistrer(Categorie categorie) {
+    public CrudResult<Boolean> enregistrer(Categorie categorie) {
 
         CrudResult<Boolean> validation = estValide(categorie);
         if (validation.estUneErreur())
