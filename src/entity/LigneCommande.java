@@ -89,7 +89,7 @@ public class LigneCommande {
         this.deletedAt = deletedAt;
     }
 
-    private void recalculerMontant() {
+    public void recalculerMontant() {
         if (quantite > 0 && prixUnitaire > 0) {
             this.montantLigne = this.quantite * this.prixUnitaire;
         }

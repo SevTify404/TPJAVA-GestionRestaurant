@@ -20,8 +20,11 @@ import java.util.ArrayList;
 
 public class CommandeDAO extends AbstractDAO<Commande> {
 
-    public static Object getInstance() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private CommandeDAO() {}
+
+    
+    public static CommandeDAO getInstance() {
+        return new CommandeDAO();
     }
 
    @Override
@@ -45,10 +48,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
         return CrudResult.success(true);
 
     } catch (SQLException ex) {
-        System.getLogger(CommandeDAO.class.getName())
-              .log(System.Logger.Level.ERROR, "Erreur insertion Commande", ex);
-
-        return CrudResult.failure("Erreur base de données");
+            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
     }
 }
         
@@ -74,10 +74,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
                 return CrudResult.success(c);
             }
         } catch (SQLException ex) {
-             System.getLogger(CommandeDAO.class.getName())
-              .log(System.Logger.Level.ERROR, "Erreur lecture Commande", ex);
-
-        return CrudResult.failure("Erreur base de données");
+            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
         }
         
     }
@@ -109,8 +106,8 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
             }
             return CrudResult.success(AUpdate);
         } catch (SQLException ex) {
-            System.getLogger(CommandeDAO.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-            return CrudResult.failure("Erreur base de données");
+            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
+
         }
     }
 
@@ -129,8 +126,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
             }
             return CrudResult.success(true);
         } catch (SQLException ex) {
-            System.getLogger(CommandeDAO.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-            return CrudResult.failure("Erreur base de données");
+            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
         }
     }
 
@@ -150,8 +146,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
             }
                 return CrudResult.success(true);
         } catch (SQLException ex) {
-            System.getLogger(CommandeDAO.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-            return CrudResult.failure("Erreur de Suppression");
+            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
         }
     }
 
@@ -170,8 +165,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
             }
             return CrudResult.success(valide);
         } catch (SQLException ex) {
-            System.getLogger(CommandeDAO.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-            return CrudResult.failure("Erreur base de données");
+            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
         }
     }
 
@@ -197,9 +191,7 @@ public CrudResult<List<Commande>> recupererTout() {
         return CrudResult.success(commandes);
 
     } catch (SQLException ex) {
-        System.getLogger(CommandeDAO.class.getName())
-              .log(System.Logger.Level.ERROR, "Erreur récupération Commandes", ex);
-        return CrudResult.failure("Erreur base de données");
+        return CrudResult.failure("Erreur base de données :" + ex.getMessage());
     }
 }
     

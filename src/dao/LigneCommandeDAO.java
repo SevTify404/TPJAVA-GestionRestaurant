@@ -18,6 +18,14 @@ import java.util.ArrayList;
 
 public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
+    private LigneCommandeDAO() {}
+    
+    public static LigneCommandeDAO getInstance(){
+        return new LigneCommandeDAO();
+    }
+    
+    
+
         @Override
     public CrudResult<Boolean> enregistrer(LigneCommande ligneCommande) {
         String sql = "INSERT INTO LigneCommande (idCommande, idProduit, quantite, prixUnitaire, montantLigne) VALUES (?, ?, ?, ?, ?)";
@@ -77,22 +85,17 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
     @Override
     public CrudResult<LigneCommande> mettreAJour(LigneCommande AMettreAJour) {
-        String sql = "UPDATE LigneCommande SET idCommande = ?, idProduit = ?, quantite = ?, prixUnitaire = ?, montantLigne = ?, deletedAt = ? WHERE idLC = ?";
+        String sql = "UPDATE LigneCommande SET quantite = ?, idProduit = ?, prixUnitaire = ?, montantLigne = ? WHERE idLC = ?";
         try (Connection conn = toConnect(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
             // recalculer le montant avant update
-            AMettreAJour.setMontantLigne(AMettreAJour.getQuantite() * AMettreAJour.getPrixUnitaire());
-            ps.setInt(1, AMettreAJour.getIdCommande());
+            AMettreAJour.recalculerMontant();
+            ps.setInt(1, AMettreAJour.getQuantite());
             ps.setInt(2, AMettreAJour.getIdProduit());
-            ps.setInt(3, AMettreAJour.getQuantite());
-            ps.setDouble(4, AMettreAJour.getPrixUnitaire());
-            ps.setDouble(5, AMettreAJour.getMontantLigne());
-            if (AMettreAJour.getDeletedAt() != null) {
-                ps.setTimestamp(6, java.sql.Timestamp.valueOf(AMettreAJour.getDeletedAt()));
-            } else {
-                ps.setNull(6, java.sql.Types.TIMESTAMP);
-            }
-            ps.setInt(7, AMettreAJour.getIdLC());
+            ps.setDouble(3, AMettreAJour.getPrixUnitaire());
+            ps.setDouble(4, AMettreAJour.getMontantLigne());
+            ps.setInt(5, AMettreAJour.getIdLC());
+            System.out.println(ps.toString());
 
             int rows = ps.executeUpdate();
             if (rows == 0) return CrudResult.failure("Aucune ligne mise à jour");

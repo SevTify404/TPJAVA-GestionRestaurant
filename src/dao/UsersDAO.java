@@ -68,7 +68,7 @@ public class UsersDAO extends AbstractDAO<Users> {
 
     @Override
     public CrudResult<Users> lire(int idUser) {
-        Users inter = new Users();
+        Users inter = null;
         String requete = "SELECT idUser, login, isAdmin, sexe from Users where idUser = ? and deletedAt is NULL";
         PreparedStatement ps = null;
         
@@ -81,6 +81,7 @@ public class UsersDAO extends AbstractDAO<Users> {
            ResultSet rs = null;
            rs = ps.executeQuery();
            if(rs.next()){
+               inter = new Users();
                inter.setIdUser(rs.getInt(1));
                inter.setLogin(rs.getString(2));
                inter.setIsAdmin(rs.getBoolean(3));
@@ -93,7 +94,7 @@ public class UsersDAO extends AbstractDAO<Users> {
            return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
         }
         if (inter == null) {
-            return CrudResult.failure("Une erreur est survenue");
+            return CrudResult.failure("Cet Utilisateur n'existe pas");
         }
         
         return CrudResult.success(inter);

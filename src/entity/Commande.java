@@ -25,13 +25,6 @@ public class Commande {
     public Commande() {
     }
 
-    public Commande(LocalDateTime dateCommande, EtatCommande etat, double total) {
-        this.dateCommande = dateCommande;
-        this.etat = etat;
-        this.total = total;
-        this.deletedAt = null;
-    }
-
     public Commande(int idCommande, LocalDateTime dateCommande, EtatCommande etat, double total, LocalDateTime deletedAt) {
         this.idCommande = idCommande;
         this.dateCommande = dateCommande;

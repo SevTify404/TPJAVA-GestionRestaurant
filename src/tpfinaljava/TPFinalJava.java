@@ -5,6 +5,7 @@
 package tpfinaljava;
 
 import com.mysql.cj.conf.PropertyKey;
+import dao.AuditDAO;
 import entity.Produit;
 
 
@@ -31,7 +32,7 @@ public class TPFinalJava {
         if (ee.estUnSucces()) {
             System.out.println(ee.getDonnes());
         }
-
+       
     }
     
     
