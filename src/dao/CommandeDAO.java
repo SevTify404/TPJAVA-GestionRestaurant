@@ -170,29 +170,29 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
     }
 
     @Override
-public CrudResult<List<Commande>> recupererTout() {
-    String sql = "SELECT idCommande, dateCommande, etat, total, deletedAt FROM Commande WHERE deletedAt IS NULL";
+    public CrudResult<List<Commande>> recupererTout() {
+        String sql = "SELECT idCommande, dateCommande, etat, total, deletedAt FROM Commande WHERE deletedAt IS NULL";
 
-    List<Commande> commandes = new ArrayList<>(); 
+        List<Commande> commandes = new ArrayList<>(); 
 
-    try (Connection conn = toConnect(); 
-         PreparedStatement ps = conn.prepareStatement(sql); 
-         ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = toConnect(); 
+             PreparedStatement ps = conn.prepareStatement(sql); 
+             ResultSet rs = ps.executeQuery()) {
 
-        while (rs.next()) {
-            Commande c = new Commande();
-            c.setIdCommande(rs.getInt("idCommande"));
-            c.setDateCommande(rs.getTimestamp("dateCommande").toLocalDateTime());
-            c.setEtat(Commande.EtatCommande.valueOf(rs.getString("etat").toUpperCase()));
-            c.setTotal(rs.getDouble("total"));
-            commandes.add(c); // ajout à la liste
+            while (rs.next()) {
+                Commande c = new Commande();
+                c.setIdCommande(rs.getInt("idCommande"));
+                c.setDateCommande(rs.getTimestamp("dateCommande").toLocalDateTime());
+                c.setEtat(Commande.EtatCommande.valueOf(rs.getString("etat").toUpperCase()));
+                c.setTotal(rs.getDouble("total"));
+                commandes.add(c); // ajout à la liste
+            }
+
+            return CrudResult.success(commandes);
+
+        } catch (SQLException ex) {
+            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
         }
-
-        return CrudResult.success(commandes);
-
-    } catch (SQLException ex) {
-        return CrudResult.failure("Erreur base de données :" + ex.getMessage());
     }
-}
-    
-}
+
+    }

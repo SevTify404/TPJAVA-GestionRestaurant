@@ -103,7 +103,7 @@ public class MenuPrincipalFrame extends JFrame {
         // Menu Central
         JPanel menuContainer = new JPanel();
         menuContainer.setOpaque(false);
-        menuContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 0, (int) (FRAME_HEIGHT * 0.015)));
+        menuContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 0, (int) (FRAME_HEIGHT * 0.01)));
 
         addNavigationButton(menuContainer, "Tableau de Bord", "DASHBOARD");
         addNavigationButton(menuContainer, "Produits", "INVENTORY");
@@ -116,7 +116,7 @@ public class MenuPrincipalFrame extends JFrame {
             addNavigationButton(menuContainer, "Audit & Logs", "LOGS");
         }
             
-        addNavigationButton(menuContainer, "Paramètres Personnels", "SETTINGS");
+        addNavigationButton(menuContainer, "Mon Compte", "SETTINGS");
 
         sideBar.add(menuContainer, BorderLayout.CENTER);
 
@@ -190,7 +190,7 @@ public class MenuPrincipalFrame extends JFrame {
 
     private JPanel createSidebarHeader() {
         JPanel header = new JPanel();
-        header.setPreferredSize(new Dimension(SIDEBAR_WIDTH, (int) (FRAME_HEIGHT * 0.25)));
+        header.setPreferredSize(new Dimension(SIDEBAR_WIDTH, (int) (FRAME_HEIGHT * 0.22)));
         header.setOpaque(false);
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
         header.setBorder(new EmptyBorder(30, 20, 20, 20));
@@ -221,7 +221,7 @@ public class MenuPrincipalFrame extends JFrame {
         lblRole.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         header.add(lblAvatar);
-        header.add(Box.createVerticalStrut(10));
+        header.add(Box.createVerticalStrut(5));
         header.add(lblUser);
         header.add(Box.createVerticalStrut(5));
         header.add(lblRole);
@@ -287,7 +287,7 @@ public class MenuPrincipalFrame extends JFrame {
         footer.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         JButton btnLogout = new JButton("Déconnexion");
-        btnLogout.setPreferredSize(new Dimension((int) (SIDEBAR_WIDTH * 0.9), 40));
+        btnLogout.setPreferredSize(new Dimension((int) (SIDEBAR_WIDTH * 0.9), (int) (FRAME_HEIGHT * 0.045)));
         btnLogout.setBackground(ApplicationColors.SUCCESS);
         btnLogout.setForeground(ApplicationColors.BACKGROUND);
         btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 17));
