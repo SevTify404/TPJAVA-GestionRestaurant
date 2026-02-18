@@ -103,7 +103,7 @@ public class MenuPrincipalFrame extends JFrame {
         // Menu Central
         JPanel menuContainer = new JPanel();
         menuContainer.setOpaque(false);
-        menuContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 18));
+        menuContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 0, (int) (FRAME_HEIGHT * 0.015)));
 
         addNavigationButton(menuContainer, "Tableau de Bord", "DASHBOARD");
         addNavigationButton(menuContainer, "Produits", "INVENTORY");
@@ -139,7 +139,7 @@ public class MenuPrincipalFrame extends JFrame {
         // TOp Bar là où y'aura un bouton de fermeture de l'application et le 
         // titre de la section courante
         JPanel topBar = new JPanel(new BorderLayout());
-        topBar.setBackground(ApplicationColors.SIDEBAR_BG);
+//        topBar.setBackground(ApplicationColors.SIDEBAR_BG);
         topBar.setOpaque(false);
         topBar.setBorder(new EmptyBorder(10, 10, 10, 10));      // un peu comme Margin marge extérieur css
         topBar.setPreferredSize(new Dimension(FRAME_WIDTH - SIDEBAR_WIDTH, FormsUtils.MENU_PRINCIPAL_TOPBAR_HEIGHT));
@@ -190,7 +190,7 @@ public class MenuPrincipalFrame extends JFrame {
 
     private JPanel createSidebarHeader() {
         JPanel header = new JPanel();
-        header.setPreferredSize(new Dimension(SIDEBAR_WIDTH, 250));
+        header.setPreferredSize(new Dimension(SIDEBAR_WIDTH, (int) (FRAME_HEIGHT * 0.25)));
         header.setOpaque(false);
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
         header.setBorder(new EmptyBorder(30, 20, 20, 20));
@@ -232,7 +232,7 @@ public class MenuPrincipalFrame extends JFrame {
     private void addNavigationButton(JPanel parent, String text, String cardName) {
         JButton btn = new JButton("   " + text);
         btn.setIcon(iconesDeTousLesBoutons.get(cardName));
-        btn.setPreferredSize(new Dimension(SIDEBAR_WIDTH - 20, 50));
+        btn.setPreferredSize(new Dimension((int) (SIDEBAR_WIDTH * 0.92), (int) (FRAME_HEIGHT * 0.055)));
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         btn.setForeground(ApplicationColors.TEXT_PRIMARY);
         btn.setBackground(ApplicationColors.BACKGROUND);
@@ -287,7 +287,7 @@ public class MenuPrincipalFrame extends JFrame {
         footer.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         JButton btnLogout = new JButton("Déconnexion");
-        btnLogout.setPreferredSize(new Dimension(280, 40));
+        btnLogout.setPreferredSize(new Dimension((int) (SIDEBAR_WIDTH * 0.9), 40));
         btnLogout.setBackground(ApplicationColors.SUCCESS);
         btnLogout.setForeground(ApplicationColors.BACKGROUND);
         btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 17));
