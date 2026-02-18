@@ -287,7 +287,7 @@ public class MenuPrincipalFrame extends JFrame {
         footer.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         JButton btnLogout = new JButton("Déconnexion");
-        btnLogout.setPreferredSize(new Dimension(SIDEBAR_WIDTH - 40, 40));
+        btnLogout.setPreferredSize(new Dimension((int) (SIDEBAR_WIDTH * 0.9), 40));
         btnLogout.setBackground(ApplicationColors.SUCCESS);
         btnLogout.setForeground(ApplicationColors.BACKGROUND);
         btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 17));
