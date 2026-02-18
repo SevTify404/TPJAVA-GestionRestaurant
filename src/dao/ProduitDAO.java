@@ -108,6 +108,8 @@ public class ProduitDAO extends AbstractDAO<Produit> {
 
     @Override
     public CrudResult<Produit> mettreAJour(Produit unProduit) {
+        CrudResult<Boolean> validation = estValide(unProduit);
+        if (validation.estUneErreur()) return CrudResult.failure(validation.getErreur());
         int inter = 0;
         String requete = "UPDATE Produit set nom=?, idCategorie=?, idUser=?, prixDeVente=?, stockActuel=?, seuilAlerte=? where idProduit=? AND deletedAt is null";
         PreparedStatement ps = null ;
@@ -221,7 +223,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     public CrudResult<List<Produit>> recupererTout() {
         List<Produit> listeProduit = new ArrayList<>();
 
-        String requete = "SELECT * FROM Produit where deleteddAt is null ";
+        String requete = "SELECT * FROM Produit where deletedAt is null ";
         PreparedStatement ps = null;
 
         try {

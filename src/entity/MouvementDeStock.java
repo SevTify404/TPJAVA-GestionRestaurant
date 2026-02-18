@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * @author ACER
  */
 
-public class mouvementdestock {
+public class MouvementDeStock {
 
     public enum TypeMouvement {
         ENTREE,
@@ -26,11 +26,11 @@ public class mouvementdestock {
     private LocalDateTime deletedAt;
 
     // Constructeur vide
-    public mouvementdestock() {
+    public MouvementDeStock() {
     }
 
     // Constructeur complet
-    public mouvementdestock(int id, TypeMouvement TYPE, int IDPRODUIT, int QUANTITE, LocalDateTime DATEMOUVEMENT, String MOTIF, LocalDateTime deletedAt) {
+    public MouvementDeStock(int id, TypeMouvement TYPE, int IDPRODUIT, int QUANTITE, LocalDateTime DATEMOUVEMENT, String MOTIF, LocalDateTime deletedAt) {
         this.id = id;
         this.TYPE = TYPE;
         this.IDPRODUIT = IDPRODUIT;

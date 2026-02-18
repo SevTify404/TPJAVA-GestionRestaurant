@@ -4,17 +4,14 @@
  */
 package tpfinaljava;
 
-import com.mysql.cj.conf.PropertyKey;
-import entity.Produit;
+import dao.AuditDAO;
+
 
 
 import dao.CrudResult;
-import dao.UsersDAO;
 import entity.Audit;
-import entity.Users;
 import java.util.List;
-import entity.Produit;
-import dao.ProduitDAO;
+
 
 /**
  *
@@ -31,7 +28,7 @@ public class TPFinalJava {
         if (ee.estUnSucces()) {
             System.out.println(ee.getDonnes());
         }
-
+       
     }
     
     

@@ -18,8 +18,21 @@ import java.util.ArrayList;
 
 public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
+    private LigneCommandeDAO() {}
+    
+    public static LigneCommandeDAO getInstance(){
+        return new LigneCommandeDAO();
+    }
+    
+    
+
         @Override
     public CrudResult<Boolean> enregistrer(LigneCommande ligneCommande) {
+        
+        CrudResult<Boolean> validation = estValide(ligneCommande);
+        
+        if (validation.estUneErreur()) return validation;
+        
         String sql = "INSERT INTO LigneCommande (idCommande, idProduit, quantite, prixUnitaire, montantLigne) VALUES (?, ?, ?, ?, ?)";
         
         try (Connection conn = toConnect(); 
@@ -77,22 +90,22 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
     @Override
     public CrudResult<LigneCommande> mettreAJour(LigneCommande AMettreAJour) {
-        String sql = "UPDATE LigneCommande SET idCommande = ?, idProduit = ?, quantite = ?, prixUnitaire = ?, montantLigne = ?, deletedAt = ? WHERE idLC = ?";
+        
+        CrudResult<Boolean> validation = estValide(AMettreAJour);
+        
+        if (validation.estUneErreur()) return CrudResult.failure(validation.getErreur());
+        
+        String sql = "UPDATE LigneCommande SET quantite = ?, idProduit = ?, prixUnitaire = ?, montantLigne = ? WHERE idLC = ?";
         try (Connection conn = toConnect(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
             // recalculer le montant avant update
-            AMettreAJour.setMontantLigne(AMettreAJour.getQuantite() * AMettreAJour.getPrixUnitaire());
-            ps.setInt(1, AMettreAJour.getIdCommande());
+            AMettreAJour.recalculerMontant();
+            ps.setInt(1, AMettreAJour.getQuantite());
             ps.setInt(2, AMettreAJour.getIdProduit());
-            ps.setInt(3, AMettreAJour.getQuantite());
-            ps.setDouble(4, AMettreAJour.getPrixUnitaire());
-            ps.setDouble(5, AMettreAJour.getMontantLigne());
-            if (AMettreAJour.getDeletedAt() != null) {
-                ps.setTimestamp(6, java.sql.Timestamp.valueOf(AMettreAJour.getDeletedAt()));
-            } else {
-                ps.setNull(6, java.sql.Types.TIMESTAMP);
-            }
-            ps.setInt(7, AMettreAJour.getIdLC());
+            ps.setDouble(3, AMettreAJour.getPrixUnitaire());
+            ps.setDouble(4, AMettreAJour.getMontantLigne());
+            ps.setInt(5, AMettreAJour.getIdLC());
+            System.out.println(ps.toString());
 
             int rows = ps.executeUpdate();
             if (rows == 0) return CrudResult.failure("Aucune ligne mise à jour");
@@ -142,21 +155,15 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
     @Override
     public CrudResult<Boolean> estValide(LigneCommande entiteAValider) {
-        String sql = "SELECT COUNT(*) FROM LigneCommande WHERE idLC = ? AND deletedAt IS NULL AND quantite > 0 AND prixUnitaire > 0";
-
-        try (Connection conn = toConnect(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, entiteAValider.getIdLC());
-
-            try (ResultSet rs = ps.executeQuery()) {
-                boolean valide = rs.next() && rs.getInt(1) > 0;
-                return CrudResult.success(valide);
-            }
-
-        } catch (SQLException e) {
-            return CrudResult.failure("Erreur SQL : " + e.getMessage());
+        if (entiteAValider.getPrixUnitaire() <= 0) {
+            return CrudResult.failure("Le PU d'une ligne de Commande doit etre supérieur à 0");
         }
+        if (entiteAValider.getQuantite()<= 0) {
+            return CrudResult.failure("La Quantité d'une ligne de Commande doit etre supérieur à 0");
+        }
+        entiteAValider.recalculerMontant();
+        
+        return CrudResult.success(true);
     }
 
     @Override

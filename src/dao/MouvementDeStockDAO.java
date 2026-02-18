@@ -4,7 +4,7 @@
  */
 package dao;
 //import com.mysql.cj.xdevapi.Statement;
-import entity.mouvementdestock;
+import entity.MouvementDeStock;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,9 +18,18 @@ import java.sql.Statement;
  * @author ACER
  */
 
-public class mouvementdestockDAO extends AbstractDAO<mouvementdestock> {
+public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
+
+    private MouvementDeStockDAO() {
+    }
+    
+    public static MouvementDeStockDAO getInstance(){
+        return new MouvementDeStockDAO();
+    }
+    
+    
 @Override
-    public CrudResult<mouvementdestock> enregistrer(mouvementdestock mouvement) {
+    public CrudResult<Boolean> enregistrer(MouvementDeStock mouvement) {
 
         CrudResult<Boolean> validation = estValide(mouvement);
         if (validation.estUneErreur())
@@ -42,7 +51,7 @@ public class mouvementdestockDAO extends AbstractDAO<mouvementdestock> {
             if(rs.next()){
                 mouvement.setID(rs.getInt(1));
             }
-            return CrudResult.success(mouvement);
+            return CrudResult.success(true);
 
         } catch (SQLException e) {
             return CrudResult.failure(e.getMessage());
@@ -50,7 +59,7 @@ public class mouvementdestockDAO extends AbstractDAO<mouvementdestock> {
     }
 
     @Override
-    public CrudResult<mouvementdestock> lire(int id) {
+    public CrudResult<MouvementDeStock> lire(int id) {
 
         String sql = "SELECT * FROM mouvementdestock WHERE id = ? AND deletedAt IS NULL";
 
@@ -61,7 +70,7 @@ public class mouvementdestockDAO extends AbstractDAO<mouvementdestock> {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                mouvementdestock mv = mapper(rs);
+                MouvementDeStock mv = mapper(rs);
                 return CrudResult.success(mv);
             }
 
@@ -73,7 +82,11 @@ public class mouvementdestockDAO extends AbstractDAO<mouvementdestock> {
     }
 
     @Override
-    public CrudResult<mouvementdestock> mettreAJour(mouvementdestock mv) {
+    public CrudResult<MouvementDeStock> mettreAJour(MouvementDeStock mv) {
+        
+        CrudResult<Boolean> validation = estValide(mv);
+        
+        if (validation.estUneErreur()) return CrudResult.failure(validation.getErreur());
 
         String sql = """
             UPDATE mouvementdestock
@@ -104,7 +117,7 @@ public class mouvementdestockDAO extends AbstractDAO<mouvementdestock> {
     }
 
     @Override
-    public CrudResult<Boolean> suppressionDefinitive(mouvementdestock mv) {
+    public CrudResult<Boolean> suppressionDefinitive(MouvementDeStock mv) {
 
         String sql = "DELETE FROM mouvementdestock WHERE id = ?";
 
@@ -122,7 +135,7 @@ public class mouvementdestockDAO extends AbstractDAO<mouvementdestock> {
     }
 
     @Override
-    public CrudResult<Boolean> suppressionLogique(mouvementdestock mv) {
+    public CrudResult<Boolean> suppressionLogique(MouvementDeStock mv) {
 
         String sql = "UPDATE mouvementdestock SET deletedAt = NOW() WHERE id = ?";
 
@@ -140,7 +153,7 @@ public class mouvementdestockDAO extends AbstractDAO<mouvementdestock> {
     }
 
     @Override
-    public CrudResult<Boolean> estValide(mouvementdestock mv) {
+    public CrudResult<Boolean> estValide(MouvementDeStock mv) {
 
         if (mv == null)
             return CrudResult.failure("Objet null");
@@ -161,10 +174,10 @@ public class mouvementdestockDAO extends AbstractDAO<mouvementdestock> {
     }
 
     @Override
-    public CrudResult<List<mouvementdestock>> recupererTout() {
+    public CrudResult<List<MouvementDeStock>> recupererTout() {
 
         String sql = "SELECT * FROM mouvementdestock WHERE deletedAt IS NULL";
-        List<mouvementdestock> liste = new ArrayList<>();
+        List<MouvementDeStock> liste = new ArrayList<>();
 
         try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -181,12 +194,12 @@ public class mouvementdestockDAO extends AbstractDAO<mouvementdestock> {
         }
     }
 
-    private mouvementdestock mapper(ResultSet rs) throws SQLException {
+    private MouvementDeStock mapper(ResultSet rs) throws SQLException {
 
-        mouvementdestock mv = new mouvementdestock();
+        MouvementDeStock mv = new MouvementDeStock();
 
         mv.setID(rs.getInt("id"));
-        mv.setTYPE(mouvementdestock.TypeMouvement.valueOf(rs.getString("type")));
+        mv.setTYPE(MouvementDeStock.TypeMouvement.valueOf(rs.getString("type")));
         mv.setQUANTITE(rs.getInt("quantite"));
         mv.setDATEMOUVEMENT(rs.getTimestamp("dateMouvement").toLocalDateTime());
         mv.setIDPRODUIT(rs.getInt("idProduit"));
