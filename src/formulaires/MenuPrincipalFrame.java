@@ -109,9 +109,13 @@ public class MenuPrincipalFrame extends JFrame {
         addNavigationButton(menuContainer, "Produits", "INVENTORY");
         addNavigationButton(menuContainer, "Stocks", "STOCKS");
         addNavigationButton(menuContainer, "Commandes", "ORDERS");
-        addNavigationButton(menuContainer, "Utilisateurs", "USERS");
         addNavigationButton(menuContainer, "Statistiques", "STATS");
-        addNavigationButton(menuContainer, "Audit & Logs", "LOGS");
+        
+        if (utislisateurConnecte.isAdmin()) {
+            addNavigationButton(menuContainer, "Utilisateurs", "USERS");
+            addNavigationButton(menuContainer, "Audit & Logs", "LOGS");
+        }
+            
         addNavigationButton(menuContainer, "Paramètres Personnels", "SETTINGS");
 
         sideBar.add(menuContainer, BorderLayout.CENTER);
