@@ -36,7 +36,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
                 categorie.setIDCAT(rs.getInt(1));
             }
 
-            return CrudResult.success(categorie);
+            return CrudResult.success(true);
 
         } catch (SQLException e) {
             return CrudResult.failure(e.getMessage());
