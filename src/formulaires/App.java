@@ -5,6 +5,7 @@
 package formulaires;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import entity.Users;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import utilitaires.AuthentificationManager;
@@ -55,7 +56,7 @@ public class App {
         ecranDeLogin.setVisible(true);
     }
     
-    public void lancerMenuPrincipal(String utilisateur){
+    public void lancerMenuPrincipal(Users utilisateur){
         
         ecranDeLogin.dispose();
         ecranDeLogin = null;

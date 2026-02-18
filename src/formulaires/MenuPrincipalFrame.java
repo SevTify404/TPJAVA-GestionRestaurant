@@ -4,6 +4,7 @@
  */
 package formulaires;
 
+import entity.Users;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -30,7 +31,7 @@ public class MenuPrincipalFrame extends JFrame {
     
     private JButton boutonSelectionne = null;
     
-    private final String utislisateurConnecte = AuthentificationManager.getInstance().recupererUtilisateurConnecte();
+    private final Users utislisateurConnecte = AuthentificationManager.getInstance().recupererUtilisateurConnecte();
     
     private final Map<String, ImageIcon> iconesDeTousLesBoutons = new HashMap<>();
     
@@ -190,17 +191,25 @@ public class MenuPrincipalFrame extends JFrame {
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
         header.setBorder(new EmptyBorder(30, 20, 20, 20));
 
-        JLabel lblAvatar = new JLabel(new ImageIcon(getClass().getResource("/images/woman.png")));
+        JLabel lblAvatar = new JLabel(
+            utislisateurConnecte.getSexe().equals("F") ?
+                new ImageIcon(getClass().getResource("/images/woman.png"))
+                : 
+                new ImageIcon(getClass().getResource("/images/man.png"))
+        );
         
         lblAvatar.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel lblUser = new JLabel(utislisateurConnecte);
+        JLabel lblUser = new JLabel(utislisateurConnecte.getLogin());
         
         lblUser.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblUser.setForeground(Color.WHITE);
         lblUser.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel lblRole = new JLabel("  Administrator  ");
+        
+        JLabel lblRole = new JLabel(
+            utislisateurConnecte.isAdmin() ? "  Administrateur  " : "  Employé  "
+        );
+        
         lblRole.setOpaque(true);
         lblRole.setBackground(ApplicationColors.SUCCESS);
         lblRole.setForeground(Color.WHITE);

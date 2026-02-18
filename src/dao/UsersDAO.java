@@ -265,7 +265,7 @@ public class UsersDAO extends AbstractDAO<Users> {
     
     public CrudResult<Users> seConnecter(String login, String motDePasse){
         Users inter = null;
-        String requete = "SELECT * from Users where login =? and motDePasse =? and deletedAt is null";
+        String requete = "SELECT idUser, login, sexe, isAdmin  from Users where login =? and motDePasse =? and deletedAt is null";
         PreparedStatement ps = null;
        
         try {
@@ -280,6 +280,7 @@ public class UsersDAO extends AbstractDAO<Users> {
                inter = new Users();
                inter.setIdUser(rs.getInt(1));
                inter.setLogin(rs.getString(2));
+               inter.setSexe(rs.getString(3));
                inter.setIsAdmin(rs.getBoolean(4));
            }
            rs.close();

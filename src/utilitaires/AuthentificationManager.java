@@ -4,6 +4,8 @@
  */
 package utilitaires;
 
+import entity.Users;
+
 /**
  *
  * @author sevtify
@@ -14,7 +16,7 @@ public class AuthentificationManager {
     // J'utilise le pattern Singleton pour éviter les bugs bizzar
     
     private static AuthentificationManager instanceUnique = null;
-    private String personneActuellementConnecte = null;
+    private Users personneActuellementConnecte = null;
     
     private AuthentificationManager(){}
     
@@ -23,7 +25,7 @@ public class AuthentificationManager {
         return instanceUnique;
     }
     
-    public void connecterUnUtilisateur(String user){
+    public void connecterUnUtilisateur(Users user){
         this.personneActuellementConnecte = user;
     }
     
@@ -32,7 +34,7 @@ public class AuthentificationManager {
     }
     
 
-    public String recupererUtilisateurConnecte(){
+    public Users recupererUtilisateurConnecte(){
         return personneActuellementConnecte;
     }
     

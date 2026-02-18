@@ -4,10 +4,15 @@
  */
 package formulaires;
 
+import dao.CrudResult;
+import dao.UsersDAO;
+import entity.Users;
 import java.awt.Component;
 import java.util.Arrays;
+import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import utilitaires.Security;
 
 /**
  *
@@ -191,8 +196,22 @@ public class LoginFrame extends javax.swing.JFrame {
     private void jbConnexionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbConnexionActionPerformed
         String loginSaisi = jtfLogin.getText();
         char[] mdpSaisi = jpfMotDePasse.getPassword();
-        System.out.println("Login : " + loginSaisi + " MDP : "+ Arrays.toString(mdpSaisi));
-        App.getInstance().lancerMenuPrincipal(loginSaisi);
+        
+        String mdpString = String.copyValueOf(mdpSaisi);
+        
+        String mdpHash = Security.crypterMotdePasse(mdpString);
+        
+        CrudResult<Users> requeteRecupUtilisateur = UsersDAO.getInstance().seConnecter(loginSaisi, mdpHash);
+        
+        if (requeteRecupUtilisateur.estUnSucces()) {
+            App.getInstance().lancerMenuPrincipal(requeteRecupUtilisateur.getDonnes());
+        }else{
+            JOptionPane.showMessageDialog(rootPane, requeteRecupUtilisateur.getErreur(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        
+        }
+        
+        
+        
     }//GEN-LAST:event_jbConnexionActionPerformed
 
     private void jtfLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtfLoginActionPerformed
