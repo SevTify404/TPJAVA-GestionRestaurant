@@ -62,6 +62,10 @@ public class Users {
         this.motDePasse = motDePasse;
     }
     
+    public Boolean isAdmin(){
+        return this.isAdmin;
+    }
+    
     public void setIsAdmin(boolean isAdmin){
         this.isAdmin = isAdmin;
     }

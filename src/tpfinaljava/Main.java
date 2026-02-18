@@ -3,34 +3,28 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package tpfinaljava;
-
-import dao.AuditDAO;
-
-
-
-import dao.CrudResult;
-import entity.Audit;
-import java.util.List;
+import formulaires.App;
+import utilitaires.VariablesEnvirennement;
 
 
 /**
  *
  * @author sevtify
  */
-public class TPFinalJava {
+public class Main {
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        CrudResult<List<Audit>> ee = AuditDAO.getInstance().recupererTout();
-        System.out.println(ee);
-        if (ee.estUnSucces()) {
-            System.out.println(ee.getDonnes());
-        }
-       
+
+        
+        // Je verifie si le fiechier .env existe
+        VariablesEnvirennement.checkVariablesEnvironnement();
+        
+        App application = App.getInstance();
+        
+        application.lancerApplication();
+
     }
-    
-    
-    
 }
