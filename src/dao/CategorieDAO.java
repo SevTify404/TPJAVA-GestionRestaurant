@@ -16,6 +16,15 @@ import java.util.List;
  * @author ACER
  */
 public class CategorieDAO extends AbstractDAO <Categorie>{
+
+    private CategorieDAO() {
+    }
+    
+    public static CategorieDAO getInstance(){
+        return new CategorieDAO();
+    }
+    
+    
    @Override
     public CrudResult<Boolean> enregistrer(Categorie categorie) {
 

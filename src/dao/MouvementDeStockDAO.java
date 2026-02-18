@@ -19,6 +19,15 @@ import java.sql.Statement;
  */
 
 public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
+
+    private MouvementDeStockDAO() {
+    }
+    
+    public static MouvementDeStockDAO getInstance(){
+        return new MouvementDeStockDAO();
+    }
+    
+    
 @Override
     public CrudResult<Boolean> enregistrer(MouvementDeStock mouvement) {
 
