@@ -4,18 +4,17 @@
  */
 package tpfinaljava;
 
+import com.mysql.cj.conf.PropertyKey;
+import entity.Produit;
 
-//import dao.AuditDAO;
+
 import dao.CrudResult;
-//import entity.Audit;
-//import entity.Categorie;
-//import dao.CategorieDAO;
-import dao.mouvementdestockDAO;
-import entity.mouvementdestock;
-
-import java.time.LocalDateTime;
-        
+import dao.UsersDAO;
+import entity.Audit;
+import entity.Users;
 import java.util.List;
+import entity.Produit;
+import dao.ProduitDAO;
 
 /**
  *
@@ -27,138 +26,142 @@ public class TPFinalJava {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-       /*CategorieDAO dao = new CategorieDAO();
-
-        // =====================
-        // INSERTION
-        // =====================
-
-        Categorie cat = new Categorie();
-        cat.setLIBELLE("desert");
-
-        CrudResult<Categorie> insertResult = dao.enregistrer(cat);
-
-        System.out.println("=== INSERTION ===");
-        System.out.println(insertResult);
-
-        if (insertResult.estUneErreur()) return;
-
-        int id = insertResult.getDonnes().getIDCAT();
-
-        // =====================
-        // LECTURE
-        // =====================
-
-        CrudResult<Categorie> lireResult = dao.lire(id);
-
-        System.out.println("\n=== LECTURE ===");
-        System.out.println(lireResult);
-
-        // =====================
-        // MISE A JOUR
-        // =====================
-
-        Categorie maj = lireResult.getDonnes();
-        maj.setLIBELLE("desert alcoolisées");
-
-        CrudResult<Categorie> majResult = dao.mettreAJour(maj);
-
-        System.out.println("\n=== MISE A JOUR ===");
-        System.out.println(majResult);
-
-        // =====================
-        // LISTE COMPLETE
-        // =====================
-
-        CrudResult<List<Categorie>> liste = dao.recupererTout();
-
-        System.out.println("\n=== LISTE ===");
-
-        if (liste.estUnSucces()) {
-            for (Categorie c : liste.getDonnes()) {
-                System.out.println(c);
-            }
-        }
-
-        // =====================
-        // SUPPRESSION LOGIQUE
-        // =====================
+        /*Users unUser = new Users(3,"Gra", "talokpo", true,"F");
+        CrudResult<Boolean> ee = UsersDAO.getInstance().enregistrer(unUser);
+       
+        if (ee.estUneErreur()) {
+            System.out.println("Erreur : "+ ee.getErreur());
+        } else{
+            System.out.println("Reusii");
+        }*/
+        //CrudResult<Users> ee= UsersDAO.getInstance().lire(2);
         
-        CrudResult<Boolean> suppr = dao.suppressionLogique(maj);
+        //Mise à jour d'un user
+        /*Users unUser = new Users();
+        unUser.setIdUser(4);
+        unUser.setLogin("queen");
+        unUser.setMotDePasse("1234");
+        unUser.setIsAdmin(true);
+        unUser.setSexe("F");
+        CrudResult<Users> result = UsersDAO.getInstance().mettreAJour(unUser);*/
 
-        System.out.println("\n=== SUPPRESSION LOGIQUE ===");
-        System.out.println(suppr);*/
-       mouvementdestockDAO dao = new mouvementdestockDAO();
+       
+       //Suppression logique d'un User
+        /*Users unUser = new Users();
+        unUser.setIdUser(5);
 
-        // =====================
-        // TEST INSERTION
-        // =====================
-
-        mouvementdestock mv = new mouvementdestock();
-        mv.setTYPE(mouvementdestock.TypeMouvement.ENTREE);
-        mv.setQUANTITE(10);
-        mv.setDATEMOUVEMENT(LocalDateTime.now());
-        mv.setIDPRODUIT(3);
-        mv.setMOTIF("Test insertion");
-
-        CrudResult<mouvementdestock> insertResult = dao.enregistrer(mv);
-
-        System.out.println("=== INSERTION ===");
-        System.out.println(insertResult);
-
-        if (insertResult.estUneErreur()) return;
-
-        int id = insertResult.getDonnes().getID();
-
-        // =====================
-        // TEST LECTURE
-        // =====================
-
-        CrudResult<mouvementdestock> lireResult = dao.lire(id);
-
-        System.out.println("\n=== LECTURE ===");
-        System.out.println(lireResult);
-
-        // =====================
-        // TEST MISE A JOUR
-        // =====================
-
-        mouvementdestock mvMaj = lireResult.getDonnes();
-        mvMaj.setQUANTITE(50);
-
-        CrudResult<mouvementdestock> majResult = dao.mettreAJour(mvMaj);
-
-        System.out.println("\n=== MISE A JOUR ===");
-        System.out.println(majResult);
-
-        // =====================
-        // TEST RECUPERER TOUT
-        // =====================
-
-        CrudResult<List<mouvementdestock>> listeResult = dao.recupererTout();
-
-        System.out.println("\n=== LISTE COMPLETE ===");
-
-        if (listeResult.estUnSucces()) {
-            for (mouvementdestock m : listeResult.getDonnes()) {
-                System.out.println(m);
+        CrudResult<Boolean> result = UsersDAO.getInstance().suppressionLogique(unUser);*/
+       
+        //Suppression définitive d'un user
+        /*Users admin = new Users();
+        admin.setIdUser(7);
+        admin.setIsAdmin(true); 
+        CrudResult<Boolean> result =
+        UsersDAO.getInstance().suppressionDefinitive(admin);*/
+        
+        
+        //Récupérer tous les utilisateurs
+        /*CrudResult<List<Users>> result = UsersDAO.getInstance().recupererTout();
+        if(result.estUneErreur()) {
+            System.out.println("Erreur : " + result.getErreur());
+        } else {
+            List<Users> liste = result.getDonnes();
+            System.out.println("Liste des utilisateurs :");
+            for(Users unUser : liste){
+                System.out.println(unUser.Afficher());
             }
-        }
+        }*/
+        
+        
+        //Se connecter
+        /*String login = "queen"; 
+        String motDePasse = "1234";
 
-        // =====================
-        // TEST SUPPRESSION LOGIQUE
-        // =====================
+        CrudResult<Users> result = UsersDAO.getInstance().seConnecter(login, motDePasse);
 
-        CrudResult<Boolean> supprResult = dao.suppressionLogique(mvMaj);
+        if(result.estUneErreur()) {
+            System.out.println("Erreur : " + result.getErreur());
+        } else {
+            Users user = result.getDonnes();
+            System.out.println("Connexion réussie !");
+            System.out.println("Id de l'utilisateur : " + user.getIdUser());
+            System.out.println("Login : " + user.getLogin());
+            System.out.println("Admin : " + user.getIsAdmin());
+            System.out.println("Sexe: " + user.getSexe());
+        }*/
 
-        System.out.println("\n=== SUPPRESSION LOGIQUE ===");
-        System.out.println(supprResult);
-    
-        //CrudResult<List<Audit>> ee = AuditDAO.getInstance().recupererTout();
-        //System.out.println(ee);
-        //if (ee.estUnSucces()) {
-          //  System.out.println(ee.getDonnes());
-        //}
-    
+
+        
+
+        /*Enrégistrer un produit
+        Produit unProduit = new Produit(3,"Jus d'ananas",1,2,16000,165,10);
+        CrudResult<Boolean> ee = ProduitDAO.getInstance().enregistrer(unProduit);
+       
+        if (ee.estUneErreur()) {
+            System.out.println("Erreur : "+ ee.getErreur());
+        } else{
+            System.out.println("Reusii");
+        }*/
+        /*Lecture d'un produit
+        CrudResult<Produit> ee= ProduitDAO.getInstance().lire(2);
+        if (ee.estUneErreur()) {
+            System.out.println("Erreur : "+ ee.getErreur());
+        } else{
+            Produit unProduit = ee.getDonnes();
+            System.out.println(unProduit.Afficher());
+        }*/
+        
+        //Mise à jour d'un produit
+        /*Produit unProduit = new Produit();
+        unProduit.setIdProduit(2);
+        unProduit.setNom("pompompon");
+        unProduit.setIdCategorie(1);
+        unProduit.setIdUser(1);
+        unProduit.setPrixDeVente(15000);
+        unProduit.setStockActuel(19);
+        unProduit.setSeuilAlerte(5);
+
+        CrudResult<Produit> result = ProduitDAO.getInstance().mettreAJour(unProduit);
+        if (result.estUneErreur()) {
+            System.out.println("Erreur : "+ result.getErreur());
+        } else{
+            
+             System.out.println(result.getDonnes().Afficher());
+        }*/
+        
+        //Suppression logique d'un produit
+       /*Produit unProduit = new Produit();
+       unProduit.setIdProduit(1);
+
+       CrudResult<Boolean> result = ProduitDAO.getInstance().suppressionLogique(unProduit);*/
+       
+       /*Suppression définitive d'un produit
+        Produit produit = new Produit();
+        produit.setIdProduit(2); 
+        CrudResult<Boolean> result = ProduitDAO.getInstance().suppressionDefinitive(produit);
+
+        if(result.estUneErreur()) {
+            System.out.println("Erreur : " + result.getErreur());
+        } else {
+            System.out.println("Suppression définitive réussie !");
+        }*/
+     
+        
+        /*Récupérer tous les produits
+        CrudResult<List<Produit>> result = ProduitDAO.getInstance().recupererTout();
+        if(result.estUneErreur()) {
+            System.out.println("Erreur : " + result.getErreur());
+        } else {
+            List<Produit> liste = result.getDonnes();
+            System.out.println("Liste des produits :");
+
+            for(Produit unProduit : liste){
+                System.out.println(unProduit.Afficher());
+            }
+        }*/
+        
     }
+    
+    
+    
 }
