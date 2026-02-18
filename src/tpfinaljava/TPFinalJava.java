@@ -4,17 +4,17 @@
  */
 package tpfinaljava;
 
-import dao.CommandeDAO;
-import dao.CrudResult;
-import entity.Commande;
-import java.time.LocalDateTime;
+import com.mysql.cj.conf.PropertyKey;
+import entity.Produit;
 
 
-import dao.AuditDAO;
 import dao.CrudResult;
+import dao.UsersDAO;
 import entity.Audit;
-
+import entity.Users;
 import java.util.List;
+import entity.Produit;
+import dao.ProduitDAO;
 
 /**
  *
@@ -33,5 +33,7 @@ public class TPFinalJava {
         }
 
     }
+    
+    
     
 }
