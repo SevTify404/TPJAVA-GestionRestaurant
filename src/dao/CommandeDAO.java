@@ -9,7 +9,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import utilitaires.VariablesEnvirennement;
 
 
 /**
@@ -48,7 +50,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
         return CrudResult.success(true);
 
     } catch (SQLException ex) {
-            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
+            return gererExceptionSQL(ex);
     }
 }
         
@@ -192,6 +194,18 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
 
         } catch (SQLException ex) {
             return CrudResult.failure("Erreur base de données :" + ex.getMessage());
+        }
+    }
+    
+    public static void main(String[] args) {
+        VariablesEnvirennement.checkVariablesEnvironnement();
+        Commande maCoomange = new Commande(0, LocalDateTime.now(), Commande.EtatCommande.EN_COURS, -8222, LocalDateTime.now());
+        CrudResult<Boolean> eee = getInstance().enregistrer(maCoomange);
+        
+        if (eee.estUnSucces()) {
+            System.out.println(eee.getDonnes());
+        }else{
+            System.out.println(eee.getErreur());
         }
     }
 

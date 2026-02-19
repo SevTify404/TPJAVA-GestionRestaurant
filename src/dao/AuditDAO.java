@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.List;
 import utilitaires.Messages;
 import java.util.ArrayList;
@@ -53,12 +54,12 @@ public class AuditDAO extends AbstractDAO<Audit>{
             
             //8- Fermeture de l'objet SQL précompilé
             ps.close();
-            
+             
             //9-Fermeture de la connexion
             conn.close();
             
         } catch (SQLException ex) {
-            return CrudResult.failure(Messages.messageAvecErreur(ex.getMessage()));
+            return gererExceptionSQL(ex);
         }
         
         if (inter == 0) {
@@ -99,7 +100,7 @@ public class AuditDAO extends AbstractDAO<Audit>{
             conn.close();
             
         } catch (SQLException ex) {
-            return CrudResult.failure(Messages.messageAvecErreur(ex.getMessage()));
+            return gererExceptionSQL(ex);
         }
         
         if (inter == 0) {
@@ -153,7 +154,7 @@ public class AuditDAO extends AbstractDAO<Audit>{
             conn.close();
             
         } catch (SQLException ex) {
-            return CrudResult.failure(Messages.messageAvecErreur(ex.getMessage()));
+            return gererExceptionSQL(ex);
         }
         
         if (auditALire == null) {
@@ -223,7 +224,7 @@ public class AuditDAO extends AbstractDAO<Audit>{
             conn.close();
             
         } catch (SQLException ex) {
-            return CrudResult.failure(Messages.messageAvecErreur(ex.getMessage()));
+            return gererExceptionSQL(ex);
         }
         
         return CrudResult.success(listeDesAudits);
@@ -271,7 +272,7 @@ public class AuditDAO extends AbstractDAO<Audit>{
             conn.close();
             
         } catch (SQLException ex) {
-            return CrudResult.failure(Messages.messageAvecErreur(ex.getMessage()));
+            return gererExceptionSQL(ex);
         }
         
         return CrudResult.success(listeDesAudits);
@@ -279,14 +280,14 @@ public class AuditDAO extends AbstractDAO<Audit>{
     
     private Audit mapperResultSet(ResultSet rsAMapper) throws SQLException{
         Users utilisateur = new Users(
-                    rsAMapper.getInt(2),
-                    rsAMapper.getString(6),
-                    null,
-                    rsAMapper.getBoolean(7),
-                    rsAMapper.getString(9)
-                );
-                return new Audit(rsAMapper.getInt(1), utilisateur, ActionType.valueOf(rsAMapper.getString(3)), rsAMapper.getString(4), rsAMapper.getTimestamp(5).toInstant());
-
+            rsAMapper.getInt(2),
+            rsAMapper.getString(6),
+            null,
+            rsAMapper.getBoolean(7),
+            rsAMapper.getString(9)
+        );
+        
+        return new Audit(rsAMapper.getInt(1), utilisateur, ActionType.valueOf(rsAMapper.getString(3)), rsAMapper.getString(4), rsAMapper.getTimestamp(5).toInstant());
     }
     
     // Je test ici pour ne pas aller dans le grand Main
@@ -296,11 +297,14 @@ public class AuditDAO extends AbstractDAO<Audit>{
         VariablesEnvirennement.checkVariablesEnvironnement();
         
         // Ici vous faites vos tests
-        CrudResult<List<Audit>> ss = getInstance().recupererTout();
-        for (Audit audit : ss.getDonnes()) {
-            System.out.println(audit.afficher());
-            System.out.println("\n");
-            
+        Users laCanard = new Users(0, "", "", true, "F");
+        Audit ee = new Audit(0, laCanard, ActionType.AJOUT, "", Instant.now());
+        CrudResult<Boolean> eee = getInstance().enregistrer(ee);
+        
+        if (eee.estUnSucces()) {
+            System.out.println(eee.getDonnes());
+        }else{
+            System.out.println(eee.getErreur());
         }
         
     }
