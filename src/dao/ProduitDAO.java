@@ -10,6 +10,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import entity.Categorie;
+import entity.Users;
+import java.sql.Timestamp;
+import java.time.Instant;
+import utilitaires.VariablesEnvirennement;
+
 
 
 
@@ -26,7 +32,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     @Override
     public CrudResult<Boolean> enregistrer(Produit unProduit) {
         CrudResult<Boolean> validation = estValide(unProduit);
-        String requete = "INSERT INTO Produit(idProduit, nom, idCategorie, idUser, prixDeVente, stockActuel, seuilAlerte) VALUES (?,?,?,?,?,?,?)";
+        String requete = "INSERT INTO Produit(nom, idCategorie, idUser, prixDeVente, stockActuel, seuilAlerte) VALUES (?,?,?,?,?,?)";
         PreparedStatement ps = null;
         int inter = 0;
         if (validation.estUneErreur()){
@@ -38,13 +44,12 @@ public class ProduitDAO extends AbstractDAO<Produit> {
                 Connection conn = toConnect();
                 ps = conn.prepareStatement(requete);
 
-                ps.setInt(1, unProduit.getIdProduit());
-                ps.setString(2, unProduit.getNom());
-                ps.setInt(3, unProduit.getIdcategorie());
-                ps.setInt(4, unProduit.getIdUser());
-                ps.setDouble(5, unProduit.getPrixDeVente());
-                ps.setInt(6, unProduit.getStockActuel());
-                ps.setInt(7, unProduit.getSeuilAlerte());
+                ps.setString(1, unProduit.getNom());
+                ps.setInt(2, unProduit.getCategorie().getIDCAT());
+                ps.setInt(3, unProduit.getUser().getIdUser());
+                ps.setDouble(4, unProduit.getPrixDeVente());
+                ps.setInt(5, unProduit.getStockActuel());
+                ps.setInt(6, unProduit.getSeuilAlerte());
 
                 inter = ps.executeUpdate();
 
@@ -65,7 +70,11 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     @Override
     public CrudResult<Produit> lire(int idProduit) {
         Produit inter = new Produit();
-        String requete = "SELECT * from Produit where idProduit = ? and deletedAt is null";
+        String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
+                        "from produit p " +
+                        "JOIN categorie c on c.idCat = p.idCategorie " +
+                        "LEFT JOIN users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
+                        "where idProduit = ? and p.deletedAt is null ";
         PreparedStatement ps = null;
         
         try{
@@ -78,10 +87,16 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             rs = ps.executeQuery();
             
             if(rs.next()){
+                Categorie categorie = new Categorie(rs.getInt(3), rs.getString(9));
+                Users user = new Users();
+                user.setIdUser(rs.getInt(10));
+                user.setLogin(rs.getString(11));
+                
                 inter.setIdProduit(rs.getInt(1));
                 inter.setNom(rs.getString(2));
-                inter.setIdCategorie(rs.getInt(3));
-                inter.setIdUser(rs.getInt(4));
+                
+                inter.setUser(user);
+                inter.setCategorie(categorie);
                 inter.setPrixDeVente(rs.getDouble(5));
                 inter.setStockActuel(rs.getInt(6));
                 inter.setSeuilAlerte(rs.getInt(7));
@@ -111,7 +126,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         CrudResult<Boolean> validation = estValide(unProduit);
         if (validation.estUneErreur()) return CrudResult.failure(validation.getErreur());
         int inter = 0;
-        String requete = "UPDATE Produit set nom=?, idCategorie=?, idUser=?, prixDeVente=?, stockActuel=?, seuilAlerte=? where idProduit=? AND deletedAt is null";
+        String requete = "UPDATE Produit set nom=?, idCategorie=?, prixDeVente=?, stockActuel=?, seuilAlerte=? where idProduit=? AND deletedAt is null";
         PreparedStatement ps = null ;
         
         
@@ -121,12 +136,12 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             
             
             ps.setString(1,unProduit.getNom());
-            ps.setInt(2, unProduit.getIdcategorie());
-            ps.setInt(3, unProduit.getIdUser());
-            ps.setDouble(4, unProduit.getPrixDeVente());
-            ps.setInt(5, unProduit.getStockActuel());
-            ps.setInt(6, unProduit.getSeuilAlerte());
-            ps.setInt(7, unProduit.getIdProduit());
+            ps.setInt(2, unProduit.getCategorie().getIDCAT());
+            
+            ps.setDouble(3, unProduit.getPrixDeVente());
+            ps.setInt(4, unProduit.getStockActuel());
+            ps.setInt(5, unProduit.getSeuilAlerte());
+            ps.setInt(6, unProduit.getIdProduit());
             
             inter = ps.executeUpdate();
             
@@ -205,6 +220,10 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     public CrudResult<Boolean> estValide(Produit unProduit) {
         if(unProduit.getPrixDeVente() <= 0){
             return CrudResult.failure("Le prix de vente doit être strictement positif");
+        }
+        System.out.println(unProduit.getUser().getDeletedAt());
+        if (unProduit.getUser().getDeletedAt() != null) {
+            return CrudResult.failure("Cet utilisateur ne peut pas enregistrer");
             
         }
         if(unProduit.getStockActuel() < 0){
@@ -223,7 +242,11 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     public CrudResult<List<Produit>> recupererTout() {
         List<Produit> listeProduit = new ArrayList<>();
 
-        String requete = "SELECT * FROM Produit where deletedAt is null ";
+        String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
+                        "from produit p " +
+                        "JOIN categorie c ON c.idCat = p.idCategorie " +
+                        "LEFT JOIN users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
+                        "where p.deletedAt is null ";
         PreparedStatement ps = null;
 
         try {
@@ -234,19 +257,22 @@ public class ProduitDAO extends AbstractDAO<Produit> {
 
             while (rs.next()) {
 
-                Produit UnProduit = new Produit();
-
-                UnProduit.setIdProduit(rs.getInt("idProduit"));
-                UnProduit.setNom(rs.getString("nom"));
-                UnProduit.setIdCategorie(rs.getInt("idCategorie"));
-                UnProduit.setIdUser(rs.getInt("idUser"));
-
-                UnProduit.setPrixDeVente(rs.getDouble("prixDeVente"));
-                UnProduit.setStockActuel(rs.getInt("stockActuel"));
-                UnProduit.setSeuilAlerte(rs.getInt("seuilAlerte"));
+                Categorie categorie = new Categorie(rs.getInt(3), rs.getString(9));
+                Users user = new Users();
+                user.setIdUser(rs.getInt(4));
+                user.setLogin(rs.getString(11));
+                Produit inter = new Produit();
+                inter.setIdProduit(rs.getInt(1));
+                inter.setNom(rs.getString(2));
+                
+                inter.setUser(user);
+                inter.setCategorie(categorie);
+                inter.setPrixDeVente(rs.getDouble(5));
+                inter.setStockActuel(rs.getInt(6));
+                inter.setSeuilAlerte(rs.getInt(7));
                 
 
-                listeProduit.add(UnProduit);
+                listeProduit.add(inter);
             }
 
 
@@ -255,13 +281,60 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             return CrudResult.failure("Erreur BD : " + ex.getMessage());
         }
         return CrudResult.success(listeProduit);
-        
-        
     }
+    
+    public CrudResult<List<Produit>> recupererProduitsCategorie(Categorie categorie){
+        List<Produit> liste_Produit_Categorie = new ArrayList<>();
+        String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
+                        "from produit p " +
+                        "JOIN categorie c ON c.idCat = p.idCategorie " +
+                        "LEFT JOIN users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
+                        "where p.deletedAt is null AND p.idCategorie = ?";
+        PreparedStatement ps = null;
+
+        try {
+            Connection conn = this.toConnect();
+            ps= conn.prepareStatement(requete);
+            ps.setInt(1, categorie.getIDCAT());
+            ResultSet rs = ps.executeQuery();
+            
+
+            while (rs.next()) {
+
+                
+                Users user = new Users();
+                user.setIdUser(rs.getInt(4));
+                user.setLogin(rs.getString(11));
+                Produit inter = new Produit();
+                inter.setIdProduit(rs.getInt(1));
+                inter.setNom(rs.getString(2));
+                
+                inter.setUser(user);
+                inter.setCategorie(categorie);
+                inter.setPrixDeVente(rs.getDouble(5));
+                inter.setStockActuel(rs.getInt(6));
+                inter.setSeuilAlerte(rs.getInt(7));
+                liste_Produit_Categorie.add(inter);
+            }
+        }catch (SQLException ex) {
+
+            return CrudResult.failure("Erreur BD : " + ex.getMessage());
+        }
+        return CrudResult.success(liste_Produit_Categorie);
+                
+        
+        
+        }
 
     
     
-
+    public static void main(String[] args) {
+        
+        VariablesEnvirennement.checkVariablesEnvironnement();
+        CrudResult<List<Produit>> rr = getInstance().recupererProduitsCategorie(new Categorie(1, ""));
+        System.err.println(rr.getDonnes());
+        //System.out.println(rr.getDonnes().Afficher());
+    }
 
 
 
