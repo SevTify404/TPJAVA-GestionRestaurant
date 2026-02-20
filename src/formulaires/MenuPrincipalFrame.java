@@ -45,6 +45,7 @@ public class MenuPrincipalFrame extends JFrame {
     private void configureFrame() {
         FormsUtils.configurationDeBaseDeFenetre(this, FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setTitle("Restaurant Maman Rose");
     }
 
     private void initComponents() {
@@ -144,7 +145,7 @@ public class MenuPrincipalFrame extends JFrame {
         topBar.setBorder(new EmptyBorder(10, 10, 10, 10));      // un peu comme Margin marge extérieur css
         topBar.setPreferredSize(new Dimension(FRAME_WIDTH - SIDEBAR_WIDTH, FormsUtils.MENU_PRINCIPAL_TOPBAR_HEIGHT));
 
-        JButton btnClose = new JButton("Fermer L'application ✕");
+        JButton btnClose = new JButton(" Fermer L'application ");
         btnClose.setBackground(ApplicationColors.ERROR);
         btnClose.setForeground(ApplicationColors.BACKGROUND);
         btnClose.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -190,7 +191,7 @@ public class MenuPrincipalFrame extends JFrame {
 
     private JPanel createSidebarHeader() {
         JPanel header = new JPanel();
-        header.setPreferredSize(new Dimension(SIDEBAR_WIDTH, (int) (FRAME_HEIGHT * 0.22)));
+        header.setPreferredSize(new Dimension(SIDEBAR_WIDTH, (int) (FRAME_HEIGHT * 0.3)));
         header.setOpaque(false);
         header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
         header.setBorder(new EmptyBorder(30, 20, 20, 20));
@@ -219,6 +220,7 @@ public class MenuPrincipalFrame extends JFrame {
         lblRole.setForeground(Color.WHITE);
         lblRole.setFont(new Font("Segoe UI", Font.BOLD, 15));
         lblRole.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lblRole.setAlignmentY(Component.CENTER_ALIGNMENT);
 
         header.add(lblAvatar);
         header.add(Box.createVerticalStrut(5));
@@ -287,7 +289,7 @@ public class MenuPrincipalFrame extends JFrame {
         footer.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         JButton btnLogout = new JButton("Déconnexion");
-        btnLogout.setPreferredSize(new Dimension((int) (SIDEBAR_WIDTH * 0.9), (int) (FRAME_HEIGHT * 0.045)));
+        btnLogout.setPreferredSize(new Dimension((int) (SIDEBAR_WIDTH * 0.92), (int) (FRAME_HEIGHT * 0.055)));
         btnLogout.setBackground(ApplicationColors.SUCCESS);
         btnLogout.setForeground(ApplicationColors.BACKGROUND);
         btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 17));
@@ -297,7 +299,7 @@ public class MenuPrincipalFrame extends JFrame {
 
         btnLogout.addActionListener(this::boutonDeconnexioonActionPerformed);
 
-        footer.add(btnLogout, BorderLayout.WEST);
+        footer.add(btnLogout, BorderLayout.CENTER);
         return footer;
     }
     
