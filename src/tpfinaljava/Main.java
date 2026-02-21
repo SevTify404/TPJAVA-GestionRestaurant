@@ -5,11 +5,7 @@
 package tpfinaljava;
 import formulaires.App;
 import utilitaires.VariablesEnvirennement;
-import dao.MouvementDeStockDAO;
-import dao.ProduitDAO;
-import entity.MouvementDeStock;
-import entity.Produit;
-import java.time.LocalDateTime;
+
 
 
 /**
@@ -26,8 +22,10 @@ public class Main {
         App application = App.getInstance();
         application.lancerApplication();
         VariablesEnvirennement.checkVariablesEnvironnement();
-        
-}
-
+         
+        App application = App.getInstance();
+      
+        application.lancerApplication();
+    }
 }
     

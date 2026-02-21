@@ -54,7 +54,7 @@ public class UsersDAO extends AbstractDAO<Users> {
                 conn.close();
 
             } catch (SQLException ex) {
-                return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+                return gererExceptionSQL(ex);
             }
 
             if (inter == 0) {
@@ -91,7 +91,7 @@ public class UsersDAO extends AbstractDAO<Users> {
            ps.close();
            conn.close();
         } catch (SQLException ex) {
-           return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+           return gererExceptionSQL(ex);
         }
         if (inter == null) {
             return CrudResult.failure("Cet Utilisateur n'existe pas");
@@ -128,7 +128,7 @@ public class UsersDAO extends AbstractDAO<Users> {
             inter = ps.executeUpdate();
             
         } catch (SQLException ex) {
-            return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         if (inter == 0) {
             return CrudResult.failure("Une erreur est survenue");
@@ -161,7 +161,7 @@ public class UsersDAO extends AbstractDAO<Users> {
                 ps.close();
                 conn.close();
             } catch (SQLException ex) {
-                return CrudResult.failure("Erreur de bd"+ ex.getMessage());
+                return gererExceptionSQL(ex);
             }     
             if(inter == 0){
                 return CrudResult.failure("Une erreur est survenue");
@@ -192,7 +192,7 @@ public class UsersDAO extends AbstractDAO<Users> {
 
         } catch (SQLException ex) {
 
-            return CrudResult.failure("Erreur BD : " + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
     }
 
@@ -218,7 +218,7 @@ public class UsersDAO extends AbstractDAO<Users> {
             }
 
         } catch (SQLException ex) {
-            return CrudResult.failure("Erreur de bd"+ ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         
         if (!valide) {
@@ -258,7 +258,7 @@ public class UsersDAO extends AbstractDAO<Users> {
 
         } catch (SQLException ex) {
 
-            return CrudResult.failure("Erreur BD : " + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         return CrudResult.success(listeUsers);
     }
@@ -288,7 +288,7 @@ public class UsersDAO extends AbstractDAO<Users> {
            conn.close();
            
         } catch (SQLException ex) {
-            return CrudResult.failure("Erreur de bd"+ex.getMessage());
+            return gererExceptionSQL(ex);
             
         }
         if(inter == null){

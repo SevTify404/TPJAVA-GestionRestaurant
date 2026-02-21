@@ -6,11 +6,28 @@ package formulaires;
 
 import entity.Users;
 import entity.enums.ActionType;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+
+
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.BoxLayout;
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import utilitaires.ApplicationColors;
 import utilitaires.AuthentificationManager;
 

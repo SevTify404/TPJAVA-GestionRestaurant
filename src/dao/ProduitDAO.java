@@ -12,8 +12,6 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import entity.Categorie;
 import entity.Users;
-import java.sql.Timestamp;
-import java.time.Instant;
 import utilitaires.VariablesEnvirennement;
 
 
@@ -56,7 +54,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
                 ps.close();
                 conn.close();
             } catch (SQLException ex) {
-                return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+                return gererExceptionSQL(ex);
             }
 
             if (inter == 0) {
@@ -109,7 +107,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             
             
         }catch(SQLException ex) {
-            return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+            return gererExceptionSQL(ex);
 
         }
         if (inter == null) {
@@ -149,7 +147,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             conn.close();
             
         } catch (SQLException ex) {
-            return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         
         if (inter == 0) {
@@ -177,7 +175,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             conn.close();
             
         } catch (SQLException ex) {
-           return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+           return gererExceptionSQL(ex);
         }
         if (inter == 0) {
             return CrudResult.failure("Une erreur est survenue");
@@ -210,7 +208,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
 
         } catch (SQLException ex) {
 
-            return CrudResult.failure("Erreur BD : " + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         
     }
@@ -221,7 +219,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         if(unProduit.getPrixDeVente() <= 0){
             return CrudResult.failure("Le prix de vente doit être strictement positif");
         }
-        System.out.println(unProduit.getUser().getDeletedAt());
+       
         if (unProduit.getUser().getDeletedAt() != null) {
             return CrudResult.failure("Cet utilisateur ne peut pas enregistrer");
             
@@ -278,7 +276,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
 
         } catch (SQLException ex) {
 
-            return CrudResult.failure("Erreur BD : " + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         return CrudResult.success(listeProduit);
     }
@@ -318,7 +316,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             }
         }catch (SQLException ex) {
 
-            return CrudResult.failure("Erreur BD : " + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         return CrudResult.success(liste_Produit_Categorie);
                 

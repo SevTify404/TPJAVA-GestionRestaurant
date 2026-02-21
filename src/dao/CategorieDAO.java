@@ -48,7 +48,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.success(true);
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -70,7 +70,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.failure("Catégorie introuvable");
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -97,7 +97,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.failure("Aucune modification effectuée");
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -113,7 +113,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.success(ps.executeUpdate() > 0);
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -129,7 +129,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.success(ps.executeUpdate() > 0);
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -162,7 +162,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.success(liste);
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 

@@ -75,7 +75,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             return CrudResult.success(true);
 
         } catch (SQLException e) {
-            return gererException(e, "enregistrement");
+            return gererExceptionSQL(e);
         }
     }
 
@@ -104,7 +104,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             }
 
         } catch (SQLException e) {
-            return gererException(e, "lecture");
+            return gererExceptionSQL(e);
         }
     }
 
@@ -140,7 +140,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             return CrudResult.success(AMettreAJour);
 
         } catch (SQLException e) {
-            return gererException(e, "mise à jour");
+            return gererExceptionSQL(e);
         }
     }
 
@@ -159,7 +159,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             return CrudResult.success(true);
 
         } catch (SQLException e) {
-            return gererException(e, "Suppression definitif");
+            return gererExceptionSQL(e);
         }
     }
 
@@ -178,7 +178,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             return CrudResult.success(true);
 
         } catch (SQLException e) {
-            return gererException(e, "Suppression Logique");
+            return gererExceptionSQL(e);
         }
     }
 
@@ -225,7 +225,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             return CrudResult.success(lignes);
 
         } catch (SQLException e) {
-            return gererException(e, "Récupération");
+            return gererExceptionSQL(e);
         }
 
     }

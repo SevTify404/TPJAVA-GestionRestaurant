@@ -113,7 +113,7 @@ public class CommandeDAO extends AbstractDAO<Commande> {
                 return CrudResult.success(c);
             }
         } catch (SQLException ex) {
-            return gererException(ex, "lecture");
+            return gererExceptionSQL(ex);
         }
         
     }
@@ -144,7 +144,8 @@ public class CommandeDAO extends AbstractDAO<Commande> {
             }
             return CrudResult.success(AUpdate);
         } catch (SQLException ex) {
-            return gererException(ex, "mise à jour");
+            return gererExceptionSQL(ex);
+
         }
     }
 
@@ -212,7 +213,7 @@ public class CommandeDAO extends AbstractDAO<Commande> {
             }
             return CrudResult.success(valide);
         } catch (SQLException ex) {
-            return gererException(ex, "Validation");
+            return gererExceptionSQL(ex);
         }
     }
 
@@ -269,8 +270,9 @@ public class CommandeDAO extends AbstractDAO<Commande> {
 
         return CrudResult.success(lignes);
 
-    } catch (SQLException e) {
-        return gererException(e, "recupererLignes");
+        } catch (SQLException ex) {
+            return gererExceptionSQL(ex);
+        }
     }
 }
 
