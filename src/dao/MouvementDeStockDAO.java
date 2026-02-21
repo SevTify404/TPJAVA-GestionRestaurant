@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.Statement;
+import entity.Produit;
 /**
  *
  * @author ACER
@@ -28,29 +29,34 @@ public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
     }
     
     
-@Override
+    @Override
     public CrudResult<Boolean> enregistrer(MouvementDeStock mouvement) {
 
         CrudResult<Boolean> validation = estValide(mouvement);
         if (validation.estUneErreur())
             return CrudResult.failure(validation.getErreur());
 
-        String sql = "INSERT INTO mouvementdestock(type, quantite, dateMouvement, idProduit, motif, deletedAt) VALUES (?, ?, ?, ?, ?, NULL)";
+        String sql = """
+            INSERT INTO mouvementdestock(type, quantite, dateMouvement, idProduit, motif, deletedAt)
+            VALUES (?, ?, ?, ?, ?, NULL)
+        """;
 
         try (Connection conn = toConnect();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, mouvement.getTYPE().name());
             ps.setInt(2, mouvement.getQUANTITE());
             ps.setTimestamp(3, Timestamp.valueOf(mouvement.getDATEMOUVEMENT()));
-            ps.setInt(4, mouvement.getIDPRODUIT());
+            ps.setInt(4, mouvement.getProduit().getIdProduit()); // 🔥 changement ici
             ps.setString(5, mouvement.getMOTIF());
 
             ps.executeUpdate();
+
             ResultSet rs = ps.getGeneratedKeys();
-            if(rs.next()){
+            if (rs.next()) {
                 mouvement.setID(rs.getInt(1));
             }
+
             return CrudResult.success(true);
 
         } catch (SQLException e) {
@@ -58,19 +64,24 @@ public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
         }
     }
 
+
     @Override
     public CrudResult<MouvementDeStock> lire(int id) {
 
-        String sql = "SELECT * FROM mouvementdestock WHERE id = ? AND deletedAt IS NULL";
+        String sql = "select m.*, p.idProduit, P.nom, P.prixDeVente "
+                + "from MouvementDestock m join produit p on m.idProduit = p.idProduit "
+                + "where m.id =? and deletedAt is null " ;
 
         try (Connection conn = toConnect();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+            PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+
                 MouvementDeStock mv = mapper(rs);
+
                 return CrudResult.success(mv);
             }
 
@@ -81,12 +92,13 @@ public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
         }
     }
 
+
     @Override
     public CrudResult<MouvementDeStock> mettreAJour(MouvementDeStock mv) {
-        
+
         CrudResult<Boolean> validation = estValide(mv);
-        
-        if (validation.estUneErreur()) return CrudResult.failure(validation.getErreur());
+        if (validation.estUneErreur())
+            return CrudResult.failure(validation.getErreur());
 
         String sql = """
             UPDATE mouvementdestock
@@ -95,12 +107,12 @@ public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
         """;
 
         try (Connection conn = toConnect();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+            PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, mv.getTYPE().name());
             ps.setInt(2, mv.getQUANTITE());
             ps.setTimestamp(3, Timestamp.valueOf(mv.getDATEMOUVEMENT()));
-            ps.setInt(4, mv.getIDPRODUIT());
+            ps.setInt(4, mv.getProduit().getIdProduit()); // 🔥 changement ici
             ps.setString(5, mv.getMOTIF());
             ps.setInt(6, mv.getID());
 
@@ -115,6 +127,7 @@ public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
             return CrudResult.failure(e.getMessage());
         }
     }
+
 
     @Override
     public CrudResult<Boolean> suppressionDefinitive(MouvementDeStock mv) {
@@ -167,21 +180,24 @@ public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
         if (mv.getDATEMOUVEMENT() == null)
             return CrudResult.failure("Date obligatoire");
 
-        if (mv.getIDPRODUIT() <= 0)
+        if (mv.getProduit() == null || mv.getProduit().getIdProduit() <= 0)
             return CrudResult.failure("Produit invalide");
 
         return CrudResult.success(true);
     }
 
+
     @Override
     public CrudResult<List<MouvementDeStock>> recupererTout() {
 
-        String sql = "SELECT * FROM mouvementdestock WHERE deletedAt IS NULL";
+        String sql = "select m.*, p.idProduit, P.nom, P.prixDeVente "
+                + "from MouvementDestock m join produit p on m.idProduit = p.idProduit "
+                + "where m.deletedAt is null";
         List<MouvementDeStock> liste = new ArrayList<>();
 
         try (Connection conn = toConnect();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 liste.add(mapper(rs));
@@ -194,7 +210,11 @@ public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
         }
     }
 
+
+   
     private MouvementDeStock mapper(ResultSet rs) throws SQLException {
+        
+        Produit produit = new Produit();
 
         MouvementDeStock mv = new MouvementDeStock();
 
@@ -202,10 +222,24 @@ public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
         mv.setTYPE(MouvementDeStock.TypeMouvement.valueOf(rs.getString("type")));
         mv.setQUANTITE(rs.getInt("quantite"));
         mv.setDATEMOUVEMENT(rs.getTimestamp("dateMouvement").toLocalDateTime());
-        mv.setIDPRODUIT(rs.getInt("idProduit"));
         mv.setMOTIF(rs.getString("motif"));
+
+    //  Récupération complète du produit
+        int idProduit = rs.getInt("idProduit");
+
+        ProduitDAO produitDAO = ProduitDAO.getInstance(); // Singleton DAO Produit
+        CrudResult<Produit> prodResult = produitDAO.lire(idProduit);
+
+        if (prodResult.estUnSucces()) {
+            mv.setProduit(prodResult.getDonnes());
+        } else {
+            mv.setProduit(null); // ou new Produit() vide si tu veux
+        }
 
         return mv;
     }
+
+
+
 
 }
