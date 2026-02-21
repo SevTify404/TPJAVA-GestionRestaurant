@@ -16,11 +16,12 @@ public class FormsUtils {
     
     // Centralisation de toute les dimensions de l'application ici pour plus de
     // facilité lors des modifications
+    private static final Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
     
-    protected static final int MENU_PRINCIPAL_WIDTH = 1800;
-    protected static final int MENU_PRINCIPAL_HEIGHT = 1000;
-    protected static final int MENU_PRINCIPAL_SIDEBAR_WIDTH = 320;
-    protected static final int MENU_PRINCIPAL_TOPBAR_HEIGHT = 60;
+    protected static final int MENU_PRINCIPAL_WIDTH = (int) (SCREEN_SIZE.width * 0.95) ;
+    protected static final int MENU_PRINCIPAL_HEIGHT = (int) (SCREEN_SIZE.height * 0.95);
+    protected static final int MENU_PRINCIPAL_SIDEBAR_WIDTH = (int) (MENU_PRINCIPAL_WIDTH * 0.22);
+    protected static final int MENU_PRINCIPAL_TOPBAR_HEIGHT = (int) (SCREEN_SIZE.height * 0.05);
     protected static final int LOGIN_WIDTH = 620;
     protected static final int LOGIN_HEIGHT = 520;
     
@@ -38,11 +39,11 @@ public class FormsUtils {
         laFenetre.setSize(largeur, longueur);
         laFenetre.setResizable(false);      // On enleve la possibilité de redimenssionner
         laFenetre.setLocationRelativeTo(null);      // Ici on essaye de redimensionner
-        
+        System.out.println(JPANNEL_DIMENSION);
         // Un peu de calcul niveau CM2
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int x = (screenSize.width - laFenetre.getWidth()) / 2;
-        int y = (screenSize.height - laFenetre.getHeight()) / 2;
+        
+        int x = (SCREEN_SIZE.width - laFenetre.getWidth()) / 2;
+        int y = (SCREEN_SIZE.height - laFenetre.getHeight()) / 2;
             
         laFenetre.setLocation(x, y);
     

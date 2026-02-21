@@ -17,36 +17,38 @@ public class MouvementDeStock {
         SORTIE
     }
 
-    private int id;
+    private int ID;
     private TypeMouvement TYPE;
-    private int IDPRODUIT;
     private int QUANTITE;
     private LocalDateTime DATEMOUVEMENT;
     private String MOTIF;
     private LocalDateTime deletedAt;
+    
+     
 
-    // Constructeur vide
-    public MouvementDeStock() {
-    }
-
+    // 🔥 Référence objet
+    private Produit produit;
+    
+    public MouvementDeStock(){}
+    
     // Constructeur complet
-    public MouvementDeStock(int id, TypeMouvement TYPE, int IDPRODUIT, int QUANTITE, LocalDateTime DATEMOUVEMENT, String MOTIF, LocalDateTime deletedAt) {
-        this.id = id;
+    public MouvementDeStock(int ID, TypeMouvement TYPE, Produit produit , int QUANTITE, LocalDateTime DATEMOUVEMENT, String MOTIF, LocalDateTime deletedAt) {
+        this.ID = ID;
         this.TYPE = TYPE;
-        this.IDPRODUIT = IDPRODUIT;
+        this.produit = produit;
         this.QUANTITE = QUANTITE;
         this.DATEMOUVEMENT = DATEMOUVEMENT;
         this.MOTIF = MOTIF;
         this.deletedAt = deletedAt;
     }
+    // ===== GETTERS & SETTERS =====
 
-    // Getters et Setters
     public int getID() {
-        return id;
+        return ID;
     }
 
-    public void setID(int id) {
-        this.id = id;
+    public void setID(int ID) {
+        this.ID = ID;
     }
 
     public TypeMouvement getTYPE() {
@@ -55,14 +57,6 @@ public class MouvementDeStock {
 
     public void setTYPE(TypeMouvement TYPE) {
         this.TYPE = TYPE;
-    }
-
-    public int getIDPRODUIT() {
-        return IDPRODUIT;
-    }
-
-    public void setIDPRODUIT(int IDPRODUIT) {
-        this.IDPRODUIT = IDPRODUIT;
     }
 
     public int getQUANTITE() {
@@ -89,7 +83,14 @@ public class MouvementDeStock {
         this.MOTIF = MOTIF;
     }
 
-    public LocalDateTime getDeletedAt() {
+    public Produit getProduit() {
+        return produit;
+    }
+
+    public void setProduit(Produit produit) {
+        this.produit = produit;
+    }
+     public LocalDateTime getDeletedAt() {
         return deletedAt;
     }
 
@@ -97,12 +98,13 @@ public class MouvementDeStock {
         this.deletedAt = deletedAt;
     }
 
+
     @Override
     public String toString() {
         return "mouvementdestock{" +
-                "id=" + id +
+                "id=" + ID +
                 ", TYPE=" + TYPE +
-                ", IDPRODUIT=" + IDPRODUIT +
+                ", PRODUIT=" + (produit != null ? produit.getNom() : "null")  +
                 ", QUANTITE=" + QUANTITE +
                 ", DATEMOUVEMENT=" + DATEMOUVEMENT +
                 ", MOTIF='" + MOTIF + '\'' +

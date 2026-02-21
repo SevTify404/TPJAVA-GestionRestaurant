@@ -13,14 +13,15 @@ import java.util.Date;
  */
 
 public class Audit {
-    private int idAudit, idUser;
+    private int idAudit;
+    private Users utilisateurRelatifALAudit;
     private ActionType action;
     private String message;
     private Instant tempsAction;
 
-    public Audit(int idAudit, int idUser, ActionType action, String message, Instant tempsAction) {
+    public Audit(int idAudit, Users utilisateur, ActionType action, String message, Instant tempsAction) {
         this.idAudit = idAudit;
-        this.idUser = idUser;
+        this.utilisateurRelatifALAudit = utilisateur;
         this.action = action;
         this.message = message;
         this.tempsAction = tempsAction;
@@ -35,8 +36,8 @@ public class Audit {
         return idAudit;
     }
 
-    public int getIdUser() {
-        return idUser;
+    public Users getUser() {
+        return utilisateurRelatifALAudit;
     }
 
     public String getMessage() {
@@ -55,8 +56,8 @@ public class Audit {
         this.idAudit = idAudit;
     }
 
-    public void setIdUser(int idUser) {
-        this.idUser = idUser;
+    public void setUser(Users utilisaeur) {
+        this.utilisateurRelatifALAudit = utilisaeur;
     }
 
     public void setMessage(String message) {
@@ -70,7 +71,7 @@ public class Audit {
     public String afficher(){
 
         String aRetourner = "Id : " + idAudit;
-        aRetourner += "\nUtilisateur : " + idUser;
+        aRetourner += "\nUtilisateur : " + utilisateurRelatifALAudit.getLogin();
         aRetourner += "\nMessage : " + message;
         aRetourner += "\nAction : " + action;
         aRetourner += "\nTemps de l'action : " + Date.from(tempsAction);

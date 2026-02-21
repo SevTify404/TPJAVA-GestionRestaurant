@@ -5,6 +5,11 @@
 package tpfinaljava;
 import formulaires.App;
 import utilitaires.VariablesEnvirennement;
+import dao.MouvementDeStockDAO;
+import dao.ProduitDAO;
+import entity.MouvementDeStock;
+import entity.Produit;
+import java.time.LocalDateTime;
 
 
 /**

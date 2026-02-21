@@ -43,6 +43,14 @@ public class App {
             
             // ici j'active un thème moderne
             try {
+                // Force la gestion du DPI pour éviter l'effet "agrandi" sur Windows
+                System.setProperty("flatlaf.useWindowDecorations", "true");
+                System.setProperty("flatlaf.uiScale.enabled", "true");
+
+                // Optionnel : force une échelle spécifique si tu veux que ce soit identique partout
+                System.setProperty("flatlaf.uiScale", "1.0"); 
+
+                com.formdev.flatlaf.FlatLightLaf.setup();
                 UIManager.setLookAndFeel(new FlatLightLaf());
                 System.out.println("Installation de flatlad réussie");
             } catch (UnsupportedLookAndFeelException ex) {

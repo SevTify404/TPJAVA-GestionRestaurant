@@ -10,7 +10,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import utilitaires.VariablesEnvirennement;
 
 
 /**
@@ -85,7 +87,7 @@ public class CommandeDAO extends AbstractDAO<Commande> {
         return CrudResult.success(true);
 
     } catch (SQLException ex) {
-        return gererException(ex, "insertion");
+            return gererExceptionSQL(ex);
     }
 }
         
@@ -233,7 +235,7 @@ public class CommandeDAO extends AbstractDAO<Commande> {
             commandes.add(c); // ajout à la liste
         }
 
-        return CrudResult.success(commandes);
+        List<Commande> commandes = new ArrayList<>(); 
 
     } catch (SQLException ex) {
         return gererException(ex, "Récuperation");
