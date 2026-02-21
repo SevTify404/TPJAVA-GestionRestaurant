@@ -13,18 +13,20 @@ public class CrudResult<T> {
     
     private final T donnes;
     private final String erreur;
+    private final Boolean ok;
 
-    public CrudResult(T donnes, String erreur) {
+    public CrudResult(T donnes, String erreur, Boolean reussi) {
         this.donnes = donnes;
         this.erreur = erreur;
+        this.ok = reussi;
     }
 
     public static <T> CrudResult<T> success(T donnes) {
-        return new CrudResult<>(donnes, null);
+        return new CrudResult<>(donnes, null, true);
     }
 
     public static <T> CrudResult<T> failure(String error) {
-        return new CrudResult<>(null, error);
+        return new CrudResult<>(null, error, false);
     }
 
     public T getDonnes() {
@@ -36,11 +38,11 @@ public class CrudResult<T> {
     }
 
     public boolean estUnSucces() {
-        return erreur == null;
+        return ok;
     }
 
     public boolean estUneErreur() {
-        return erreur != null;
+        return !ok;
     }
     
     @Override
