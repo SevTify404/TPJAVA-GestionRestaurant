@@ -19,12 +19,10 @@ public class Main {
      */
     public static void main(String[] args) {
         
-        App application = App.getInstance();
-        application.lancerApplication();
         VariablesEnvirennement.checkVariablesEnvironnement();
-         
         
-      
+        App application = App.getInstance();
+        
         application.lancerApplication();
     }
 }
