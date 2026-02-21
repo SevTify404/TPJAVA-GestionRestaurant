@@ -11,16 +11,18 @@ import java.security.Timestamp;
  * @author Rose
  */
 public class Produit {
-    private int idProduit, idCategorie, idUser, stockActuel, seuilAlerte ;
+    private int idProduit, stockActuel, seuilAlerte ;
     private double prixDeVente;
     private String nom;
     private Timestamp deletedAt;
+    private Categorie categorie;
+    private Users user;
     
     public Produit(){};
-    public Produit(int idProduit, String nom, int idCategorie,int idUser, double prixDeVente, int stockActuel, int seuilAlerte){
+    public Produit(int idProduit, String nom, Categorie categorie,Users user, double prixDeVente, int stockActuel, int seuilAlerte){
      this.idProduit = idProduit;
-     this.idCategorie = idCategorie;
-     this.idUser = idUser;
+     this.categorie = categorie;
+     this.user = user;
      this.prixDeVente = prixDeVente;
      this.nom = nom;
      this.stockActuel = stockActuel;
@@ -31,14 +33,14 @@ public class Produit {
      return idProduit;
     }
     
-    public int getIdcategorie(){
-     return idCategorie;
+    public Categorie getCategorie(){
+     return categorie;
     }
     
     
 
-    public int getIdUser(){
-     return idUser;
+    public Users getUser(){
+     return user;
     }
     
 
@@ -72,12 +74,12 @@ public class Produit {
         this.nom = nom;
     }
     
-    public void setIdCategorie(int idCategorie){
-        this.idCategorie = idCategorie ;
+    public void setCategorie(Categorie categorie){
+        this.categorie = categorie ;
     }
     
-    public void setIdUser(int idUser){
-        this.idUser = idUser;
+    public void setUser(Users user){
+        this.user = user;
     }
     public void setPrixDeVente(double prixDeVente){
         this.prixDeVente = prixDeVente;
@@ -97,7 +99,10 @@ public class Produit {
     
     
     public String Afficher(){
-        return "Id du produit :" + idProduit + "\nNom du produit : " + nom + "\nPrix de vente: "+ prixDeVente +"\nStock actuel: " + stockActuel + "\nSeuil d'alerte : " + seuilAlerte + "\ncatégorie : "; //+libelle 
+        return "Id du produit :" + idProduit + "\nNom du produit : " +
+                nom + "\nPrix de vente: "+ prixDeVente +"\nStock actuel: " +
+                stockActuel + "\nSeuil d'alerte : " + seuilAlerte +
+                "\nCatégorie : " + categorie.getLIBELLE()+ " User :" + user.Afficher(); //+libelle 
     }
 
 
