@@ -23,7 +23,7 @@ public class Main {
         application.lancerApplication();
         VariablesEnvirennement.checkVariablesEnvironnement();
          
-        App application = App.getInstance();
+        
       
         application.lancerApplication();
     }

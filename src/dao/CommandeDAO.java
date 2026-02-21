@@ -10,9 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import utilitaires.VariablesEnvirennement;
 
 
 /**
@@ -40,20 +38,13 @@ public class CommandeDAO extends AbstractDAO<Commande> {
     LigneCommande lc = new LigneCommande();
 
     lc.setIdLC(rs.getInt("idLC"));
-    lc.setIdCommande(rs.getInt("idCommande"));
-    lc.setIdProduit(rs.getInt("idProduit"));
     lc.setQuantite(rs.getInt("quantite"));
     lc.setPrixUnitaire(rs.getDouble("prixUnitaire"));
     lc.setMontantLigne(rs.getDouble("montantLigne"));
-
     return lc;
     }
     
-    private <T> CrudResult<T> gererException(SQLException ex, String action) {
-    System.getLogger(CommandeDAO.class.getName())
-          .log(System.Logger.Level.ERROR, "Erreur lors de " + action, ex);
-    return CrudResult.failure("Erreur SQL lors de " + action + " : " + ex.getMessage());
-    }
+
     
     @Override
     public CrudResult<Boolean> enregistrer(Commande commande) {
@@ -167,13 +158,12 @@ public class CommandeDAO extends AbstractDAO<Commande> {
         }
         return CrudResult.success(true);
     } catch (SQLException ex) {
-        return gererException(ex, "Suppression Definitif");
+        return gererExceptionSQL(ex);
     }
 }
 
     @Override
     public CrudResult<Boolean> suppressionLogique(Commande cmd) {
-
     if (cmd == null || cmd.getIdCommande() <= 0) {
         return CrudResult.failure("ID invalide");
     }
@@ -181,22 +171,35 @@ public class CommandeDAO extends AbstractDAO<Commande> {
     String sqlCommande = "UPDATE Commande SET deletedAt = NOW() WHERE idCommande = ?";
     String sqlLignes   = "UPDATE LigneCommande SET deletedAt = NOW() WHERE idCommande = ?";
 
-    try (Connection conn = toConnect();
-         PreparedStatement psCmd = conn.prepareStatement(sqlCommande);
-         PreparedStatement psLigne = conn.prepareStatement(sqlLignes)) {
+    Connection conn = null;
+    try {
+        conn = toConnect();
+        conn.setAutoCommit(false); // transaction manuelle
 
-        psCmd.setInt(1, cmd.getIdCommande());
-        psCmd.executeUpdate();
+        try (PreparedStatement psCmd = conn.prepareStatement(sqlCommande);
+             PreparedStatement psLigne = conn.prepareStatement(sqlLignes)) {
 
-        psLigne.setInt(1, cmd.getIdCommande());
-        psLigne.executeUpdate();
+            psCmd.setInt(1, cmd.getIdCommande());
+            psCmd.executeUpdate();
 
-        return CrudResult.success(true);
+            psLigne.setInt(1, cmd.getIdCommande());
+            psLigne.executeUpdate();
 
-    } catch (SQLException ex) {
-        return gererException(ex, "Suppression Logique");
+            conn.commit(); // commit seulement si tout a réussi
+            return CrudResult.success(true);
+        }
+
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            return gererExceptionSQL(ex);
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
     }
-}
 
     @Override
     public CrudResult<Boolean> estValide(Commande etreValide) {
@@ -221,7 +224,7 @@ public class CommandeDAO extends AbstractDAO<Commande> {
     public CrudResult<List<Commande>> recupererTout() {
     String sql = "SELECT idCommande, dateCommande, etat, total, deletedAt FROM Commande WHERE deletedAt IS NULL";
 
-    List<Commande> commandes = new ArrayList<>(); // initialisation correcte
+    List<Commande> commandes = new ArrayList<>();
 
     try (Connection conn = toConnect(); 
          PreparedStatement ps = conn.prepareStatement(sql); 
@@ -233,13 +236,13 @@ public class CommandeDAO extends AbstractDAO<Commande> {
             c.setDateCommande(rs.getTimestamp("dateCommande").toLocalDateTime());
             c.setEtat(Commande.EtatCommande.valueOf(rs.getString("etat").toUpperCase()));
             c.setTotal(rs.getDouble("total"));
-            commandes.add(c); // ajout à la liste
+            commandes.add(c);
         }
 
-        List<Commande> commandes = new ArrayList<>(); 
+        return CrudResult.success(commandes);
 
     } catch (SQLException ex) {
-        return gererException(ex, "Récuperation");
+        return gererExceptionSQL(ex);
     }
 }
 
@@ -274,38 +277,43 @@ public class CommandeDAO extends AbstractDAO<Commande> {
             return gererExceptionSQL(ex);
         }
     }
-}
-
-    public CrudResult<Boolean> recalculerTotalCommande(int idCommande) {
-
+    
+    public CrudResult<Boolean> recalculerTotalCommandeJava(int idCommande) {
     if (idCommande <= 0) {
         return CrudResult.failure("ID commande invalide");
     }
 
-    String sql = """
-        UPDATE Commande c
-        SET total = (
-            SELECT COALESCE(SUM(montantLigne), 0)
-            FROM LigneCommande
-            WHERE idCommande = c.idCommande
-            AND deletedAt IS NULL
-        )
-        WHERE c.idCommande = ? AND c.deletedAt IS NULL
-    """;
+    // 1. Récupérer toutes les lignes de la commande
+    CrudResult<List<LigneCommande>> lignesResult = recupererLignes(idCommande);
+    if (!lignesResult.estUnSucces()) {
+        return CrudResult.failure("Impossible de récupérer les lignes: " + lignesResult.estUneErreur());
+    }
+
+    List<LigneCommande> lignes = lignesResult.getDonnes();
+
+    // 2. Calculer le total côté Java
+    double total = lignes.stream()
+                         .mapToDouble(LigneCommande::getMontantLigne)
+                         .sum();
+
+    // 3. Mettre à jour le total dans la table Commande
+    String sql = "UPDATE Commande SET total = ? WHERE idCommande = ? AND deletedAt IS NULL";
 
     try (Connection conn = toConnect();
          PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        ps.setInt(1, idCommande);
+        ps.setDouble(1, total);
+        ps.setInt(2, idCommande);
 
         int rows = ps.executeUpdate();
-
         if (rows == 0) {
             return CrudResult.failure("Commande introuvable ou supprimée");
         }
+
         return CrudResult.success(true);
-    } catch (SQLException e) {
-        return gererException(e, "Calcul Total Commande");
+
+    } catch (SQLException ex) {
+        return gererExceptionSQL(ex);
     }
 }
 

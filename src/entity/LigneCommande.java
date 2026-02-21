@@ -6,41 +6,38 @@ package entity;
 
 import java.time.LocalDateTime;
 
-/**
- *
- * @author loyale
- */
 public class LigneCommande {
 
     private int idLC;
-    private int idCommande;
-    private int idProduit;
     private int quantite;
     private double prixUnitaire;
     private double montantLigne;
     private LocalDateTime deletedAt;
 
+    private Commande commande;
+    private Produit produit;
+
     public LigneCommande() {
     }
-    
-    public LigneCommande(int idCommande, int idProduit, int quantite, double prixUnitaire) {
-        this.idCommande = idCommande;
-        this.idProduit = idProduit;
+
+    public LigneCommande(int idLC, int quantite, double prixUnitaire,
+        Commande commande, Produit produit,
+        LocalDateTime deletedAt) {
+
+        this.idLC = idLC;
         this.quantite = quantite;
         this.prixUnitaire = prixUnitaire;
-        this.montantLigne = quantite * prixUnitaire;
+        this.commande = commande;
+        this.produit = produit;
+        this.deletedAt = deletedAt;
+
+        recalculerMontant();
     }
+
+    // GETTERS
 
     public int getIdLC() {
         return idLC;
-    }
-
-    public int getIdCommande() {
-        return idCommande;
-    }
-
-    public int getIdProduit() {
-        return idProduit;
     }
 
     public int getQuantite() {
@@ -59,16 +56,24 @@ public class LigneCommande {
         return deletedAt;
     }
 
+    public Commande getCommande() {
+        return commande;
+    }
+
+    public Produit getProduit() {
+        return produit;
+    }
+    
+    public int getIdCommande() {
+        return (commande != null) ? commande.getIdCommande() : 0;
+    }
+
+    public int getIdProduit() {
+        return (produit != null) ? produit.getIdProduit() : 0;
+    }
+
     public void setIdLC(int idLC) {
         this.idLC = idLC;
-    }
-
-    public void setIdCommande(int idCommande) {
-        this.idCommande = idCommande;
-    }
-
-    public void setIdProduit(int idProduit) {
-        this.idProduit = idProduit;
     }
 
     public void setQuantite(int quantite) {
@@ -81,8 +86,13 @@ public class LigneCommande {
         recalculerMontant();
     }
 
-    public void setMontantLigne(double montantLigne) {
-        this.montantLigne = montantLigne;
+    public void setCommande(Commande commande) {
+        this.commande = commande;
+    }
+
+    public void setProduit(Produit produit) {
+        this.produit = produit;
+        recalculerMontant();
     }
 
     public void setDeletedAt(LocalDateTime deletedAt) {
@@ -90,9 +100,22 @@ public class LigneCommande {
     }
 
     public void recalculerMontant() {
-        if (quantite > 0 && prixUnitaire > 0) {
-            this.montantLigne = this.quantite * this.prixUnitaire;
+
+        double prix = this.prixUnitaire;
+        
+        if (prix <= 0 && produit != null) {
+            prix = produit.getPrixDeVente();
+            this.prixUnitaire = prix;
         }
+        if (quantite <= 0 || prix <= 0) {
+            this.montantLigne = 0;
+            return;
+        }
+        this.montantLigne = quantite * prix;
     }
-    
+    public void setMontantLigne(double montantLigne) {
+        recalculerMontant();
+        this.montantLigne = montantLigne;
+        
+    }
 }
