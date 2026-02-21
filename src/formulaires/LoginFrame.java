@@ -4,14 +4,19 @@
  */
 package formulaires;
 
+import dao.AuditDAO;
 import dao.CrudResult;
 import dao.UsersDAO;
+import entity.Audit;
 import entity.Users;
+import entity.enums.ActionType;
 import java.awt.Component;
+import java.time.Instant;
 import java.util.Arrays;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import utilitaires.AuthentificationManager;
 import utilitaires.Security;
 
 /**
@@ -206,8 +211,11 @@ public class LoginFrame extends javax.swing.JFrame {
         if (requeteRecupUtilisateur.estUnSucces()) {
             App.getInstance().lancerMenuPrincipal(requeteRecupUtilisateur.getDonnes());
         }else{
+            AuthentificationManager.getInstance().enregistrerActionDansAuditSansUtilisateur(ActionType.MODIFICATION, "Tentative de connexion échouée avec les identifiants " + loginSaisi + " et "+ mdpString);
+            jtfLogin.setText("");
+            jpfMotDePasse.setText("");
             JOptionPane.showMessageDialog(rootPane, requeteRecupUtilisateur.getErreur(), "Erreur", JOptionPane.ERROR_MESSAGE);
-        
+            jtfLogin.requestFocus();
         }
         
         

@@ -5,6 +5,7 @@
 package formulaires;
 
 import entity.Users;
+import entity.enums.ActionType;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -185,6 +186,7 @@ public class MenuPrincipalFrame extends JFrame {
         );
         
         if (res == JOptionPane.YES_OPTION) {
+            AuthentificationManager.getInstance().enregistrerActionDansAudit(ActionType.MODIFICATION, utislisateurConnecte.getLogin() + " a fermé l'application");
             App.getInstance().fermerApp();
         }
     } 
