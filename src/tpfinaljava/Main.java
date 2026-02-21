@@ -19,8 +19,8 @@ public class Main {
      */
     public static void main(String[] args) {
         
-
-        // Je verifie si le fiechier .env existe
+        App application = App.getInstance();
+        application.lancerApplication();
         VariablesEnvirennement.checkVariablesEnvironnement();
          
         App application = App.getInstance();
@@ -28,3 +28,4 @@ public class Main {
         application.lancerApplication();
     }
 }
+    

@@ -16,23 +16,42 @@ import java.util.ArrayList;
  * @author loyale
  */
 
-public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
-    private LigneCommandeDAO() {}
+public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
     
-    public static LigneCommandeDAO getInstance(){
-        return new LigneCommandeDAO();
+    private <T> CrudResult<T> gererException(SQLException e, String action) {
+    System.getLogger(LigneCommandeDAO.class.getName())
+          .log(System.Logger.Level.ERROR, "Erreur lors de " + action, e);
+    return CrudResult.failure("Erreur SQL lors de " + action + " : " + e.getMessage());
     }
     
-    
+    private CrudResult<Boolean> validerLigneCommande(LigneCommande ligne) {
+    if (ligne == null) return CrudResult.failure("LigneCommande null");
+    if (ligne.getIdLC() <= 0) return CrudResult.failure("ID invalide");
+    if (ligne.getIdCommande() <= 0) return CrudResult.failure("ID commande invalide");
+    if (ligne.getQuantite() <= 0) return CrudResult.failure("Quantité invalide");
+    if (ligne.getPrixUnitaire() <= 0) return CrudResult.failure("Prix unitaire invalide");
+    return CrudResult.success(true);
+    }
+   
+    private CrudResult<Boolean> validerPourInsert(LigneCommande ligne) {
 
-        @Override
+    if (ligne == null) return CrudResult.failure("LigneCommande null");
+    if (ligne.getIdCommande() <= 0) return CrudResult.failure("ID commande invalide");
+    if (ligne.getIdProduit() <= 0) return CrudResult.failure("ID produit invalide");
+    if (ligne.getQuantite() <= 0) return CrudResult.failure("Quantité invalide");
+    if (ligne.getPrixUnitaire() <= 0) return CrudResult.failure("Prix unitaire invalide");
+
+    return CrudResult.success(true);
+    }
+
+    
+    @Override
     public CrudResult<Boolean> enregistrer(LigneCommande ligneCommande) {
         
-        CrudResult<Boolean> validation = estValide(ligneCommande);
-        
-        if (validation.estUneErreur()) return validation;
-        
+        CrudResult<Boolean> validation = validerPourInsert(ligneCommande);
+        if (!validation.estUnSucces()) return validation;
+    
         String sql = "INSERT INTO LigneCommande (idCommande, idProduit, quantite, prixUnitaire, montantLigne) VALUES (?, ?, ?, ?, ?)";
         
         try (Connection conn = toConnect(); 
@@ -62,6 +81,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
     @Override
     public CrudResult<LigneCommande> lire(int id) {
+        
         String sql = "SELECT idLC, idCommande, idProduit, quantite, prixUnitaire, montantLigne, deletedAt FROM LigneCommande WHERE idLC = ? AND deletedAt IS NULL";
 
         try (Connection conn = toConnect(); 
@@ -90,22 +110,29 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
     @Override
     public CrudResult<LigneCommande> mettreAJour(LigneCommande AMettreAJour) {
-        
-        CrudResult<Boolean> validation = estValide(AMettreAJour);
-        
-        if (validation.estUneErreur()) return CrudResult.failure(validation.getErreur());
-        
-        String sql = "UPDATE LigneCommande SET quantite = ?, idProduit = ?, prixUnitaire = ?, montantLigne = ? WHERE idLC = ?";
+        CrudResult<Boolean> validation = validerLigneCommande(AMettreAJour);
+        if (!validation.estUnSucces()) {
+            return CrudResult.failure(validation.getErreur());
+        }
+        String sql = "UPDATE LigneCommande SET idCommande = ?, idProduit = ?, quantite = ?, prixUnitaire = ?, montantLigne = ?, deletedAt = ? WHERE idLC = ?";
+
         try (Connection conn = toConnect(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
+
             // recalculer le montant avant update
-            AMettreAJour.recalculerMontant();
-            ps.setInt(1, AMettreAJour.getQuantite());
+            AMettreAJour.setMontantLigne(AMettreAJour.getQuantite() * AMettreAJour.getPrixUnitaire());
+
+            ps.setInt(1, AMettreAJour.getIdCommande());
             ps.setInt(2, AMettreAJour.getIdProduit());
-            ps.setDouble(3, AMettreAJour.getPrixUnitaire());
-            ps.setDouble(4, AMettreAJour.getMontantLigne());
-            ps.setInt(5, AMettreAJour.getIdLC());
-            System.out.println(ps.toString());
+            ps.setInt(3, AMettreAJour.getQuantite());
+            ps.setDouble(4, AMettreAJour.getPrixUnitaire());
+            ps.setDouble(5, AMettreAJour.getMontantLigne());
+            if (AMettreAJour.getDeletedAt() != null) {
+                ps.setTimestamp(6, java.sql.Timestamp.valueOf(AMettreAJour.getDeletedAt()));
+            } else {
+                ps.setNull(6, java.sql.Types.TIMESTAMP);
+            }
+            ps.setInt(7, AMettreAJour.getIdLC());
 
             int rows = ps.executeUpdate();
             if (rows == 0) return CrudResult.failure("Aucune ligne mise à jour");
@@ -119,8 +146,9 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
     @Override
     public CrudResult<Boolean> suppressionDefinitive(LigneCommande entiteASupprimer) {
+        if (entiteASupprimer == null || entiteASupprimer.getIdLC() <= 0) return CrudResult.failure("ID invalide pour suppression");
         String sql = "DELETE FROM LigneCommande WHERE idLC = ?";
-
+        
         try (Connection conn = toConnect(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -137,6 +165,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
     @Override
     public CrudResult<Boolean> suppressionLogique(LigneCommande entiteASupprimer) {
+        if (entiteASupprimer == null || entiteASupprimer.getIdLC() <= 0) return CrudResult.failure("ID invalide pour suppression");
         String sql = "UPDATE LigneCommande SET deletedAt = NOW() WHERE idLC = ?";
 
         try (Connection conn = toConnect(); 
@@ -155,15 +184,22 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
     @Override
     public CrudResult<Boolean> estValide(LigneCommande entiteAValider) {
-        if (entiteAValider.getPrixUnitaire() <= 0) {
-            return CrudResult.failure("Le PU d'une ligne de Commande doit etre supérieur à 0");
+        if (entiteAValider == null || entiteAValider.getIdLC() <= 0) return CrudResult.failure("ID invalide pour validation");
+        String sql = "SELECT COUNT(*) FROM LigneCommande WHERE idLC = ? AND deletedAt IS NULL AND quantite > 0 AND prixUnitaire > 0";
+
+        try (Connection conn = toConnect(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, entiteAValider.getIdLC());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                boolean valide = rs.next() && rs.getInt(1) > 0;
+                return CrudResult.success(valide);
+            }
+
+        } catch (SQLException e) {
+            return gererException(e, "Validation");
         }
-        if (entiteAValider.getQuantite()<= 0) {
-            return CrudResult.failure("La Quantité d'une ligne de Commande doit etre supérieur à 0");
-        }
-        entiteAValider.recalculerMontant();
-        
-        return CrudResult.success(true);
     }
 
     @Override
@@ -191,18 +227,6 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
         } catch (SQLException e) {
             return gererExceptionSQL(e);
         }
+
     }
 }
-
-    
-
-
-
-
-
-
-
-
-
-   
-
