@@ -10,6 +10,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.sql.Timestamp;
+import java.sql.Types;
+import entity.Commande;
+import entity.Produit;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -19,31 +24,56 @@ import java.util.ArrayList;
 
 public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
     
-    private <T> CrudResult<T> gererException(SQLException e, String action) {
-    System.getLogger(LigneCommandeDAO.class.getName())
-          .log(System.Logger.Level.ERROR, "Erreur lors de " + action, e);
-    return CrudResult.failure("Erreur SQL lors de " + action + " : " + e.getMessage());
-    }
+    
     
     private CrudResult<Boolean> validerLigneCommande(LigneCommande ligne) {
-    if (ligne == null) return CrudResult.failure("LigneCommande null");
-    if (ligne.getIdLC() <= 0) return CrudResult.failure("ID invalide");
-    if (ligne.getIdCommande() <= 0) return CrudResult.failure("ID commande invalide");
-    if (ligne.getQuantite() <= 0) return CrudResult.failure("Quantité invalide");
-    if (ligne.getPrixUnitaire() <= 0) return CrudResult.failure("Prix unitaire invalide");
-    return CrudResult.success(true);
+
+    if (ligne == null)
+        return CrudResult.failure("LigneCommande null");
+
+    if (ligne.getIdLC() <= 0)
+        return CrudResult.failure("ID ligne invalide");
+
+    if (ligne.getCommande() == null || ligne.getCommande().getIdCommande() <= 0)
+        return CrudResult.failure("Commande invalide");
+
+    if (ligne.getProduit() == null || ligne.getProduit().getIdProduit() <= 0)
+        return CrudResult.failure("Produit invalide");
+
+    if (ligne.getQuantite() <= 0)
+        return CrudResult.failure("Quantité invalide");
+
+    double prix = ligne.getPrixUnitaire();
+
+    if (prix <= 0) {
+        double prixProduit = ligne.getProduit().getPrixDeVente();
+        if (prixProduit <= 0)
+            return CrudResult.failure("Prix unitaire invalide");
+        ligne.setPrixUnitaire(prixProduit);
     }
+
+    return CrudResult.success(true);
+}
    
     private CrudResult<Boolean> validerPourInsert(LigneCommande ligne) {
 
-    if (ligne == null) return CrudResult.failure("LigneCommande null");
-    if (ligne.getIdCommande() <= 0) return CrudResult.failure("ID commande invalide");
-    if (ligne.getIdProduit() <= 0) return CrudResult.failure("ID produit invalide");
-    if (ligne.getQuantite() <= 0) return CrudResult.failure("Quantité invalide");
-    if (ligne.getPrixUnitaire() <= 0) return CrudResult.failure("Prix unitaire invalide");
+    if (ligne == null)
+        return CrudResult.failure("LigneCommande null");
+
+    if (ligne.getIdCommande() <= 0)
+        return CrudResult.failure("ID commande invalide");
+
+    if (ligne.getIdProduit() <= 0)
+        return CrudResult.failure("ID produit invalide");
+
+    if (ligne.getQuantite() <= 0)
+        return CrudResult.failure("Quantité invalide");
+
+    if (ligne.getPrixUnitaire() <= 0)
+        return CrudResult.failure("Prix unitaire invalide");
 
     return CrudResult.success(true);
-    }
+}
 
     
     @Override
@@ -61,8 +91,9 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             ps.setInt(2, ligneCommande.getIdProduit());
             ps.setInt(3, ligneCommande.getQuantite());
             ps.setDouble(4, ligneCommande.getPrixUnitaire());
-            ps.setDouble(5, ligneCommande.getQuantite() * ligneCommande.getPrixUnitaire());
-
+            
+            ligneCommande.recalculerMontant();
+            ps.setDouble(5, ligneCommande.getMontantLigne());
             int rows = ps.executeUpdate();
             if (rows == 0) return CrudResult.failure("Insertion échouée");
 
@@ -81,10 +112,15 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
     @Override
     public CrudResult<LigneCommande> lire(int id) {
-        
-        String sql = "SELECT idLC, idCommande, idProduit, quantite, prixUnitaire, montantLigne, deletedAt FROM LigneCommande WHERE idLC = ? AND deletedAt IS NULL";
+        String sql =
+        "SELECT lc.idLC, lc.idCommande, lc.idProduit, lc.quantite, lc.prixUnitaire, lc.montantLigne, lc.deletedAt, " +
+        "c.idCommande AS cmd_id, p.idProduit AS prod_id, p.prixDeVente " +
+        "FROM LigneCommande lc " +
+        "JOIN Commande c ON c.idCommande = lc.idCommande AND c.deletedAt IS NULL " +
+        "JOIN Produit p ON p.idProduit = lc.idProduit AND p.deletedAt IS NULL " +
+        "WHERE lc.idLC = ? AND lc.deletedAt IS NULL";
 
-        try (Connection conn = toConnect(); 
+        try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
@@ -94,11 +130,16 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
 
                 LigneCommande lc = new LigneCommande();
                 lc.setIdLC(rs.getInt("idLC"));
-                lc.setIdCommande(rs.getInt("idCommande"));
-                lc.setIdProduit(rs.getInt("idProduit"));
                 lc.setQuantite(rs.getInt("quantite"));
                 lc.setPrixUnitaire(rs.getDouble("prixUnitaire"));
-                lc.setMontantLigne(rs.getDouble("montantLigne"));
+                lc.setDeletedAt(rs.getTimestamp("deletedAt") != null ? rs.getTimestamp("deletedAt").toLocalDateTime() : null);
+
+                // Références à Commande et Produit
+                lc.setCommande(new Commande());
+                lc.getCommande().setIdCommande(rs.getInt("idCommande"));
+
+                lc.setProduit(new Produit());
+                lc.getProduit().setIdProduit(rs.getInt("idProduit"));
 
                 return CrudResult.success(lc);
             }
@@ -109,35 +150,35 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
     }
 
     @Override
-    public CrudResult<LigneCommande> mettreAJour(LigneCommande AMettreAJour) {
-        CrudResult<Boolean> validation = validerLigneCommande(AMettreAJour);
-        if (!validation.estUnSucces()) {
-            return CrudResult.failure(validation.getErreur());
-        }
-        String sql = "UPDATE LigneCommande SET idCommande = ?, idProduit = ?, quantite = ?, prixUnitaire = ?, montantLigne = ?, deletedAt = ? WHERE idLC = ?";
+    public CrudResult<LigneCommande> mettreAJour(LigneCommande lc) {
+        CrudResult<Boolean> validation = validerLigneCommande(lc);
+        if (!validation.estUnSucces()) return CrudResult.failure(validation.getErreur());
 
-        try (Connection conn = toConnect(); 
+        String sql = "UPDATE LigneCommande SET idCommande = ?, idProduit = ?, quantite = ?, " +
+                     "prixUnitaire = ?, montantLigne = ?, deletedAt = ? WHERE idLC = ? AND deletedAt IS NULL ";
+
+        try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // recalculer le montant avant update
-            AMettreAJour.setMontantLigne(AMettreAJour.getQuantite() * AMettreAJour.getPrixUnitaire());
+            // recalculer montant
+            lc.recalculerMontant();
 
-            ps.setInt(1, AMettreAJour.getIdCommande());
-            ps.setInt(2, AMettreAJour.getIdProduit());
-            ps.setInt(3, AMettreAJour.getQuantite());
-            ps.setDouble(4, AMettreAJour.getPrixUnitaire());
-            ps.setDouble(5, AMettreAJour.getMontantLigne());
-            if (AMettreAJour.getDeletedAt() != null) {
-                ps.setTimestamp(6, java.sql.Timestamp.valueOf(AMettreAJour.getDeletedAt()));
+            ps.setInt(1, lc.getIdCommande());
+            ps.setInt(2, lc.getIdProduit());
+            ps.setInt(3, lc.getQuantite());
+            ps.setDouble(4, lc.getPrixUnitaire());
+            ps.setDouble(5, lc.getMontantLigne());
+            if (lc.getDeletedAt() != null) {
+                ps.setTimestamp(6, Timestamp.valueOf(lc.getDeletedAt()));
             } else {
-                ps.setNull(6, java.sql.Types.TIMESTAMP);
+                ps.setNull(6, Types.TIMESTAMP);
             }
-            ps.setInt(7, AMettreAJour.getIdLC());
+            ps.setInt(7, lc.getIdLC());
 
             int rows = ps.executeUpdate();
             if (rows == 0) return CrudResult.failure("Aucune ligne mise à jour");
 
-            return CrudResult.success(AMettreAJour);
+            return CrudResult.success(lc);
 
         } catch (SQLException e) {
             return gererExceptionSQL(e);
@@ -145,14 +186,15 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
     }
 
     @Override
-    public CrudResult<Boolean> suppressionDefinitive(LigneCommande entiteASupprimer) {
-        if (entiteASupprimer == null || entiteASupprimer.getIdLC() <= 0) return CrudResult.failure("ID invalide pour suppression");
+    public CrudResult<Boolean> suppressionDefinitive(LigneCommande lc) {
+        if (lc == null || lc.getIdLC() <= 0) return CrudResult.failure("ID invalide pour suppression");
+
         String sql = "DELETE FROM LigneCommande WHERE idLC = ?";
-        
-        try (Connection conn = toConnect(); 
+
+        try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, entiteASupprimer.getIdLC());
+            ps.setInt(1, lc.getIdLC());
             int rows = ps.executeUpdate();
             if (rows == 0) return CrudResult.failure("Aucune ligne supprimée");
 
@@ -164,14 +206,18 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
     }
 
     @Override
-    public CrudResult<Boolean> suppressionLogique(LigneCommande entiteASupprimer) {
-        if (entiteASupprimer == null || entiteASupprimer.getIdLC() <= 0) return CrudResult.failure("ID invalide pour suppression");
-        String sql = "UPDATE LigneCommande SET deletedAt = NOW() WHERE idLC = ?";
+    public CrudResult<Boolean> suppressionLogique(LigneCommande lc) {
+        if (lc == null || lc.getIdLC() <= 0) return CrudResult.failure("ID invalide pour suppression");
 
-        try (Connection conn = toConnect(); 
+        String sql = "UPDATE LigneCommande SET deletedAt = ? WHERE idLC = ?";
+
+
+
+        try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, entiteASupprimer.getIdLC());
+            ps.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(2, lc.getIdLC());
             int rows = ps.executeUpdate();
             if (rows == 0) return CrudResult.failure("Aucune ligne supprimée logiquement");
 
@@ -183,14 +229,23 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
     }
 
     @Override
-    public CrudResult<Boolean> estValide(LigneCommande entiteAValider) {
-        if (entiteAValider == null || entiteAValider.getIdLC() <= 0) return CrudResult.failure("ID invalide pour validation");
-        String sql = "SELECT COUNT(*) FROM LigneCommande WHERE idLC = ? AND deletedAt IS NULL AND quantite > 0 AND prixUnitaire > 0";
+    public CrudResult<Boolean> estValide(LigneCommande lc) {
+        if (lc == null || lc.getIdLC() <= 0) return CrudResult.failure("ID invalide pour validation");
 
-        try (Connection conn = toConnect(); 
+        String sql =
+            "SELECT COUNT(*) " +
+            "FROM LigneCommande lc " +
+            "JOIN Commande c ON c.idCommande = lc.idCommande AND c.deletedAt IS NULL " +
+            "JOIN Produit p ON p.idProduit = lc.idProduit AND p.deletedAt IS NULL " +
+            "WHERE lc.idLC = ? " +
+            "AND lc.deletedAt IS NULL " +
+            "AND lc.quantite > 0 " +
+            "AND lc.prixUnitaire > 0";
+
+        try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, entiteAValider.getIdLC());
+            ps.setInt(1, lc.getIdLC());
 
             try (ResultSet rs = ps.executeQuery()) {
                 boolean valide = rs.next() && rs.getInt(1) > 0;
@@ -198,27 +253,38 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             }
 
         } catch (SQLException e) {
-            return gererException(e, "Validation");
+            return gererExceptionSQL(e);
         }
     }
 
     @Override
     public CrudResult<List<LigneCommande>> recupererTout() {
-        String sql = "SELECT idLC, idCommande, idProduit, quantite, prixUnitaire, montantLigne, deletedAt FROM LigneCommande WHERE deletedAt IS NULL";
+        String sql = "SELECT lc.idLC,lc.idCommande,lc.idProduit,lc.quantite,lc.prixUnitaire,lc.montantLigne,lc.deletedAt,p.nom AS nomProduit,p.prixDeVent FROM LigneCommande lc LEFT JOIN Produit p ON p.idProduit = lc.idProduit WHERE lc.deletedAt IS NULL;";
 
         List<LigneCommande> lignes = new ArrayList<>();
-        try (Connection conn = toConnect(); 
-             PreparedStatement ps = conn.prepareStatement(sql); 
+
+        try (Connection conn = toConnect();
+             PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 LigneCommande lc = new LigneCommande();
                 lc.setIdLC(rs.getInt("idLC"));
-                lc.setIdCommande(rs.getInt("idCommande"));
-                lc.setIdProduit(rs.getInt("idProduit"));
                 lc.setQuantite(rs.getInt("quantite"));
                 lc.setPrixUnitaire(rs.getDouble("prixUnitaire"));
-                lc.setMontantLigne(rs.getDouble("montantLigne"));
+                lc.setDeletedAt(rs.getTimestamp("deletedAt") != null ? rs.getTimestamp("deletedAt").toLocalDateTime() : null);
+
+                lc.setCommande(new Commande());
+                lc.getCommande().setIdCommande(rs.getInt("idCommande"));
+
+                lc.setProduit(new Produit());
+                lc.getProduit().setIdProduit(rs.getInt("idProduit"));
+                
+                Produit produit = new Produit();
+                produit.setIdProduit(rs.getInt("idProduit"));
+                produit.setNom(rs.getString("nomProduit"));
+                
+                lc.setProduit(produit);
                 lignes.add(lc);
             }
 
@@ -227,6 +293,5 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
         } catch (SQLException e) {
             return gererExceptionSQL(e);
         }
-
     }
 }

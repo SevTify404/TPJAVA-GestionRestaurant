@@ -15,6 +15,7 @@ public class Commande {
     private EtatCommande etat;
     private double total;
     private LocalDateTime deletedAt;
+    
 
     public enum EtatCommande {
         EN_COURS,
