@@ -4,15 +4,11 @@
  */
 package formulaires;
 
-import dao.AuditDAO;
 import dao.CrudResult;
 import dao.UsersDAO;
-import entity.Audit;
 import entity.Users;
 import entity.enums.ActionType;
 import java.awt.Component;
-import java.time.Instant;
-import java.util.Arrays;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;

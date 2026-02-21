@@ -76,7 +76,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
                 return CrudResult.success(c);
             }
         } catch (SQLException ex) {
-            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         
     }
@@ -108,7 +108,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
             }
             return CrudResult.success(AUpdate);
         } catch (SQLException ex) {
-            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
+            return gererExceptionSQL(ex);
 
         }
     }
@@ -128,7 +128,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
             }
             return CrudResult.success(true);
         } catch (SQLException ex) {
-            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
     }
 
@@ -148,7 +148,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
             }
                 return CrudResult.success(true);
         } catch (SQLException ex) {
-            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
     }
 
@@ -167,7 +167,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
             }
             return CrudResult.success(valide);
         } catch (SQLException ex) {
-            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
     }
 
@@ -193,7 +193,7 @@ public CrudResult<Boolean> enregistrer(Commande commande) {
             return CrudResult.success(commandes);
 
         } catch (SQLException ex) {
-            return CrudResult.failure("Erreur base de données :" + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
     }
     

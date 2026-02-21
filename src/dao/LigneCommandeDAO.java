@@ -56,7 +56,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             return CrudResult.success(true);
 
         } catch (SQLException e) {
-            return CrudResult.failure("Erreur SQL : " + e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -84,7 +84,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             }
 
         } catch (SQLException e) {
-            return CrudResult.failure("Erreur SQL : " + e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -113,7 +113,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             return CrudResult.success(AMettreAJour);
 
         } catch (SQLException e) {
-            return CrudResult.failure("Erreur SQL : " + e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -131,7 +131,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             return CrudResult.success(true);
 
         } catch (SQLException e) {
-            return CrudResult.failure("Erreur SQL : " + e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -149,7 +149,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             return CrudResult.success(true);
 
         } catch (SQLException e) {
-            return CrudResult.failure("Erreur SQL : " + e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -189,7 +189,7 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
             return CrudResult.success(lignes);
 
         } catch (SQLException e) {
-            return CrudResult.failure("Erreur SQL : " + e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 }
