@@ -3,8 +3,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package tpfinaljava;
-import formulaires.App;
-import utilitaires.VariablesEnvirennement;
+//import formulaires.App;
+import formulaires.DashBoardPanel;
+import java.awt.BorderLayout;
+import javax.swing.JFrame;
+//import utilitaires.VariablesEnvirennement;
 
 
 
@@ -19,11 +22,17 @@ public class Main {
      */
     public static void main(String[] args) {
         
-        VariablesEnvirennement.checkVariablesEnvironnement();
-        
-        App application = App.getInstance();
-        
-        application.lancerApplication();
+       java.awt.EventQueue.invokeLater(() -> {
+           JFrame frame = new JFrame("Test Dashboard");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1200, 800);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(new BorderLayout());
+
+        frame.add(new DashBoardPanel(), BorderLayout.CENTER);
+
+        frame.setVisible(true);
+    });
     }
 }
     
