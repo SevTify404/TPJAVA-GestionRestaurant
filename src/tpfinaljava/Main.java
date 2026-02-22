@@ -4,9 +4,12 @@
  */
 package tpfinaljava;
 //import formulaires.App;
+import com.formdev.flatlaf.FlatLightLaf;
 import formulaires.DashBoardPanel;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 //import utilitaires.VariablesEnvirennement;
 
 
@@ -20,7 +23,18 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnsupportedLookAndFeelException {
+        
+         // Force la gestion du DPI pour éviter l'effet "agrandi" sur Windows
+                System.setProperty("flatlaf.useWindowDecorations", "true");
+                System.setProperty("flatlaf.uiScale.enabled", "true");
+
+                // Optionnel : force une échelle spécifique si tu veux que ce soit identique partout
+                System.setProperty("flatlaf.uiScale", "1.0"); 
+
+                com.formdev.flatlaf.FlatLightLaf.setup();
+                UIManager.setLookAndFeel(new FlatLightLaf());
+                System.out.println("Installation de flatlad réussie");
         
        java.awt.EventQueue.invokeLater(() -> {
            JFrame frame = new JFrame("Test Dashboard");

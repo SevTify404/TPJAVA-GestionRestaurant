@@ -12,6 +12,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import utilitaires.ApplicationColors;
@@ -30,32 +31,105 @@ public class DashBoardPanel extends javax.swing.JPanel {
     }
     
     private void initCustomCOmponents(){
-        rafraichirListeCommandes(jPanel24);
-        rafraichirListeCommandes(jPanel20);
+        
+        // Pour accelerer le scroll
+        jspAlerteProduit.getVerticalScrollBar().setUnitIncrement(16);
+        jspCommandes.getVerticalScrollBar().setUnitIncrement(16);
+        rafraichirListeCommandes(jpContenuCommandes);
+        rafraichirAlertesStock(jpContenuProduitAlert);
+        
     }
     
     public static void main(String[] args) {
          java.awt.EventQueue.invokeLater(() -> new DashBoardPanel().setVisible(true));
     }
     
+    
+    
     private void rafraichirListeCommandes(JPanel containerParent) {
     containerParent.removeAll(); // Vide le contenu actuel
     
     // Exemple avec une boucle
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 100; i++) {
             JPanel card = createCard("Commande #" + "24", 
                                      "2x Burger, 1x Coca", 
                                      "1200" + " €");
-
+            
+            // Fixe une taille préférée pour la carte sinon le layout peut la compresser
+            card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+                                     
             containerParent.add(card);
             containerParent.add(Box.createRigidArea(new Dimension(0, 10))); // Espacement entre cartes
                         
         }
     
-    containerParent.revalidate(); // Indique à Swing de recalculer l'affichage
-    containerParent.repaint();    // Force le redessin
+        containerParent.revalidate(); // Indique à Swing de recalculer l'affichage
+        containerParent.repaint();    // Force le redessin
+    }
+    
+    private void rafraichirAlertesStock(JPanel container) {
+    container.removeAll(); // Nettoie les anciennes alertes
+    
+    // Exemple : boucle sur tes produits en alerte
+    // Supposons une liste 'produitsAlertes' récupérée de ton DAO
+    for (int i = 0; i < 2; i++) {
+        JPanel alerte = createAlerteStockCard("Zogbon", "Boisons", 3, 2);
+        
+        container.add(alerte);
+        // Ajout d'un petit espacement entre les cartes
+        container.add(Box.createRigidArea(new Dimension(0, 8))); 
+    }
+    
+    container.revalidate(); // Indique à Swing de recalculer le layout
+    container.repaint();    // Rafraîchit l'affichage
 }
     
+    public JPanel createAlerteStockCard(String nomProduit, String categorie, int stock, int seuil) {
+        // 1. Création du panneau principal de la carte
+        JPanel card = new JPanel(new BorderLayout());
+        // Fond rose pâle pour signaler l'alerte
+        card.setBackground(new Color(255, 235, 238)); 
+        card.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(255, 205, 210), 1, true),
+            new EmptyBorder(10, 15, 10, 15)
+        ));
+
+        // 2. Panneau gauche : Nom et Catégorie
+        JPanel leftPanel = new JPanel(new GridLayout(2, 1));
+        leftPanel.setOpaque(false);
+
+        JLabel lblNom = new JLabel(nomProduit);
+        lblNom.setFont(new Font("Segoe UI", Font.BOLD, 16));
+
+        JLabel lblCat = new JLabel(categorie);
+        lblCat.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblCat.setForeground(ApplicationColors.TEXT_SECONDARY);
+
+        leftPanel.add(lblNom);
+        leftPanel.add(lblCat);
+
+        // 3. Panneau droit : Stock et Seuil
+        JPanel rightPanel = new JPanel(new GridLayout(2, 1));
+        rightPanel.setOpaque(false);
+
+        JLabel lblStock = new JLabel("Stock: " + stock);
+        lblStock.setForeground(ApplicationColors.ERROR); // Rouge pour le stock
+        lblStock.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        JLabel lblSeuil = new JLabel("Seuil: " + seuil);
+        lblSeuil.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        rightPanel.add(lblStock);
+        rightPanel.add(lblSeuil);
+
+        card.add(leftPanel, BorderLayout.CENTER);
+        card.add(rightPanel, BorderLayout.EAST);
+
+        // Fixer une hauteur maximale pour éviter que la carte ne s'étire trop
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+
+        return card;
+}
     public JPanel createCard(String title, String subtitle, String amountOrValue) {
         // 1. Panel conteneur avec un layout propre
         JPanel card = new JPanel(new BorderLayout());
@@ -102,108 +176,110 @@ public class DashBoardPanel extends javax.swing.JPanel {
 
         jpCartes = new javax.swing.JPanel();
         jpCarte1 = new javax.swing.JPanel();
-        jPanel1 = new javax.swing.JPanel();
+        jpImageCarte1 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jpCarte5 = new javax.swing.JPanel();
-        jPanel4 = new javax.swing.JPanel();
+        jpDetailsCarte1 = new javax.swing.JPanel();
+        jlDetailsCarte1_1 = new javax.swing.JLabel();
+        jlDetailsCarte1_2 = new javax.swing.JLabel();
+        jpCarte2 = new javax.swing.JPanel();
+        jpImageCarte2 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        jPanel6 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        jpCarte6 = new javax.swing.JPanel();
-        jPanel7 = new javax.swing.JPanel();
+        jpDetailsCarte2 = new javax.swing.JPanel();
+        jlDetailsCarte2_1 = new javax.swing.JLabel();
+        jlDetailsCarte2_2 = new javax.swing.JLabel();
+        jpCarte3 = new javax.swing.JPanel();
+        jpImageCarte3 = new javax.swing.JPanel();
         jPanel8 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
-        jPanel9 = new javax.swing.JPanel();
-        jLabel8 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
-        jpCarte7 = new javax.swing.JPanel();
-        jPanel10 = new javax.swing.JPanel();
+        jpDetailsCarte3 = new javax.swing.JPanel();
+        jlDetailsCarte3_1 = new javax.swing.JLabel();
+        jlDetailsCarte3_2 = new javax.swing.JLabel();
+        jpCarte4 = new javax.swing.JPanel();
+        jpImageCarte4 = new javax.swing.JPanel();
         jPanel11 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
-        jPanel12 = new javax.swing.JPanel();
-        jLabel11 = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
+        jpDetailsCarte4 = new javax.swing.JPanel();
+        jlDetailsCarte4_1 = new javax.swing.JLabel();
+        jlDetailsCarte4_2 = new javax.swing.JLabel();
         jpNavigation = new javax.swing.JPanel();
-        jPanel14 = new javax.swing.JPanel();
-        jLabel13 = new javax.swing.JLabel();
-        jPanel13 = new javax.swing.JPanel();
-        jPanel15 = new javax.swing.JPanel();
-        jLabel14 = new javax.swing.JLabel();
-        jLabel15 = new javax.swing.JLabel();
-        jPanel16 = new javax.swing.JPanel();
-        jLabel16 = new javax.swing.JLabel();
-        jLabel17 = new javax.swing.JLabel();
-        jPanel17 = new javax.swing.JPanel();
-        jLabel18 = new javax.swing.JLabel();
-        jLabel19 = new javax.swing.JLabel();
-        jPanel18 = new javax.swing.JPanel();
-        jLabel20 = new javax.swing.JLabel();
-        jLabel21 = new javax.swing.JLabel();
+        jpTexteNavigation = new javax.swing.JPanel();
+        jlNavigatiopRapide = new javax.swing.JLabel();
+        jpCartesNavigationRapide = new javax.swing.JPanel();
+        jpCarteNaviguation1 = new javax.swing.JPanel();
+        jlImageCarteNaviguation1 = new javax.swing.JLabel();
+        jlDetailsCarteNaviguation1 = new javax.swing.JLabel();
+        jpCarteNaviguation2 = new javax.swing.JPanel();
+        jlImageCarteNaviguation2 = new javax.swing.JLabel();
+        jlDetailsCarteNaviguation2 = new javax.swing.JLabel();
+        jpCarteNaviguation3 = new javax.swing.JPanel();
+        jlImageCarteNaviguation3 = new javax.swing.JLabel();
+        jlDetailsCarteNaviguation3 = new javax.swing.JLabel();
+        jpCarteNaviguation4 = new javax.swing.JPanel();
+        jlImageCarteNaviguation4 = new javax.swing.JLabel();
+        jlDetailsCarteNaviguation4 = new javax.swing.JLabel();
         jpDetailsDashorad = new javax.swing.JPanel();
-        jPanel19 = new javax.swing.JPanel();
-        jPanel21 = new javax.swing.JPanel();
-        jLabel22 = new javax.swing.JLabel();
-        jPanel20 = new javax.swing.JPanel();
-        jPanel22 = new javax.swing.JPanel();
-        jPanel23 = new javax.swing.JPanel();
-        jLabel23 = new javax.swing.JLabel();
-        jPanel24 = new javax.swing.JPanel();
+        jpProduitsAlertes = new javax.swing.JPanel();
+        jpDetailAlerteProduit = new javax.swing.JPanel();
+        jlDetailAlerteProduit = new javax.swing.JLabel();
+        jspAlerteProduit = new javax.swing.JScrollPane();
+        jpContenuProduitAlert = new javax.swing.JPanel();
+        jpCommandes = new javax.swing.JPanel();
+        jpDetailsCommandes = new javax.swing.JPanel();
+        jlDetailsCommandes = new javax.swing.JLabel();
+        jspCommandes = new javax.swing.JScrollPane();
+        jpContenuCommandes = new javax.swing.JPanel();
 
         addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 formKeyPressed(evt);
             }
         });
-        setLayout(new java.awt.BorderLayout());
+        setLayout(new java.awt.BorderLayout(0, 15));
 
+        jpCartes.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 15, 0, 15));
         jpCartes.setLayout(new java.awt.GridLayout(1, 4, 20, 0));
 
         jpCarte1.setBackground(ApplicationColors.BACKGROUND);
         jpCarte1.setBorder(new javax.swing.border.MatteBorder(null));
         jpCarte1.setLayout(new java.awt.BorderLayout(10, 0));
 
-        jPanel1.setBackground(ApplicationColors.PANEL_BG);
-        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.LINE_AXIS));
+        jpImageCarte1.setBackground(ApplicationColors.PANEL_BG);
+        jpImageCarte1.setLayout(new javax.swing.BoxLayout(jpImageCarte1, javax.swing.BoxLayout.LINE_AXIS));
 
         jPanel3.setLayout(new java.awt.BorderLayout());
 
-        jLabel4.setBackground(ApplicationColors.BACKGROUND);
         jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/in-stock (1).png"))); // NOI18N
         jPanel3.add(jLabel4, java.awt.BorderLayout.CENTER);
 
-        jPanel1.add(jPanel3);
+        jpImageCarte1.add(jPanel3);
 
-        jpCarte1.add(jPanel1, java.awt.BorderLayout.WEST);
+        jpCarte1.add(jpImageCarte1, java.awt.BorderLayout.WEST);
 
-        jPanel2.setBackground(ApplicationColors.BACKGROUND);
-        jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.Y_AXIS));
+        jpDetailsCarte1.setBackground(ApplicationColors.BACKGROUND        );
+        jpDetailsCarte1.setLayout(new javax.swing.BoxLayout(jpDetailsCarte1, javax.swing.BoxLayout.Y_AXIS));
 
-        jLabel1.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("48");
-        jPanel2.add(jLabel1);
+        jlDetailsCarte1_1.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        jlDetailsCarte1_1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarte1_1.setText("48");
+        jpDetailsCarte1.add(jlDetailsCarte1_1);
 
-        jLabel2.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        jLabel2.setForeground(ApplicationColors.TEXT_SECONDARY);
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Total Produits");
-        jPanel2.add(jLabel2);
+        jlDetailsCarte1_2.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        jlDetailsCarte1_2.setForeground(ApplicationColors.TEXT_SECONDARY);
+        jlDetailsCarte1_2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarte1_2.setText("Total Produits");
+        jpDetailsCarte1.add(jlDetailsCarte1_2);
 
-        jpCarte1.add(jPanel2, java.awt.BorderLayout.CENTER);
+        jpCarte1.add(jpDetailsCarte1, java.awt.BorderLayout.CENTER);
 
         jpCartes.add(jpCarte1);
 
-        jpCarte5.setBorder(new javax.swing.border.MatteBorder(null));
-        jpCarte5.setLayout(new java.awt.BorderLayout(10, 0));
+        jpCarte2.setBorder(new javax.swing.border.MatteBorder(null));
+        jpCarte2.setLayout(new java.awt.BorderLayout(10, 0));
 
-        jPanel4.setBackground(ApplicationColors.PANEL_BG);
-        jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.LINE_AXIS));
+        jpImageCarte2.setBackground(ApplicationColors.PANEL_BG);
+        jpImageCarte2.setLayout(new javax.swing.BoxLayout(jpImageCarte2, javax.swing.BoxLayout.LINE_AXIS));
 
         jPanel5.setLayout(new java.awt.BorderLayout());
 
@@ -211,33 +287,33 @@ public class DashBoardPanel extends javax.swing.JPanel {
         jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/purchase-order.png"))); // NOI18N
         jPanel5.add(jLabel5, java.awt.BorderLayout.CENTER);
 
-        jPanel4.add(jPanel5);
+        jpImageCarte2.add(jPanel5);
 
-        jpCarte5.add(jPanel4, java.awt.BorderLayout.WEST);
+        jpCarte2.add(jpImageCarte2, java.awt.BorderLayout.WEST);
 
-        jPanel6.setBackground(ApplicationColors.BACKGROUND);
-        jPanel6.setLayout(new javax.swing.BoxLayout(jPanel6, javax.swing.BoxLayout.Y_AXIS));
+        jpDetailsCarte2.setBackground(ApplicationColors.BACKGROUND);
+        jpDetailsCarte2.setLayout(new javax.swing.BoxLayout(jpDetailsCarte2, javax.swing.BoxLayout.Y_AXIS));
 
-        jLabel3.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("48");
-        jPanel6.add(jLabel3);
+        jlDetailsCarte2_1.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        jlDetailsCarte2_1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarte2_1.setText("48");
+        jpDetailsCarte2.add(jlDetailsCarte2_1);
 
-        jLabel6.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        jLabel6.setForeground(ApplicationColors.TEXT_SECONDARY);
-        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel6.setText("Total Produits");
-        jPanel6.add(jLabel6);
+        jlDetailsCarte2_2.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        jlDetailsCarte2_2.setForeground(ApplicationColors.TEXT_SECONDARY);
+        jlDetailsCarte2_2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarte2_2.setText("Commandes Du Jour");
+        jpDetailsCarte2.add(jlDetailsCarte2_2);
 
-        jpCarte5.add(jPanel6, java.awt.BorderLayout.CENTER);
+        jpCarte2.add(jpDetailsCarte2, java.awt.BorderLayout.CENTER);
 
-        jpCartes.add(jpCarte5);
+        jpCartes.add(jpCarte2);
 
-        jpCarte6.setBorder(new javax.swing.border.MatteBorder(null));
-        jpCarte6.setLayout(new java.awt.BorderLayout(10, 0));
+        jpCarte3.setBorder(new javax.swing.border.MatteBorder(null));
+        jpCarte3.setLayout(new java.awt.BorderLayout(10, 0));
 
-        jPanel7.setBackground(ApplicationColors.PANEL_BG);
-        jPanel7.setLayout(new javax.swing.BoxLayout(jPanel7, javax.swing.BoxLayout.LINE_AXIS));
+        jpImageCarte3.setBackground(ApplicationColors.PANEL_BG);
+        jpImageCarte3.setLayout(new javax.swing.BoxLayout(jpImageCarte3, javax.swing.BoxLayout.LINE_AXIS));
 
         jPanel8.setLayout(new java.awt.BorderLayout());
 
@@ -245,33 +321,33 @@ public class DashBoardPanel extends javax.swing.JPanel {
         jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/money-bag.png"))); // NOI18N
         jPanel8.add(jLabel7, java.awt.BorderLayout.CENTER);
 
-        jPanel7.add(jPanel8);
+        jpImageCarte3.add(jPanel8);
 
-        jpCarte6.add(jPanel7, java.awt.BorderLayout.WEST);
+        jpCarte3.add(jpImageCarte3, java.awt.BorderLayout.WEST);
 
-        jPanel9.setBackground(ApplicationColors.BACKGROUND);
-        jPanel9.setLayout(new javax.swing.BoxLayout(jPanel9, javax.swing.BoxLayout.Y_AXIS));
+        jpDetailsCarte3.setBackground(ApplicationColors.BACKGROUND);
+        jpDetailsCarte3.setLayout(new javax.swing.BoxLayout(jpDetailsCarte3, javax.swing.BoxLayout.Y_AXIS));
 
-        jLabel8.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel8.setText("48");
-        jPanel9.add(jLabel8);
+        jlDetailsCarte3_1.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        jlDetailsCarte3_1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarte3_1.setText("48");
+        jpDetailsCarte3.add(jlDetailsCarte3_1);
 
-        jLabel9.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        jLabel9.setForeground(ApplicationColors.TEXT_SECONDARY);
-        jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel9.setText("Total Produits");
-        jPanel9.add(jLabel9);
+        jlDetailsCarte3_2.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        jlDetailsCarte3_2.setForeground(ApplicationColors.TEXT_SECONDARY);
+        jlDetailsCarte3_2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarte3_2.setText("Revenues Du Jour");
+        jpDetailsCarte3.add(jlDetailsCarte3_2);
 
-        jpCarte6.add(jPanel9, java.awt.BorderLayout.CENTER);
+        jpCarte3.add(jpDetailsCarte3, java.awt.BorderLayout.CENTER);
 
-        jpCartes.add(jpCarte6);
+        jpCartes.add(jpCarte3);
 
-        jpCarte7.setBorder(new javax.swing.border.MatteBorder(null));
-        jpCarte7.setLayout(new java.awt.BorderLayout(10, 0));
+        jpCarte4.setBorder(new javax.swing.border.MatteBorder(null));
+        jpCarte4.setLayout(new java.awt.BorderLayout(10, 0));
 
-        jPanel10.setBackground(ApplicationColors.PANEL_BG);
-        jPanel10.setLayout(new javax.swing.BoxLayout(jPanel10, javax.swing.BoxLayout.LINE_AXIS));
+        jpImageCarte4.setBackground(ApplicationColors.PANEL_BG);
+        jpImageCarte4.setLayout(new javax.swing.BoxLayout(jpImageCarte4, javax.swing.BoxLayout.LINE_AXIS));
 
         jPanel11.setLayout(new java.awt.BorderLayout());
 
@@ -279,152 +355,212 @@ public class DashBoardPanel extends javax.swing.JPanel {
         jLabel10.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/danger.png"))); // NOI18N
         jPanel11.add(jLabel10, java.awt.BorderLayout.CENTER);
 
-        jPanel10.add(jPanel11);
+        jpImageCarte4.add(jPanel11);
 
-        jpCarte7.add(jPanel10, java.awt.BorderLayout.WEST);
+        jpCarte4.add(jpImageCarte4, java.awt.BorderLayout.WEST);
 
-        jPanel12.setBackground(ApplicationColors.BACKGROUND);
-        jPanel12.setLayout(new javax.swing.BoxLayout(jPanel12, javax.swing.BoxLayout.Y_AXIS));
+        jpDetailsCarte4.setBackground(ApplicationColors.BACKGROUND);
+        jpDetailsCarte4.setLayout(new javax.swing.BoxLayout(jpDetailsCarte4, javax.swing.BoxLayout.Y_AXIS));
 
-        jLabel11.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel11.setText("48");
-        jPanel12.add(jLabel11);
+        jlDetailsCarte4_1.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        jlDetailsCarte4_1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarte4_1.setText("48");
+        jpDetailsCarte4.add(jlDetailsCarte4_1);
 
-        jLabel12.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        jLabel12.setForeground(ApplicationColors.TEXT_SECONDARY);
-        jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel12.setText("Total Produits");
-        jPanel12.add(jLabel12);
+        jlDetailsCarte4_2.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        jlDetailsCarte4_2.setForeground(ApplicationColors.TEXT_SECONDARY);
+        jlDetailsCarte4_2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarte4_2.setText("Produits Dessous Seuil");
+        jpDetailsCarte4.add(jlDetailsCarte4_2);
 
-        jpCarte7.add(jPanel12, java.awt.BorderLayout.CENTER);
+        jpCarte4.add(jpDetailsCarte4, java.awt.BorderLayout.CENTER);
 
-        jpCartes.add(jpCarte7);
+        jpCartes.add(jpCarte4);
 
         add(jpCartes, java.awt.BorderLayout.NORTH);
 
+        jpNavigation.setBackground(ApplicationColors.BACKGROUND);
+        jpNavigation.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 15, 15, 15));
         jpNavigation.setLayout(new java.awt.BorderLayout(0, 10));
 
-        jPanel14.setLayout(new java.awt.BorderLayout());
+        jpTexteNavigation.setBackground(ApplicationColors.BACKGROUND);
+        jpTexteNavigation.setLayout(new java.awt.BorderLayout());
 
-        jLabel13.setFont(new Font("Segoe UI", Font.BOLD, 25)
+        jlNavigatiopRapide.setFont(new Font("Segoe UI", Font.BOLD, 25)
         );
-        jLabel13.setForeground(ApplicationColors.TEXT_PRIMARY);
-        jLabel13.setText("Navigation Rapide");
-        jPanel14.add(jLabel13, java.awt.BorderLayout.CENTER);
+        jlNavigatiopRapide.setForeground(ApplicationColors.TEXT_PRIMARY);
+        jlNavigatiopRapide.setText("Navigation Rapide");
+        jpTexteNavigation.add(jlNavigatiopRapide, java.awt.BorderLayout.CENTER);
 
-        jpNavigation.add(jPanel14, java.awt.BorderLayout.NORTH);
+        jpNavigation.add(jpTexteNavigation, java.awt.BorderLayout.NORTH);
 
-        jPanel13.setLayout(new java.awt.GridLayout(1, 4, 25, 0));
+        jpCartesNavigationRapide.setBackground(ApplicationColors.BACKGROUND);
+        jpCartesNavigationRapide.setLayout(new java.awt.GridLayout(1, 4, 25, 0));
 
-        jPanel15.setBackground(ApplicationColors.BACKGROUND);
-        jPanel15.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jPanel15.setLayout(new java.awt.BorderLayout());
+        jpCarteNaviguation1.setBackground(ApplicationColors.PANEL_BG);
+        jpCarteNaviguation1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jpCarteNaviguation1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jpCarteNaviguation1MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jpCarteNaviguation1MouseExited(evt);
+            }
+        });
+        jpCarteNaviguation1.setLayout(new java.awt.BorderLayout());
 
-        jLabel14.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/store.png"))); // NOI18N
-        jPanel15.add(jLabel14, java.awt.BorderLayout.NORTH);
+        jlImageCarteNaviguation1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlImageCarteNaviguation1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/store-xxl.png"))); // NOI18N
+        jpCarteNaviguation1.add(jlImageCarteNaviguation1, java.awt.BorderLayout.CENTER);
 
-        jLabel15.setFont(new Font("Segoe UI", Font.PLAIN, 22));
-        jLabel15.setForeground(ApplicationColors.TEXT_PRIMARY);
-        jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel15.setText("Produits");
-        jLabel15.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jPanel15.add(jLabel15, java.awt.BorderLayout.CENTER);
+        jlDetailsCarteNaviguation1.setFont(new Font("Segoe UI", Font.PLAIN, 22));
+        jlDetailsCarteNaviguation1.setForeground(ApplicationColors.TEXT_PRIMARY);
+        jlDetailsCarteNaviguation1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarteNaviguation1.setText("Produits");
+        jlDetailsCarteNaviguation1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jpCarteNaviguation1.add(jlDetailsCarteNaviguation1, java.awt.BorderLayout.PAGE_END);
 
-        jPanel13.add(jPanel15);
+        jpCartesNavigationRapide.add(jpCarteNaviguation1);
 
-        jPanel16.setBackground(ApplicationColors.BACKGROUND);
-        jPanel16.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jPanel16.setLayout(new java.awt.BorderLayout(0, 24));
+        jpCarteNaviguation2.setBackground(ApplicationColors.PANEL_BG);
+        jpCarteNaviguation2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jpCarteNaviguation2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jpCarteNaviguation2MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jpCarteNaviguation2MouseExited(evt);
+            }
+        });
+        jpCarteNaviguation2.setLayout(new java.awt.BorderLayout(0, 24));
 
-        jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/stock.png"))); // NOI18N
-        jPanel16.add(jLabel16, java.awt.BorderLayout.NORTH);
+        jlImageCarteNaviguation2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlImageCarteNaviguation2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/stock-xxl.png"))); // NOI18N
+        jpCarteNaviguation2.add(jlImageCarteNaviguation2, java.awt.BorderLayout.CENTER);
 
-        jLabel17.setFont(new Font("Segoe UI", Font.PLAIN, 22));
-        jLabel17.setForeground(ApplicationColors.TEXT_PRIMARY);
-        jLabel17.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel17.setText("Stock");
-        jPanel16.add(jLabel17, java.awt.BorderLayout.CENTER);
+        jlDetailsCarteNaviguation2.setFont(new Font("Segoe UI", Font.PLAIN, 22));
+        jlDetailsCarteNaviguation2.setForeground(ApplicationColors.TEXT_PRIMARY);
+        jlDetailsCarteNaviguation2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarteNaviguation2.setText("Stock");
+        jpCarteNaviguation2.add(jlDetailsCarteNaviguation2, java.awt.BorderLayout.PAGE_END);
 
-        jPanel13.add(jPanel16);
+        jpCartesNavigationRapide.add(jpCarteNaviguation2);
 
-        jPanel17.setBackground(ApplicationColors.BACKGROUND);
-        jPanel17.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jPanel17.setLayout(new java.awt.BorderLayout(0, 24));
+        jpCarteNaviguation3.setBackground(ApplicationColors.PANEL_BG);
+        jpCarteNaviguation3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jpCarteNaviguation3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jpCarteNaviguation3MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jpCarteNaviguation3MouseExited(evt);
+            }
+        });
+        jpCarteNaviguation3.setLayout(new java.awt.BorderLayout(0, 24));
 
-        jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/shopping.png"))); // NOI18N
-        jPanel17.add(jLabel18, java.awt.BorderLayout.NORTH);
+        jlImageCarteNaviguation3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlImageCarteNaviguation3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/shopping-xxl.png"))); // NOI18N
+        jlImageCarteNaviguation3.setToolTipText("");
+        jpCarteNaviguation3.add(jlImageCarteNaviguation3, java.awt.BorderLayout.CENTER);
 
-        jLabel19.setFont(new Font("Segoe UI", Font.PLAIN, 22));
-        jLabel19.setForeground(ApplicationColors.TEXT_PRIMARY);
-        jLabel19.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel19.setText("Commandes");
-        jPanel17.add(jLabel19, java.awt.BorderLayout.CENTER);
+        jlDetailsCarteNaviguation3.setFont(new Font("Segoe UI", Font.PLAIN, 22));
+        jlDetailsCarteNaviguation3.setForeground(ApplicationColors.TEXT_PRIMARY);
+        jlDetailsCarteNaviguation3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarteNaviguation3.setText("Commandes");
+        jpCarteNaviguation3.add(jlDetailsCarteNaviguation3, java.awt.BorderLayout.SOUTH);
 
-        jPanel13.add(jPanel17);
+        jpCartesNavigationRapide.add(jpCarteNaviguation3);
 
-        jPanel18.setBackground(ApplicationColors.BACKGROUND);
-        jPanel18.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jPanel18.setLayout(new java.awt.BorderLayout(0, 24));
+        jpCarteNaviguation4.setBackground(ApplicationColors.PANEL_BG);
+        jpCarteNaviguation4.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jpCarteNaviguation4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jpCarteNaviguation4MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jpCarteNaviguation4MouseExited(evt);
+            }
+        });
+        jpCarteNaviguation4.setLayout(new java.awt.BorderLayout(0, 24));
 
-        jLabel20.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel20.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/stats.png"))); // NOI18N
-        jPanel18.add(jLabel20, java.awt.BorderLayout.NORTH);
+        jlImageCarteNaviguation4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlImageCarteNaviguation4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/stats-xxl.png"))); // NOI18N
+        jpCarteNaviguation4.add(jlImageCarteNaviguation4, java.awt.BorderLayout.CENTER);
 
-        jLabel21.setFont(new Font("Segoe UI", Font.PLAIN, 22));
-        jLabel21.setForeground(ApplicationColors.TEXT_PRIMARY);
-        jLabel21.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel21.setText("Statistiques");
-        jPanel18.add(jLabel21, java.awt.BorderLayout.CENTER);
+        jlDetailsCarteNaviguation4.setFont(new Font("Segoe UI", Font.PLAIN, 22));
+        jlDetailsCarteNaviguation4.setForeground(ApplicationColors.TEXT_PRIMARY);
+        jlDetailsCarteNaviguation4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlDetailsCarteNaviguation4.setText("Statistiques");
+        jpCarteNaviguation4.add(jlDetailsCarteNaviguation4, java.awt.BorderLayout.PAGE_END);
 
-        jPanel13.add(jPanel18);
+        jpCartesNavigationRapide.add(jpCarteNaviguation4);
 
-        jpNavigation.add(jPanel13, java.awt.BorderLayout.CENTER);
+        jpNavigation.add(jpCartesNavigationRapide, java.awt.BorderLayout.CENTER);
 
         add(jpNavigation, java.awt.BorderLayout.CENTER);
 
+        jpDetailsDashorad.setBackground(ApplicationColors.BACKGROUND);
+        jpDetailsDashorad.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 15, 10, 15));
+        jpDetailsDashorad.setPreferredSize(new java.awt.Dimension(660, 440));
         jpDetailsDashorad.setLayout(new java.awt.GridLayout(1, 2, 30, 0));
 
-        jPanel19.setBackground(ApplicationColors.BACKGROUND);
-        jPanel19.setLayout(new java.awt.BorderLayout(0, 15));
+        jpProduitsAlertes.setBackground(ApplicationColors.BACKGROUND);
+        jpProduitsAlertes.setLayout(new java.awt.BorderLayout(0, 15));
 
-        jPanel21.setBackground(ApplicationColors.BACKGROUND);
-        jPanel21.setLayout(new java.awt.BorderLayout());
+        jpDetailAlerteProduit.setBackground(ApplicationColors.BACKGROUND);
+        jpDetailAlerteProduit.setLayout(new java.awt.BorderLayout());
 
-        jLabel22.setBackground(ApplicationColors.BACKGROUND        );
-        jLabel22.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        jLabel22.setForeground(ApplicationColors.TEXT_PRIMARY);
-        jLabel22.setText("Produit en alertes de stock");
-        jPanel21.add(jLabel22, java.awt.BorderLayout.CENTER);
+        jlDetailAlerteProduit.setBackground(ApplicationColors.BACKGROUND        );
+        jlDetailAlerteProduit.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        jlDetailAlerteProduit.setForeground(ApplicationColors.TEXT_PRIMARY);
+        jlDetailAlerteProduit.setText("Produit en alertes de stock");
+        jpDetailAlerteProduit.add(jlDetailAlerteProduit, java.awt.BorderLayout.CENTER);
 
-        jPanel19.add(jPanel21, java.awt.BorderLayout.NORTH);
+        jpProduitsAlertes.add(jpDetailAlerteProduit, java.awt.BorderLayout.NORTH);
 
-        jPanel20.setLayout(new javax.swing.BoxLayout(jPanel20, javax.swing.BoxLayout.Y_AXIS));
-        jPanel19.add(jPanel20, java.awt.BorderLayout.CENTER);
+        jspAlerteProduit.setBorder(null);
+        jspAlerteProduit.setToolTipText("");
+        jspAlerteProduit.setMinimumSize(new java.awt.Dimension(100, 100));
+        jspAlerteProduit.setOpaque(false);
+        jspAlerteProduit.setPreferredSize(new java.awt.Dimension(300, 400));
+        jspAlerteProduit.setViewportView(null);
 
-        jpDetailsDashorad.add(jPanel19);
+        jpContenuProduitAlert.setBackground(ApplicationColors.BACKGROUND);
+        jpContenuProduitAlert.setLayout(new javax.swing.BoxLayout(jpContenuProduitAlert, javax.swing.BoxLayout.Y_AXIS));
+        jspAlerteProduit.setViewportView(jpContenuProduitAlert);
 
-        jPanel22.setBackground(ApplicationColors.BACKGROUND);
-        jPanel22.setLayout(new java.awt.BorderLayout(0, 15));
+        jpProduitsAlertes.add(jspAlerteProduit, java.awt.BorderLayout.CENTER);
 
-        jPanel23.setBackground(ApplicationColors.BACKGROUND);
-        jPanel23.setLayout(new java.awt.BorderLayout());
+        jpDetailsDashorad.add(jpProduitsAlertes);
 
-        jLabel23.setBackground(ApplicationColors.BACKGROUND        );
-        jLabel23.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        jLabel23.setForeground(ApplicationColors.TEXT_PRIMARY);
-        jLabel23.setText("Dernières Commandes");
-        jPanel23.add(jLabel23, java.awt.BorderLayout.CENTER);
+        jpCommandes.setBackground(ApplicationColors.BACKGROUND);
+        jpCommandes.setLayout(new java.awt.BorderLayout(0, 15));
 
-        jPanel22.add(jPanel23, java.awt.BorderLayout.NORTH);
+        jpDetailsCommandes.setBackground(ApplicationColors.BACKGROUND);
+        jpDetailsCommandes.setLayout(new java.awt.BorderLayout());
 
-        jPanel24.setLayout(new javax.swing.BoxLayout(jPanel24, javax.swing.BoxLayout.Y_AXIS));
-        jPanel22.add(jPanel24, java.awt.BorderLayout.CENTER);
+        jlDetailsCommandes.setBackground(ApplicationColors.BACKGROUND        );
+        jlDetailsCommandes.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        jlDetailsCommandes.setForeground(ApplicationColors.TEXT_PRIMARY);
+        jlDetailsCommandes.setText("Produit en alertes de stock");
+        jpDetailsCommandes.add(jlDetailsCommandes, java.awt.BorderLayout.CENTER);
 
-        jpDetailsDashorad.add(jPanel22);
+        jpCommandes.add(jpDetailsCommandes, java.awt.BorderLayout.NORTH);
+
+        jspCommandes.setBorder(null);
+        jspCommandes.setToolTipText("");
+        jspCommandes.setMinimumSize(new java.awt.Dimension(100, 100));
+        jspCommandes.setOpaque(false);
+        jspCommandes.setPreferredSize(new java.awt.Dimension(300, 400));
+        jspCommandes.setViewportView(null);
+
+        jpContenuCommandes.setBackground(ApplicationColors.BACKGROUND);
+        jpContenuCommandes.setLayout(new javax.swing.BoxLayout(jpContenuCommandes, javax.swing.BoxLayout.Y_AXIS));
+        jspCommandes.setViewportView(jpContenuCommandes);
+
+        jpCommandes.add(jspCommandes, java.awt.BorderLayout.CENTER);
+
+        jpDetailsDashorad.add(jpCommandes);
 
         add(jpDetailsDashorad, java.awt.BorderLayout.SOUTH);
     }// </editor-fold>//GEN-END:initComponents
@@ -433,61 +569,104 @@ public class DashBoardPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_formKeyPressed
 
+    private void jpCarteNaviguation1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jpCarteNaviguation1MouseEntered
+        jpCarteNaviguation1.setBackground(ApplicationColors.SIDEBAR_HOVER);
+    }//GEN-LAST:event_jpCarteNaviguation1MouseEntered
+
+    private void jpCarteNaviguation1MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jpCarteNaviguation1MouseExited
+        jpCarteNaviguation1.setBackground(ApplicationColors.PANEL_BG);
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jpCarteNaviguation1MouseExited
+
+    private void jpCarteNaviguation2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jpCarteNaviguation2MouseEntered
+        // TODO add your handling code here:
+        jpCarteNaviguation2.setBackground(ApplicationColors.SIDEBAR_HOVER);
+
+    }//GEN-LAST:event_jpCarteNaviguation2MouseEntered
+
+    private void jpCarteNaviguation2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jpCarteNaviguation2MouseExited
+        // TODO add your handling code here:
+        jpCarteNaviguation2.setBackground(ApplicationColors.PANEL_BG);
+
+    }//GEN-LAST:event_jpCarteNaviguation2MouseExited
+
+    private void jpCarteNaviguation3MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jpCarteNaviguation3MouseEntered
+        // TODO add your handling code here:
+        jpCarteNaviguation3.setBackground(ApplicationColors.SIDEBAR_HOVER);
+
+    }//GEN-LAST:event_jpCarteNaviguation3MouseEntered
+
+    private void jpCarteNaviguation3MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jpCarteNaviguation3MouseExited
+        // TODO add your handling code here:
+        jpCarteNaviguation3.setBackground(ApplicationColors.PANEL_BG);
+    }//GEN-LAST:event_jpCarteNaviguation3MouseExited
+
+    private void jpCarteNaviguation4MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jpCarteNaviguation4MouseEntered
+        // TODO add your handling code here:
+        jpCarteNaviguation4.setBackground(ApplicationColors.SIDEBAR_HOVER);
+    }//GEN-LAST:event_jpCarteNaviguation4MouseEntered
+
+    private void jpCarteNaviguation4MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jpCarteNaviguation4MouseExited
+        jpCarteNaviguation4.setBackground(ApplicationColors.PANEL_BG);
+    }//GEN-LAST:event_jpCarteNaviguation4MouseExited
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
-    private javax.swing.JLabel jLabel17;
-    private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel20;
-    private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel22;
-    private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
-    private javax.swing.JPanel jPanel12;
-    private javax.swing.JPanel jPanel13;
-    private javax.swing.JPanel jPanel14;
-    private javax.swing.JPanel jPanel15;
-    private javax.swing.JPanel jPanel16;
-    private javax.swing.JPanel jPanel17;
-    private javax.swing.JPanel jPanel18;
-    private javax.swing.JPanel jPanel19;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel20;
-    private javax.swing.JPanel jPanel21;
-    private javax.swing.JPanel jPanel22;
-    private javax.swing.JPanel jPanel23;
-    private javax.swing.JPanel jPanel24;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
-    private javax.swing.JPanel jPanel9;
+    private javax.swing.JLabel jlDetailAlerteProduit;
+    private javax.swing.JLabel jlDetailsCarte1_1;
+    private javax.swing.JLabel jlDetailsCarte1_2;
+    private javax.swing.JLabel jlDetailsCarte2_1;
+    private javax.swing.JLabel jlDetailsCarte2_2;
+    private javax.swing.JLabel jlDetailsCarte3_1;
+    private javax.swing.JLabel jlDetailsCarte3_2;
+    private javax.swing.JLabel jlDetailsCarte4_1;
+    private javax.swing.JLabel jlDetailsCarte4_2;
+    private javax.swing.JLabel jlDetailsCarteNaviguation1;
+    private javax.swing.JLabel jlDetailsCarteNaviguation2;
+    private javax.swing.JLabel jlDetailsCarteNaviguation3;
+    private javax.swing.JLabel jlDetailsCarteNaviguation4;
+    private javax.swing.JLabel jlDetailsCommandes;
+    private javax.swing.JLabel jlImageCarteNaviguation1;
+    private javax.swing.JLabel jlImageCarteNaviguation2;
+    private javax.swing.JLabel jlImageCarteNaviguation3;
+    private javax.swing.JLabel jlImageCarteNaviguation4;
+    private javax.swing.JLabel jlNavigatiopRapide;
     private javax.swing.JPanel jpCarte1;
-    private javax.swing.JPanel jpCarte5;
-    private javax.swing.JPanel jpCarte6;
-    private javax.swing.JPanel jpCarte7;
+    private javax.swing.JPanel jpCarte2;
+    private javax.swing.JPanel jpCarte3;
+    private javax.swing.JPanel jpCarte4;
+    private javax.swing.JPanel jpCarteNaviguation1;
+    private javax.swing.JPanel jpCarteNaviguation2;
+    private javax.swing.JPanel jpCarteNaviguation3;
+    private javax.swing.JPanel jpCarteNaviguation4;
     private javax.swing.JPanel jpCartes;
+    private javax.swing.JPanel jpCartesNavigationRapide;
+    private javax.swing.JPanel jpCommandes;
+    private javax.swing.JPanel jpContenuCommandes;
+    private javax.swing.JPanel jpContenuProduitAlert;
+    private javax.swing.JPanel jpDetailAlerteProduit;
+    private javax.swing.JPanel jpDetailsCarte1;
+    private javax.swing.JPanel jpDetailsCarte2;
+    private javax.swing.JPanel jpDetailsCarte3;
+    private javax.swing.JPanel jpDetailsCarte4;
+    private javax.swing.JPanel jpDetailsCommandes;
     private javax.swing.JPanel jpDetailsDashorad;
+    private javax.swing.JPanel jpImageCarte1;
+    private javax.swing.JPanel jpImageCarte2;
+    private javax.swing.JPanel jpImageCarte3;
+    private javax.swing.JPanel jpImageCarte4;
     private javax.swing.JPanel jpNavigation;
+    private javax.swing.JPanel jpProduitsAlertes;
+    private javax.swing.JPanel jpTexteNavigation;
+    private javax.swing.JScrollPane jspAlerteProduit;
+    private javax.swing.JScrollPane jspCommandes;
     // End of variables declaration//GEN-END:variables
 }
