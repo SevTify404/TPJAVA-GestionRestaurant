@@ -60,6 +60,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             if (inter == 0) {
                 return CrudResult.failure("Une erreur est survenue");
             }
+            
 
             return CrudResult.success(true);
         }
@@ -104,6 +105,9 @@ public class ProduitDAO extends AbstractDAO<Produit> {
                 conn.close();
                 
             }
+            conn.close();
+            ps.close();
+            rs.close();
             
             
         }catch(SQLException ex) {
@@ -115,8 +119,6 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         }
         
         return CrudResult.success(inter);
-        
-        
     }
 
     @Override
@@ -203,6 +205,8 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             if (lignes > 0) {
                 return CrudResult.success(true);
             }
+            conn.close();
+            ps.close();
 
             return CrudResult.failure("Produit non trouvé");
 
@@ -233,6 +237,83 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         
         return CrudResult.success(true);
           
+    }
+    
+    public CrudResult<Integer> recupererNombreDeProduits(){
+        int nombreDeProduit = 0;
+
+        String requete = "SELECT COUNT(*) FROM Produit WHERE deletedAt IS NULL";
+        PreparedStatement ps = null;
+
+        try {
+            Connection conn = this.toConnect();
+            ps= conn.prepareStatement(requete);
+            ResultSet rs = ps.executeQuery();
+
+
+            if (rs.next()) {
+                nombreDeProduit = rs.getInt(1);
+            }
+            conn.close();
+            ps.close();
+            rs.close();
+
+        } catch (SQLException ex) {
+
+            return gererExceptionSQL(ex);
+        }
+        
+        return CrudResult.success(nombreDeProduit);
+        
+    }
+    
+    public CrudResult<List<Produit>> recupererProduitsEnDessousDeSeuil(){
+        List<Produit> listeProduit = new ArrayList<>();
+
+        String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
+                        "from Produit p " +
+                        "JOIN Categorie c ON c.idCat = p.idCategorie " +
+                        "LEFT JOIN Users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
+                        "where p.deletedAt is null AND p.stockActuel <= p.seuilAlerte";
+        
+        PreparedStatement ps = null;
+
+        try {
+            Connection conn = this.toConnect();
+            ps= conn.prepareStatement(requete);
+            ResultSet rs = ps.executeQuery();
+
+
+            while (rs.next()) {
+
+                Categorie categorie = new Categorie(rs.getInt(3), rs.getString(9));
+                Users user = new Users();
+                user.setIdUser(rs.getInt(4));
+                user.setLogin(rs.getString(11));
+                Produit inter = new Produit();
+                inter.setIdProduit(rs.getInt(1));
+                inter.setNom(rs.getString(2));
+                
+                inter.setUser(user);
+                inter.setCategorie(categorie);
+                inter.setPrixDeVente(rs.getDouble(5));
+                inter.setStockActuel(rs.getInt(6));
+                inter.setSeuilAlerte(rs.getInt(7));
+                
+
+                listeProduit.add(inter);
+            }
+            conn.close();
+            ps.close();
+            rs.close();
+
+
+        } catch (SQLException ex) {
+
+            return gererExceptionSQL(ex);
+        }
+        return CrudResult.success(listeProduit);
+    
     }
     
     
@@ -272,6 +353,10 @@ public class ProduitDAO extends AbstractDAO<Produit> {
 
                 listeProduit.add(inter);
             }
+            
+            conn.close();
+            ps.close();
+            rs.close();
 
 
         } catch (SQLException ex) {
@@ -280,6 +365,10 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         }
         return CrudResult.success(listeProduit);
     }
+    
+    
+
+    
     
     public CrudResult<List<Produit>> recupererProduitsCategorie(Categorie categorie){
         List<Produit> liste_Produit_Categorie = new ArrayList<>();
@@ -314,6 +403,10 @@ public class ProduitDAO extends AbstractDAO<Produit> {
                 inter.setSeuilAlerte(rs.getInt(7));
                 liste_Produit_Categorie.add(inter);
             }
+            
+            conn.close();
+            ps.close();
+            rs.close();
         }catch (SQLException ex) {
 
             return gererExceptionSQL(ex);

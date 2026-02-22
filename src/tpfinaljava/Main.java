@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import utilitaires.VariablesEnvirennement;
 //import utilitaires.VariablesEnvirennement;
 
 
@@ -24,6 +25,8 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
+                VariablesEnvirennement.checkVariablesEnvironnement();
+
         
          // Force la gestion du DPI pour éviter l'effet "agrandi" sur Windows
                 System.setProperty("flatlaf.useWindowDecorations", "true");
@@ -38,6 +41,7 @@ public class Main {
         
        java.awt.EventQueue.invokeLater(() -> {
            JFrame frame = new JFrame("Test Dashboard");
+           
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1200, 800);
         frame.setLocationRelativeTo(null);

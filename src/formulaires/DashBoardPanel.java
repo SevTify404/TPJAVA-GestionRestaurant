@@ -3,11 +3,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package formulaires;
+import dao.CommandeDAO;
+import dao.CrudResult;
+import dao.ProduitDAO;
+import entity.Commande;
+import entity.LigneCommande;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.util.ArrayList;
+import java.util.List;
+import entity.Produit;
+import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -35,9 +44,67 @@ public class DashBoardPanel extends javax.swing.JPanel {
         // Pour accelerer le scroll
         jspAlerteProduit.getVerticalScrollBar().setUnitIncrement(16);
         jspCommandes.getVerticalScrollBar().setUnitIncrement(16);
-        rafraichirListeCommandes(jpContenuCommandes);
-        rafraichirAlertesStock(jpContenuProduitAlert);
+        chargerDonneesDashBoard();
         
+        
+    }
+    
+    private void chargerDonneesDashBoard(){
+        List<String> erreur  = new ArrayList<>();
+        
+        
+        List<Produit> produitsEnDessousDeSeuil  = null;
+        List<Commande> dernieresCommandes  = null;
+        int nbreProduit = 0;
+        int nbreProduitEnDessousDeStock = 0;
+        int nbreCommandesDuJour = 0;
+        double caDuJour = 0;
+        
+        ProduitDAO produitDAO = ProduitDAO.getInstance();
+        CommandeDAO commandeDAO = CommandeDAO.getInstance();
+        
+        CrudResult<Integer> requeteNbreProduit = produitDAO.recupererNombreDeProduits();
+        
+        if (requeteNbreProduit.estUnSucces()) {
+            nbreProduit = requeteNbreProduit.getDonnes();
+        } else {
+            erreur.add(requeteNbreProduit.getErreur());
+        }
+        
+        CrudResult<List<Produit>> requeteProduitEnDessousDeStock = produitDAO.recupererProduitsEnDessousDeSeuil();
+        
+        if (requeteProduitEnDessousDeStock.estUnSucces()) {
+            produitsEnDessousDeSeuil = requeteProduitEnDessousDeStock.getDonnes();
+            nbreProduitEnDessousDeStock = produitsEnDessousDeSeuil.size();
+        }else{
+            erreur.add(requeteProduitEnDessousDeStock.getErreur());
+        }
+        
+        CrudResult<Map<String, Integer>> requeteCommandeValideDuJour = commandeDAO.recupererInfosJourPourDashboard();
+        
+        if (requeteCommandeValideDuJour.estUnSucces()) {
+            nbreCommandesDuJour = requeteCommandeValideDuJour.getDonnes().get("count");
+            caDuJour = requeteCommandeValideDuJour.getDonnes().get("chiffreAffaireJour");
+        }else{
+            erreur.add(requeteCommandeValideDuJour.getErreur());
+        }
+        
+        CrudResult<List<Commande>> dernieresCommandesRequet = commandeDAO.recuperer10DerniersCommandesAvecLignePourDashBoard(nbreCommandesDuJour);
+        
+        if (dernieresCommandesRequet.estUnSucces()) {
+            dernieresCommandes = dernieresCommandesRequet.getDonnes();
+        }else{
+            erreur.add(dernieresCommandesRequet.getErreur());
+        }
+        
+        
+        System.out.println(erreur);
+        jlDetailsCarte1_1.setText(String.valueOf(nbreProduit));
+        jlDetailsCarte2_1.setText(String.valueOf(nbreCommandesDuJour));
+        jlDetailsCarte3_1.setText(String.valueOf(caDuJour));
+        jlDetailsCarte4_1.setText(String.valueOf(nbreProduitEnDessousDeStock));
+        rafraichirAlertesStock(produitsEnDessousDeSeuil);
+        rafraichirListeCommandes(dernieresCommandes);
     }
     
     public static void main(String[] args) {
@@ -46,45 +113,81 @@ public class DashBoardPanel extends javax.swing.JPanel {
     
     
     
-    private void rafraichirListeCommandes(JPanel containerParent) {
-    containerParent.removeAll(); // Vide le contenu actuel
-    
-    // Exemple avec une boucle
-        for (int i = 0; i < 100; i++) {
-            JPanel card = createCard("Commande #" + "24", 
-                                     "2x Burger, 1x Coca", 
-                                     "1200" + " €");
+    private void rafraichirListeCommandes(List<Commande> lesCommandes) {
+        jpContenuCommandes.removeAll(); // Vide le contenu actuel
+        if (lesCommandes == null || lesCommandes.isEmpty()) {
+            JLabel labelPasCommandes = new JLabel("Auucune Commandes Récentes");
             
-            // Fixe une taille préférée pour la carte sinon le layout peut la compresser
-            card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
-                                     
-            containerParent.add(card);
-            containerParent.add(Box.createRigidArea(new Dimension(0, 10))); // Espacement entre cartes
-                        
+            labelPasCommandes.setForeground(ApplicationColors.TEXT_PRIMARY);
+            
+            labelPasCommandes.setFont(new Font("Segoe UI", Font.BOLD, 22));
+
+            labelPasCommandes.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            labelPasCommandes.setVerticalAlignment(javax.swing.SwingConstants.CENTER);
+            labelPasCommandes.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+            labelPasCommandes.setVerticalTextPosition(javax.swing.SwingConstants.CENTER);
+            
+            jpContenuCommandes.add(labelPasCommandes);
+            
+        } else {
+            for (Commande laCommande : lesCommandes) {
+                String prduits = "";
+
+                for (LigneCommande ligneC : laCommande.getLigneCommnandes()) {
+                    prduits = prduits.isEmpty() ?
+                        ligneC.getQuantite() + "x " + ligneC.getProduit().getNom() :
+                        prduits + ", " + ligneC.getQuantite() + "x "  + ligneC.getProduit().getNom();
+                }
+                JPanel card = createCard("Commande #" + String.valueOf(laCommande.getIdCommande()), 
+                                        prduits, 
+                                         String.valueOf(laCommande.getTotal()) + " FCFA");
+
+                // Fixe une taille préférée pour la carte sinon le layout peut la compresser
+                card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+
+                jpContenuCommandes.add(card);
+                jpContenuCommandes.add(Box.createRigidArea(new Dimension(0, 10))); // Espacement entre cartes
+
+            }
         }
     
-        containerParent.revalidate(); // Indique à Swing de recalculer l'affichage
-        containerParent.repaint();    // Force le redessin
+        jpContenuCommandes.revalidate(); // Indique à Swing de recalculer l'affichage
+        jpContenuCommandes.repaint();    // Force le redessin
     }
     
-    private void rafraichirAlertesStock(JPanel container) {
-    container.removeAll(); // Nettoie les anciennes alertes
-    
-    // Exemple : boucle sur tes produits en alerte
-    // Supposons une liste 'produitsAlertes' récupérée de ton DAO
-    for (int i = 0; i < 2; i++) {
-        JPanel alerte = createAlerteStockCard("Zogbon", "Boisons", 3, 2);
+    private void rafraichirAlertesStock(List<Produit> lesProduits) {
+        jpContenuProduitAlert.removeAll(); // Nettoie les anciennes alertes
         
-        container.add(alerte);
-        // Ajout d'un petit espacement entre les cartes
-        container.add(Box.createRigidArea(new Dimension(0, 8))); 
-    }
-    
-    container.revalidate(); // Indique à Swing de recalculer le layout
-    container.repaint();    // Rafraîchit l'affichage
+        if (lesProduits == null || lesProduits.isEmpty()) {
+            JLabel labelPasAlerte = new JLabel("Auucun Produit en Dessous de Stock");
+            
+            labelPasAlerte.setForeground(ApplicationColors.TEXT_PRIMARY);
+            
+            labelPasAlerte.setFont(new Font("Segoe UI", Font.BOLD, 22));
+
+            labelPasAlerte.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            labelPasAlerte.setVerticalAlignment(javax.swing.SwingConstants.CENTER);
+            labelPasAlerte.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+            labelPasAlerte.setVerticalTextPosition(javax.swing.SwingConstants.CENTER);
+            
+            jpContenuProduitAlert.add(labelPasAlerte);
+        }else{
+        
+            for (Produit leProduit : lesProduits) {
+                JPanel alerte = createAlerteStockCard(leProduit);
+
+                jpContenuProduitAlert.add(alerte);
+                // Ajout d'un petit espacement entre les cartes
+                jpContenuProduitAlert.add(Box.createRigidArea(new Dimension(0, 8))); 
+            }
+        }
+
+
+        jpContenuProduitAlert.revalidate(); // Indique à Swing de recalculer le layout
+        jpContenuProduitAlert.repaint();    // Rafraîchit l'affichage
 }
     
-    public JPanel createAlerteStockCard(String nomProduit, String categorie, int stock, int seuil) {
+    public JPanel createAlerteStockCard(Produit leProduit) {
         // 1. Création du panneau principal de la carte
         JPanel card = new JPanel(new BorderLayout());
         // Fond rose pâle pour signaler l'alerte
@@ -98,10 +201,10 @@ public class DashBoardPanel extends javax.swing.JPanel {
         JPanel leftPanel = new JPanel(new GridLayout(2, 1));
         leftPanel.setOpaque(false);
 
-        JLabel lblNom = new JLabel(nomProduit);
+        JLabel lblNom = new JLabel(leProduit.getNom());
         lblNom.setFont(new Font("Segoe UI", Font.BOLD, 16));
 
-        JLabel lblCat = new JLabel(categorie);
+        JLabel lblCat = new JLabel(leProduit.getCategorie().getLIBELLE());
         lblCat.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblCat.setForeground(ApplicationColors.TEXT_SECONDARY);
 
@@ -112,11 +215,11 @@ public class DashBoardPanel extends javax.swing.JPanel {
         JPanel rightPanel = new JPanel(new GridLayout(2, 1));
         rightPanel.setOpaque(false);
 
-        JLabel lblStock = new JLabel("Stock: " + stock);
+        JLabel lblStock = new JLabel("Stock: " + leProduit.getStockActuel());
         lblStock.setForeground(ApplicationColors.ERROR); // Rouge pour le stock
         lblStock.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        JLabel lblSeuil = new JLabel("Seuil: " + seuil);
+        JLabel lblSeuil = new JLabel("Seuil: " + leProduit.getSeuilAlerte());
         lblSeuil.setHorizontalAlignment(SwingConstants.RIGHT);
 
         rightPanel.add(lblStock);
@@ -542,7 +645,7 @@ public class DashBoardPanel extends javax.swing.JPanel {
         jlDetailsCommandes.setBackground(ApplicationColors.BACKGROUND        );
         jlDetailsCommandes.setFont(new Font("Segoe UI", Font.BOLD, 22));
         jlDetailsCommandes.setForeground(ApplicationColors.TEXT_PRIMARY);
-        jlDetailsCommandes.setText("Produit en alertes de stock");
+        jlDetailsCommandes.setText("10 Dernières Commandes");
         jpDetailsCommandes.add(jlDetailsCommandes, java.awt.BorderLayout.CENTER);
 
         jpCommandes.add(jpDetailsCommandes, java.awt.BorderLayout.NORTH);
