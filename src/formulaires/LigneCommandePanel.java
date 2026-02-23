@@ -9,11 +9,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import utilitaires.ApplicationColors;
 import utilitaires.RoundedButton;
 import utilitaires.RoundedPanel;
@@ -24,54 +24,52 @@ import utilitaires.RoundedPanel;
  */
 public class LigneCommandePanel extends RoundedPanel {
     
-    // J'ai trop galéré sur ce truc
     private JLabel lblQty;
-    private JLabel lblSubTotal;
-    LigneCommande ligneCommande;
-    private int  quantiteActuel;
-    private double prixActuel;
-   
+    private JLabel lblSubTotal; // Le label pour Qty * PU
+    private JTextField txtPrix; // Le champ pour modifier le PU
+    private LigneCommande ligneCommande;
+    private int quantiteActuel;
+    private double prixUnitaireActuel;
+    private Runnable onUpdateCallback;
     
-    public LigneCommandePanel(LigneCommande laLigne, ActionListener soustraire, ActionListener incrementer, ActionListener supprimer) {
-        super(15); // Coins arrondis de 15px
+    public LigneCommandePanel(LigneCommande laLigne, ActionListener soustraire, ActionListener incrementer, ActionListener supprimer, Runnable onUpdate) {
+        super(15);
         this.ligneCommande = laLigne;
-        this.prixActuel = laLigne.getProduit().getPrixDeVente();
+        this.prixUnitaireActuel = laLigne.getPrixUnitaire(); // Assure-toi que ton entité a cette méthode
         this.quantiteActuel = laLigne.getQuantite();
+        this.onUpdateCallback = onUpdate;
         
         setLayout(new BorderLayout(10, 0));
-        setBackground(Color.WHITE); // Fond blanc pour chaque ligne
+        setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
 
-        // Nom du produit
         JLabel lblNom = new JLabel(ligneCommande.getProduit().getNom());
-        lblNom.setFont(new Font("Segoe UI", Font.BOLD, 14));
         
-        // Panneau de contrôle (Qty + Boutons)
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         controlPanel.setOpaque(false);
         
-        // Sous-total
-        lblSubTotal = new JLabel(String.format("%.0f FCFA", prixActuel));
+        // 1. Label sous-total
+        lblSubTotal = new JLabel(String.format("%.0f FCFA", prixUnitaireActuel * quantiteActuel));
         
-        // Boutons - et +
+        // 2. Champ prix unitaire
+        txtPrix = new JTextField(String.format("%.0f", prixUnitaireActuel), 6);
+        txtPrix.addActionListener(e -> updatePrix());
+        
+        // Boutons
         RoundedButton btnMoins = new RoundedButton("-");
-        btnMoins.addActionListener(e -> {
-            soustraire.actionPerformed(e);
-        });
+        btnMoins.addActionListener(soustraire);
         
-        lblQty = new JLabel(String.valueOf(ligneCommande.getQuantite()));
+        lblQty = new JLabel(String.valueOf(quantiteActuel));
+        
         RoundedButton btnPlus = new RoundedButton("+");
-        btnPlus.addActionListener(e -> {
-            incrementer.actionPerformed(e);
-        });
+        btnPlus.addActionListener(incrementer);
         
         RoundedButton btnRemove = new RoundedButton("x");
-        btnRemove.setBackground(ApplicationColors.ERROR); // Rouge pour le bouton remove
-        btnRemove.addActionListener(e -> {
-            supprimer.actionPerformed(e);
-        });
+        btnRemove.setBackground(ApplicationColors.ERROR);
+        btnRemove.addActionListener(supprimer);
 
         controlPanel.add(lblSubTotal);
+        controlPanel.add(txtPrix);
         controlPanel.add(btnMoins);
         controlPanel.add(lblQty);
         controlPanel.add(btnPlus);
@@ -79,41 +77,36 @@ public class LigneCommandePanel extends RoundedPanel {
 
         add(lblNom, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.EAST);
-        
-        // Empêcher la ligne de s'étirer verticalement
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
     }
-    
 
-    
-
-    
-    public Boolean incrementeQuantite(){
-    if (this.quantiteActuel + 1 > this.ligneCommande.getProduit().getStockActuel()) {
-        return false;
-    }
-    
-    this.quantiteActuel++;
-    
-    
-    lblQty.setText(String.valueOf(quantiteActuel));
-    lblSubTotal.setText(String.format("%.0f FCFA", prixActuel * quantiteActuel));
-    revalidate();
-    return true;
-        
-    }
-    
-    public Boolean decrementeQuantite(){
-        
-        if (--quantiteActuel <= 0) {
-            return false;
+    private void updatePrix() {
+        try {
+            double nouveauPrix = Double.parseDouble(txtPrix.getText());
+            this.prixUnitaireActuel = nouveauPrix;
+            this.ligneCommande.setPrixUnitaire(nouveauPrix);
+            refreshUI();
+            if (onUpdateCallback != null) onUpdateCallback.run();
+        } catch (NumberFormatException ex) {
+            txtPrix.setText(String.format("%.0f", prixUnitaireActuel));
         }
-        
-        lblQty.setText(String.valueOf(quantiteActuel));
-        lblSubTotal.setText(String.format("%.0f FCFA", prixActuel * quantiteActuel));
-        revalidate();
-        return true;
-        
     }
-    
+
+    public void refreshUI() {
+        lblQty.setText(String.valueOf(quantiteActuel));
+        lblSubTotal.setText(String.format("%.0f FCFA", prixUnitaireActuel * quantiteActuel));
+    }
+
+    public Boolean incrementeQuantite() {
+        if (this.quantiteActuel + 1 > this.ligneCommande.getProduit().getStockActuel()) return false;
+        this.quantiteActuel++;
+        refreshUI();
+        return true;
+    }
+
+    public Boolean decrementeQuantite() {
+        if (--quantiteActuel <= 0) return false;
+        refreshUI();
+        return true;
+    }
 }

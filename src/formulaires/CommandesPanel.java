@@ -17,7 +17,10 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 import entity.Produit;
+import entity.enums.ActionType;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +64,14 @@ public class CommandesPanel extends javax.swing.JPanel {
         jdCommandesEnAttente.setLocationRelativeTo(this);
         ajouterEcouteurs();
         jtfRechercheProduit.requestFocus();
+        
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                
+                mettreListeProduitAJour();
+            }
+        });
         
     }
     
@@ -213,7 +224,7 @@ public class CommandesPanel extends javax.swing.JPanel {
 
         // Parcourt les lignes de commande stockées dans ta Map
         for (LigneCommande ligne : lignesActuelles.values()) {
-            total += (ligne.getProduit().getPrixDeVente() * ligne.getQuantite());
+            total += (ligne.getPrixUnitaire()* ligne.getQuantite());
             nombreTotalProduits += ligne.getQuantite();
         }
 
@@ -228,7 +239,7 @@ public class CommandesPanel extends javax.swing.JPanel {
     
     
     
-    private void mettreAJourLignePanelCommande(LigneCommande ligneCommande, String operation){
+        private void mettreAJourLignePanelCommande(LigneCommande ligneCommande, String operation){
         int idProduit = ligneCommande.getProduit().getIdProduit();
         if (operation.equals("+")) {
             incrementerChoix(idProduit);
@@ -251,7 +262,8 @@ public class CommandesPanel extends javax.swing.JPanel {
             },
             c -> {
                 mettreAJourLignePanelCommande(ligneCommande, "jeSaisPlusQuoiMettreTchieeee");
-            }
+            },
+            () -> calculerTotalGlobal()
             
         );
         
@@ -288,11 +300,12 @@ public class CommandesPanel extends javax.swing.JPanel {
             List<LigneCommande> lignes = CommandeDAO.getInstance().recupererLignes(c.getIdCommande()).getDonnes();
             
             if (lignes == null || lignes.isEmpty()) {
-                return;
+                continue;
             } else {
                 c.setLigneCommnandes(lignes);
             }
         }
+        
         
         for (Commande cmd : listeCommandes) {
             CommandeEnCoursCard card = new CommandeEnCoursCard(
@@ -627,6 +640,8 @@ public class CommandesPanel extends javax.swing.JPanel {
         truncateLePanelDeCommande();
         showCustomInfoJOptionPane("Brouillon enregistré avec succès");
         
+        AuthentificationManager.getInstance().enregistrerActionDansAudit(ActionType.AJOUT, "A Ajouté la Commande " + laCommande.getIdCommande() + " en Brouillon");
+        
     }//GEN-LAST:event_jbBrouillonActionPerformed
 
     private void jbValiderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbValiderActionPerformed
@@ -654,7 +669,9 @@ public class CommandesPanel extends javax.swing.JPanel {
         
         truncateLePanelDeCommande();
         mettreListeProduitAJour();
-        showCustomInfoJOptionPane("Commande enregistrée avec succès");
+        showCustomInfoJOptionPane("Commande validée avec succès");
+        AuthentificationManager.getInstance().enregistrerActionDansAudit(ActionType.AJOUT, "A Validé la commande : " + laCommande.getIdCommande());
+
         
     }//GEN-LAST:event_jbValiderActionPerformed
 

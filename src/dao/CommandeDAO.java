@@ -453,7 +453,7 @@ public class CommandeDAO extends AbstractDAO<Commande> {
         SELECT lc.idLC, lc.idCommande, lc.idProduit, lc.quantite, lc.prixUnitaire, lc.montantLigne, 
                  p.prixDeVente, p.stockActuel, p.seuilAlerte, p.nom
         FROM LigneCommande lc JOIN Produit p ON p.idProduit = lc.idProduit
-         WHERE lc.idCommande = ? AND p.deletedAt IS NULL AND lc.deletedAt IS NULL AND p.stockActuel > lc.quantite
+         WHERE lc.idCommande = ? AND p.deletedAt IS NULL AND lc.deletedAt IS NULL AND p.stockActuel >= lc.quantite
     """;
 
     List<LigneCommande> lignes = new ArrayList<>();
