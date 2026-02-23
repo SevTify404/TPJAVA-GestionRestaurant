@@ -16,6 +16,7 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 import entity.Produit;
+import java.util.HashMap;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -49,54 +50,46 @@ public class DashBoardPanel extends javax.swing.JPanel {
         
     }
     
+    private <T> T extraireDonneesOuErreur(CrudResult<T> result, T valeurParDefaut, List<String> erreurs) {
+        if (result.estUnSucces()) {
+            return result.getDonnes();
+        }
+        
+        erreurs.add(result.getErreur());
+        return valeurParDefaut;
+    }
     private void chargerDonneesDashBoard(){
         List<String> erreur  = new ArrayList<>();
         
         
-        List<Produit> produitsEnDessousDeSeuil  = null;
+        List<Produit> produitsEnDessousDeSeuil  = new ArrayList<>();
         List<Commande> dernieresCommandes  = null;
-        int nbreProduit = 0;
-        int nbreProduitEnDessousDeStock = 0;
-        int nbreCommandesDuJour = 0;
-        double caDuJour = 0;
+        int nbreProduit = 0, nbreProduitEnDessousDeStock, nbreCommandesDuJour;
+        double caDuJour;
         
         ProduitDAO produitDAO = ProduitDAO.getInstance();
         CommandeDAO commandeDAO = CommandeDAO.getInstance();
         
         CrudResult<Integer> requeteNbreProduit = produitDAO.recupererNombreDeProduits();
         
-        if (requeteNbreProduit.estUnSucces()) {
-            nbreProduit = requeteNbreProduit.getDonnes();
-        } else {
-            erreur.add(requeteNbreProduit.getErreur());
-        }
-        
+        nbreProduit = extraireDonneesOuErreur(requeteNbreProduit, nbreProduit, erreur);
+      
         CrudResult<List<Produit>> requeteProduitEnDessousDeStock = produitDAO.recupererProduitsEnDessousDeSeuil();
         
-        if (requeteProduitEnDessousDeStock.estUnSucces()) {
-            produitsEnDessousDeSeuil = requeteProduitEnDessousDeStock.getDonnes();
-            nbreProduitEnDessousDeStock = produitsEnDessousDeSeuil.size();
-        }else{
-            erreur.add(requeteProduitEnDessousDeStock.getErreur());
-        }
+        produitsEnDessousDeSeuil = extraireDonneesOuErreur(requeteProduitEnDessousDeStock, produitsEnDessousDeSeuil, erreur);
+        nbreProduitEnDessousDeStock = produitsEnDessousDeSeuil.size();
+        
         
         CrudResult<Map<String, Integer>> requeteCommandeValideDuJour = commandeDAO.recupererInfosJourPourDashboard();
         
-        if (requeteCommandeValideDuJour.estUnSucces()) {
-            nbreCommandesDuJour = requeteCommandeValideDuJour.getDonnes().get("count");
-            caDuJour = requeteCommandeValideDuJour.getDonnes().get("chiffreAffaireJour");
-        }else{
-            erreur.add(requeteCommandeValideDuJour.getErreur());
-        }
+        Map<String, Integer> donnneesRequeteCommandeValideDuJour = new HashMap<>();
+        
+        donnneesRequeteCommandeValideDuJour = extraireDonneesOuErreur(requeteCommandeValideDuJour, donnneesRequeteCommandeValideDuJour, erreur);
+        nbreCommandesDuJour = donnneesRequeteCommandeValideDuJour.get("count");
+        caDuJour = donnneesRequeteCommandeValideDuJour.get("chiffreAffaireJour");
         
         CrudResult<List<Commande>> dernieresCommandesRequet = commandeDAO.recuperer10DerniersCommandesAvecLignePourDashBoard(nbreCommandesDuJour);
-        
-        if (dernieresCommandesRequet.estUnSucces()) {
-            dernieresCommandes = dernieresCommandesRequet.getDonnes();
-        }else{
-            erreur.add(dernieresCommandesRequet.getErreur());
-        }
-        
+        dernieresCommandes = extraireDonneesOuErreur(dernieresCommandesRequet, dernieresCommandes, erreur);
         
         System.out.println(erreur);
         jlDetailsCarte1_1.setText(String.valueOf(nbreProduit));
@@ -107,11 +100,7 @@ public class DashBoardPanel extends javax.swing.JPanel {
         rafraichirListeCommandes(dernieresCommandes);
     }
     
-    public static void main(String[] args) {
-         java.awt.EventQueue.invokeLater(() -> new DashBoardPanel().setVisible(true));
-    }
-    
-    
+
     
     private void rafraichirListeCommandes(List<Commande> lesCommandes) {
         jpContenuCommandes.removeAll(); // Vide le contenu actuel
@@ -309,6 +298,7 @@ public class DashBoardPanel extends javax.swing.JPanel {
         jpNavigation = new javax.swing.JPanel();
         jpTexteNavigation = new javax.swing.JPanel();
         jlNavigatiopRapide = new javax.swing.JLabel();
+        jbRafraichirPage = new javax.swing.JButton();
         jpCartesNavigationRapide = new javax.swing.JPanel();
         jpCarteNaviguation1 = new javax.swing.JPanel();
         jlImageCarteNaviguation1 = new javax.swing.JLabel();
@@ -493,7 +483,18 @@ public class DashBoardPanel extends javax.swing.JPanel {
         );
         jlNavigatiopRapide.setForeground(ApplicationColors.TEXT_PRIMARY);
         jlNavigatiopRapide.setText("Navigation Rapide");
-        jpTexteNavigation.add(jlNavigatiopRapide, java.awt.BorderLayout.CENTER);
+        jpTexteNavigation.add(jlNavigatiopRapide, java.awt.BorderLayout.WEST);
+
+        jbRafraichirPage.setBackground(ApplicationColors.SIDEBAR_SELECTION);
+        jbRafraichirPage.setFont(new Font("Segoe UI", Font.BOLD, 19));
+        jbRafraichirPage.setForeground(ApplicationColors.TEXT_LIGHT);
+        jbRafraichirPage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh-l.png"))); // NOI18N
+        jbRafraichirPage.setText("Rafraichir DashBoard");
+        jbRafraichirPage.setBorderPainted(false);
+        jbRafraichirPage.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jbRafraichirPage.setFocusPainted(false);
+        jbRafraichirPage.addActionListener(this::jbRafraichirPageActionPerformed);
+        jpTexteNavigation.add(jbRafraichirPage, java.awt.BorderLayout.EAST);
 
         jpNavigation.add(jpTexteNavigation, java.awt.BorderLayout.NORTH);
 
@@ -713,6 +714,11 @@ public class DashBoardPanel extends javax.swing.JPanel {
         jpCarteNaviguation4.setBackground(ApplicationColors.PANEL_BG);
     }//GEN-LAST:event_jpCarteNaviguation4MouseExited
 
+    private void jbRafraichirPageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbRafraichirPageActionPerformed
+        // TODO add your handling code here:
+        chargerDonneesDashBoard();
+    }//GEN-LAST:event_jbRafraichirPageActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel10;
@@ -723,6 +729,7 @@ public class DashBoardPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel8;
+    private javax.swing.JButton jbRafraichirPage;
     private javax.swing.JLabel jlDetailAlerteProduit;
     private javax.swing.JLabel jlDetailsCarte1_1;
     private javax.swing.JLabel jlDetailsCarte1_2;
