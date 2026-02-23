@@ -324,6 +324,7 @@ public class DashBoardPanel extends javax.swing.JPanel {
         jspCommandes = new javax.swing.JScrollPane();
         jpContenuCommandes = new javax.swing.JPanel();
 
+        setBackground(ApplicationColors.BACKGROUND);
         addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 formKeyPressed(evt);

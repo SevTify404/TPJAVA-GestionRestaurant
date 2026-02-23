@@ -70,8 +70,8 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     public CrudResult<Produit> lire(int idProduit) {
         Produit inter = new Produit();
         String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
-                        "from produit p " +
-                        "JOIN categorie c on c.idCat = p.idCategorie " +
+                        "from Produit p " +
+                        "JOIN Categorie c on c.idCat = p.idCategorie " +
                         "LEFT JOIN users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
                         "where idProduit = ? and p.deletedAt is null ";
         PreparedStatement ps = null;
@@ -322,9 +322,9 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         List<Produit> listeProduit = new ArrayList<>();
 
         String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
-                        "from produit p " +
-                        "JOIN categorie c ON c.idCat = p.idCategorie " +
-                        "LEFT JOIN users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
+                        "from Produit p " +
+                        "JOIN Categorie c ON c.idCat = p.idCategorie " +
+                        "LEFT JOIN Users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
                         "where p.deletedAt is null ";
         PreparedStatement ps = null;
 

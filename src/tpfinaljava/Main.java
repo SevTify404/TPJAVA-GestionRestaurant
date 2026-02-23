@@ -5,6 +5,8 @@
 package tpfinaljava;
 //import formulaires.App;
 import com.formdev.flatlaf.FlatLightLaf;
+import formulaires.App;
+import formulaires.CommandesPanel;
 import formulaires.DashBoardPanel;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
@@ -38,7 +40,9 @@ public class Main {
                 com.formdev.flatlaf.FlatLightLaf.setup();
                 UIManager.setLookAndFeel(new FlatLightLaf());
                 System.out.println("Installation de flatlad réussie");
-        
+//        
+//                App appl = App.getInstance();
+//                appl.lancerApplication();
        java.awt.EventQueue.invokeLater(() -> {
            JFrame frame = new JFrame("Test Dashboard");
            
@@ -47,7 +51,7 @@ public class Main {
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        frame.add(new DashBoardPanel(), BorderLayout.CENTER);
+        frame.add(new CommandesPanel(), BorderLayout.CENTER);
 
         frame.setVisible(true);
     });
