@@ -4,6 +4,7 @@
  */
 package formulaires;
 
+import entity.Produit;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -13,8 +14,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+
 
 import javax.swing.border.EmptyBorder;
 
@@ -22,12 +23,12 @@ import java.awt.geom.RoundRectangle2D;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import utilitaires.ApplicationColors;
+import utilitaires.RoundedButton;
 /**
  *
  * @author sevtify
@@ -38,13 +39,13 @@ public class ProductCard extends JPanel {
     private boolean hovered = false;
     private static final int RADIUS = 16;
 
-    public ProductCard(String name, String category, String price, int stock, int seuilAlerte) {
+    public ProductCard(Produit leProduit, ActionListener onAddToCart) {
         setLayout(new BorderLayout(0, 12));
         setOpaque(false); // On peint tout manuellement
         setBorder(new EmptyBorder(15, 15, 15, 15));
 
         // ── Badge catégorie ──────────────────────────────────────────
-        JLabel lblCategorie = new JLabel(category.toUpperCase());
+        JLabel lblCategorie = new JLabel(leProduit.getCategorie().getLIBELLE().toUpperCase());
         lblCategorie.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lblCategorie.setForeground(ApplicationColors.PRIMARY);
         lblCategorie.setOpaque(true);
@@ -52,12 +53,12 @@ public class ProductCard extends JPanel {
         lblCategorie.setBorder(new EmptyBorder(3, 8, 3, 8));
 
         // ── Badge stock ──────────────────────────────────────────────
-        boolean alerteStock = stock < seuilAlerte;
+        boolean alerteStock = leProduit.getStockActuel() < leProduit.getSeuilAlerte();
         Color stockColor  = alerteStock ? ApplicationColors.ERROR   : ApplicationColors.SUCCESS;
         Color stockBg     = alerteStock ? new Color(211, 47, 47, 15) : new Color(76, 175, 80, 15);
         String stockIcon  = alerteStock ? "⚠ " : "✓ ";
 
-        JLabel lblStock = new JLabel(stockIcon + "Stock : " + stock);
+        JLabel lblStock = new JLabel(stockIcon + "Stock : " + leProduit.getStockActuel());
         lblStock.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblStock.setForeground(stockColor);
         lblStock.setOpaque(true);
@@ -71,7 +72,7 @@ public class ProductCard extends JPanel {
         topRow.add(lblStock, BorderLayout.EAST);
 
         // ── Nom du produit ───────────────────────────────────────────
-        JLabel lblNom = new JLabel(name);
+        JLabel lblNom = new JLabel(leProduit.getNom());
         lblNom.setFont(new Font("Segoe UI", Font.BOLD, 17));
         lblNom.setForeground(ApplicationColors.TEXT_PRIMARY);
         lblNom.setVerticalAlignment(SwingConstants.CENTER);
@@ -82,9 +83,9 @@ public class ProductCard extends JPanel {
         sep.setForeground(ApplicationColors.BORDER);
 
         // ── Prix ─────────────────────────────────────────────────────
-        JLabel lblPrice = new JLabel(price);
+        JLabel lblPrice = new JLabel(String.valueOf(leProduit.getPrixDeVente()));
         lblPrice.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        lblPrice.setForeground(ApplicationColors.PRIMARY_DARK);
+        lblPrice.setForeground(ApplicationColors.SUCCESS);
 
         JLabel lblPriceCaption = new JLabel("Prix unitaire");
         lblPriceCaption.setFont(new Font("Segoe UI", Font.PLAIN, 11));
@@ -118,11 +119,17 @@ public class ProductCard extends JPanel {
         btnAjouter.setIconTextGap(8);
         btnAjouter.setCursor(Cursor.getDefaultCursor().getPredefinedCursor(Cursor.HAND_CURSOR));
         btnAjouter.setPreferredSize(new Dimension(0, 40));
+        
+        btnAjouter.addActionListener(e -> {
+            onAddToCart.actionPerformed(e);
+        });
 
         // ── Assemblage ───────────────────────────────────────────────
         add(topRow,      BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
         add(btnAjouter,  BorderLayout.SOUTH);
+        
+        
 
 //        
     }
@@ -148,42 +155,6 @@ public class ProductCard extends JPanel {
 
         g2.dispose();
         super.paintComponent(g);
-    }
-
-    // ── Bouton arrondi interne ────────────────────────────────────────
-    static class RoundedButton extends JButton {
-        private final int radius;
-        private Color hoverBg;
-        private Color normalBg;
-        private boolean isHovered = false;
-
-        public RoundedButton(String text, int radius) {
-            super(text);
-            this.radius = radius;
-            setContentAreaFilled(false);
-            setBorderPainted(false);
-            setFocusPainted(false);
-            setOpaque(false);
-            addMouseListener(new MouseAdapter() {
-                @Override public void mouseEntered(MouseEvent e) { isHovered = true;  repaint(); }
-                @Override public void mouseExited (MouseEvent e) { isHovered = false; repaint(); }
-            });
-        }
-
-        public void setHoverBackground(Color c) { this.hoverBg = c; }
-
-        @Override
-        public void setBackground(Color c) { super.setBackground(c); this.normalBg = c; }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(isHovered && hoverBg != null ? hoverBg : normalBg);
-            g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), radius, radius));
-            g2.dispose();
-            super.paintComponent(g);
-        }
     }
 
 

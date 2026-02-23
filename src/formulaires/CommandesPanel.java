@@ -16,11 +16,15 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 import entity.Produit;
+import java.awt.event.ActionEvent;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
@@ -36,6 +40,31 @@ public class CommandesPanel extends javax.swing.JPanel {
     /**
      * Creates new form CommandesPanel
      */
+    
+    private Map<Integer, LigneCommande> lignesActuelles = new HashMap<>();
+    private Map<Integer, LigneCommandePanel> pannelLignesActuelles = new HashMap<>();
+    
+    private int totalPrixCommandeActuel, nombreTotalDeProduit;
+    
+    private void mettreAjourTotalProduit(){
+        jlNombreProduit.setText("Nombre de Produits : " + nombreTotalDeProduit);
+    }
+    
+    private void mettreAJourTotalPrixCommande(){
+        jlTotal.setText("Total : " + totalPrixCommandeActuel + "FCFA");
+    }
+    
+    private void truncateLePanelDeCommande(){
+        lignesActuelles.clear();
+        pannelLignesActuelles.clear();
+        jpLigneCommandes.removeAll();
+        jpLigneCommandes.revalidate();
+        jpLigneCommandes.repaint();
+        calculerTotalGlobal();
+
+        
+    }
+    
     public CommandesPanel() {
         initComponents();
         initCustomComponents();
@@ -43,30 +72,156 @@ public class CommandesPanel extends javax.swing.JPanel {
     
     private void initCustomComponents(){
         jspCartesProduits.getVerticalScrollBar().setUnitIncrement(16);
+        jspLigneCommandes.getVerticalScrollBar().setUnitIncrement(16);
+        
         CrudResult<List<Produit>> produits = ProduitDAO.getInstance().recupererTout();
         System.out.println(produits);
         produits.getDonnes().addAll(produits.getDonnes());
         produits.getDonnes().addAll(produits.getDonnes());
         afficherProduits(produits.getDonnes());
     }
+    
+    private void showCustomErreurJOptionPane(String message){
+        JOptionPane.showMessageDialog(this, message, "Erreur Commandes", JOptionPane.ERROR_MESSAGE, new ImageIcon(ProductCard.class.getResource("/images/fast-food.png")));
+    }
+    
+    private void showCustomInfoJOptionPane(String message){
+        JOptionPane.showMessageDialog(this, message, "Infos Commandes", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(ProductCard.class.getResource("/images/fast-food.png")));
+    }
+    
     private void afficherProduits(List<Produit> produits) {
         jpCartesProduits.removeAll();
 
 
         for (Produit p : produits) {
             ProductCard card = new ProductCard(
-                p.getNom(), 
-                p.getCategorie().getLIBELLE(), 
-                p.getPrixDeVente()+ " FCFA", 
-                p.getStockActuel(),
-                p.getSeuilAlerte()
-            );
+                p,
+                e -> {
+                    ajouterAuPannelCommande(p);
+                }
+            );  
             jpCartesProduits.add(card);
         }
 
         jpCartesProduits.revalidate();
         jpCartesProduits.repaint();
     }
+    
+    private void ajouterAuPannelCommande(Produit leProduit){
+        System.out.println("On arrive ici");
+        if (lignesActuelles.containsKey(leProduit.getIdProduit())) {
+            incrementerChoix(leProduit.getIdProduit());
+        }else{
+            LigneCommande nouvelleLigne = new LigneCommande(0, 1, leProduit.getPrixDeVente(), null, leProduit, LocalDateTime.now());
+            
+            ajouterLigne(nouvelleLigne);
+        }
+    
+    
+    }
+    
+    public void incrementerChoix(int idProduit){
+        if (!pannelLignesActuelles.get(idProduit).incrementeQuantite()) {
+            showCustomErreurJOptionPane("Stock Insuffisant");
+        }else {
+            lignesActuelles.get(idProduit).setQuantite( lignesActuelles.get(idProduit).getQuantite() + 1);
+        }
+        calculerTotalGlobal();
+        
+    }
+    
+    public void decrementerChoix(int idProduit){
+        if (!pannelLignesActuelles.get(idProduit).decrementeQuantite()) {
+            supprimerChoix(idProduit);
+            
+        }else{
+            lignesActuelles.get(idProduit).setQuantite( lignesActuelles.get(idProduit).getQuantite() - 1);
+        }
+        
+        calculerTotalGlobal();
+        
+    }
+    
+    public void supprimerChoix(int idProduit){
+    
+            LigneCommandePanel panel = pannelLignesActuelles.get(idProduit);
+        if (panel != null) {
+            jpLigneCommandes.remove(panel);
+
+            jpLigneCommandes.revalidate();
+            jpLigneCommandes.repaint();
+
+            lignesActuelles.remove(idProduit);
+            pannelLignesActuelles.remove(idProduit);
+        
+            calculerTotalGlobal(); // N'oublie pas de recalculer le total !
+        }
+    }
+    
+    private void calculerTotalGlobal() {
+        double total = 0;
+        int nombreTotalProduits = 0;
+
+        // Parcourt les lignes de commande stockées dans ta Map
+        for (LigneCommande ligne : lignesActuelles.values()) {
+            total += (ligne.getProduit().getPrixDeVente() * ligne.getQuantite());
+            nombreTotalProduits += ligne.getQuantite();
+        }
+
+        // Mise à jour de tes variables d'instance
+        this.totalPrixCommandeActuel = (int) total;
+        this.nombreTotalDeProduit = nombreTotalProduits;
+
+
+        mettreAJourTotalPrixCommande();
+        mettreAjourTotalProduit();
+    }
+    
+    
+    
+    private void mettreAJourLignePanelCommande(LigneCommande ligneCommande, String operation){
+        int idProduit = ligneCommande.getProduit().getIdProduit();
+        if (operation.equals("+")) {
+            incrementerChoix(idProduit);
+        } else if (operation.equals("-")){
+            decrementerChoix(idProduit);
+        }else{
+            supprimerChoix(idProduit);
+        }
+    
+    }
+    
+    public void ajouterLigne(LigneCommande ligneCommande) {
+        LigneCommandePanel ligne = new LigneCommandePanel(
+            ligneCommande,
+            a -> {
+                mettreAJourLignePanelCommande(ligneCommande, "-");
+            },
+            b -> {
+                mettreAJourLignePanelCommande(ligneCommande, "+");
+            },
+            c -> {
+                mettreAJourLignePanelCommande(ligneCommande, "jeSaisPlusQuoiMettreTchieeee");
+            }
+            
+        );
+        
+        // Huuuuuuummmmmmmmmmmmmm
+        lignesActuelles.put(ligneCommande.getProduit().getIdProduit(), ligneCommande);
+        
+        pannelLignesActuelles.put(ligneCommande.getProduit().getIdProduit(), ligne);
+        
+        calculerTotalGlobal();
+
+        // On fixe la taille max pour éviter qu'elle s'étire en hauteur
+        ligne.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+
+        jpLigneCommandes.add(ligne);
+        jpLigneCommandes.add(Box.createRigidArea(new Dimension(0, 5))); // Petit espace entre lignes
+
+        jpLigneCommandes.revalidate();
+        jpLigneCommandes.repaint();
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -93,6 +248,19 @@ public class CommandesPanel extends javax.swing.JPanel {
         jpCartesProduits = new javax.swing.JPanel();
         jpConteneurCommandeEnCours = new javax.swing.JPanel();
         jpCommandeEnCours = new javax.swing.JPanel();
+        jpTitreCommande = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jpContenuCommande = new javax.swing.JPanel();
+        jspLigneCommandes = new javax.swing.JScrollPane();
+        jpLigneCommandes = new javax.swing.JPanel();
+        jpResumeCommande = new javax.swing.JPanel();
+        jpDetailsCommande = new javax.swing.JPanel();
+        jlNombreProduit = new javax.swing.JLabel();
+        jlTotal = new javax.swing.JLabel();
+        jpBoutonsActions = new javax.swing.JPanel();
+        jbAnnuler = new javax.swing.JButton();
+        jbBrouillon = new javax.swing.JButton();
+        jbValider = new javax.swing.JButton();
 
         setBackground(ApplicationColors.BACKGROUND);
         setLayout(new java.awt.BorderLayout());
@@ -178,7 +346,89 @@ public class CommandesPanel extends javax.swing.JPanel {
 
         jpConteneurCommandeEnCours.setLayout(new java.awt.BorderLayout(25, 25));
 
-        jpCommandeEnCours.setLayout(new javax.swing.BoxLayout(jpCommandeEnCours, javax.swing.BoxLayout.Y_AXIS));
+        jpCommandeEnCours.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 25, 25, 25));
+        jpCommandeEnCours.setLayout(new java.awt.BorderLayout());
+
+        jpTitreCommande.setMaximumSize(new java.awt.Dimension(2147483647, 100));
+        jpTitreCommande.setPreferredSize(new java.awt.Dimension(638, 65));
+        jpTitreCommande.setLayout(new java.awt.BorderLayout());
+
+        jLabel1.setBackground(ApplicationColors.PANEL_BG
+        );
+        jLabel1.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        jLabel1.setForeground(ApplicationColors.TEXT_PRIMARY);
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/shopping.png"))); // NOI18N
+        jLabel1.setText("Commande En Cours");
+        jLabel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 5, 1));
+        jLabel1.setMaximumSize(new java.awt.Dimension(156, 30));
+        jLabel1.setMinimumSize(new java.awt.Dimension(156, 30));
+        jLabel1.setPreferredSize(new java.awt.Dimension(156, 30));
+        jpTitreCommande.add(jLabel1, java.awt.BorderLayout.CENTER);
+
+        jpCommandeEnCours.add(jpTitreCommande, java.awt.BorderLayout.NORTH);
+
+        jpContenuCommande.setPreferredSize(new java.awt.Dimension(638, 1000));
+        jpContenuCommande.setLayout(new java.awt.BorderLayout());
+
+        jpLigneCommandes.setLayout(new javax.swing.BoxLayout(jpLigneCommandes, javax.swing.BoxLayout.Y_AXIS));
+        jspLigneCommandes.setViewportView(jpLigneCommandes);
+
+        jpContenuCommande.add(jspLigneCommandes, java.awt.BorderLayout.CENTER);
+
+        jpCommandeEnCours.add(jpContenuCommande, java.awt.BorderLayout.CENTER);
+
+        jpResumeCommande.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 1, 1, 1));
+        jpResumeCommande.setPreferredSize(new java.awt.Dimension(638, 100));
+        jpResumeCommande.setLayout(new java.awt.GridLayout(2, 1));
+
+        jpDetailsCommande.setLayout(new java.awt.BorderLayout());
+
+        jlNombreProduit.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        jlNombreProduit.setForeground(ApplicationColors.TEXT_SECONDARY);
+        jlNombreProduit.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlNombreProduit.setText("Nombre de Produits : ");
+        jlNombreProduit.setRequestFocusEnabled(false);
+        jpDetailsCommande.add(jlNombreProduit, java.awt.BorderLayout.WEST);
+
+        jlTotal.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        jlTotal.setForeground(ApplicationColors.TEXT_SECONDARY);
+        jlTotal.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jlTotal.setText("Total : 4500 FCFA");
+        jpDetailsCommande.add(jlTotal, java.awt.BorderLayout.EAST);
+
+        jpResumeCommande.add(jpDetailsCommande);
+
+        jpBoutonsActions.setPreferredSize(new java.awt.Dimension(688, 50));
+        jpBoutonsActions.setLayout(new java.awt.GridLayout(1, 3, 10, 0));
+
+        jbAnnuler.setBackground(ApplicationColors.ERROR
+        );
+        jbAnnuler.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        jbAnnuler.setForeground(ApplicationColors.TEXT_LIGHT);
+        jbAnnuler.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ban_whithe.png"))); // NOI18N
+        jbAnnuler.setText("Annuler");
+        jbAnnuler.addActionListener(this::jbAnnulerActionPerformed);
+        jpBoutonsActions.add(jbAnnuler);
+
+        jbBrouillon.setBackground(ApplicationColors.TEXT_SECONDARY);
+        jbBrouillon.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        jbBrouillon.setForeground(ApplicationColors.TEXT_LIGHT);
+        jbBrouillon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/square-pen-white.png"))); // NOI18N
+        jbBrouillon.setText("Brouillon");
+        jpBoutonsActions.add(jbBrouillon);
+
+        jbValider.setBackground(ApplicationColors.PRIMARY);
+        jbValider.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        jbValider.setForeground(ApplicationColors.TEXT_LIGHT);
+        jbValider.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/check-whith.png"))); // NOI18N
+        jbValider.setText("Valider");
+        jpBoutonsActions.add(jbValider);
+
+        jpResumeCommande.add(jpBoutonsActions);
+
+        jpCommandeEnCours.add(jpResumeCommande, java.awt.BorderLayout.SOUTH);
+
         jpConteneurCommandeEnCours.add(jpCommandeEnCours, java.awt.BorderLayout.CENTER);
 
         jpContenuPrincipalCommandes.add(jpConteneurCommandeEnCours);
@@ -186,23 +436,40 @@ public class CommandesPanel extends javax.swing.JPanel {
         add(jpContenuPrincipalCommandes, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jbAnnulerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbAnnulerActionPerformed
+        truncateLePanelDeCommande();
+    }//GEN-LAST:event_jbAnnulerActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JButton jbAncienneCommande;
+    private javax.swing.JButton jbAnnuler;
+    private javax.swing.JButton jbBrouillon;
+    private javax.swing.JButton jbValider;
     private javax.swing.JLabel jlLabelDuPanneau;
     private javax.swing.JLabel jlLogoRecherche;
+    private javax.swing.JLabel jlNombreProduit;
     private javax.swing.JLabel jlProduitsDispo;
+    private javax.swing.JLabel jlTotal;
+    private javax.swing.JPanel jpBoutonsActions;
     private javax.swing.JPanel jpCartesProduits;
     private javax.swing.JPanel jpCatalogueProduit;
     private javax.swing.JPanel jpCommandeEnCours;
     private javax.swing.JPanel jpConteneurCartesProduits;
     private javax.swing.JPanel jpConteneurCatalogueProduit;
     private javax.swing.JPanel jpConteneurCommandeEnCours;
+    private javax.swing.JPanel jpContenuCommande;
     private javax.swing.JPanel jpContenuPrincipalCommandes;
+    private javax.swing.JPanel jpDetailsCommande;
+    private javax.swing.JPanel jpLigneCommandes;
     private javax.swing.JPanel jpRechercheProduit;
+    private javax.swing.JPanel jpResumeCommande;
     private javax.swing.JPanel jpTitreCatalogue;
+    private javax.swing.JPanel jpTitreCommande;
     private javax.swing.JPanel jpTopbarCommandes;
     private javax.swing.JScrollPane jspCartesProduits;
+    private javax.swing.JScrollPane jspLigneCommandes;
     private javax.swing.JTextField jtfRechercheProduit;
     // End of variables declaration//GEN-END:variables
 }

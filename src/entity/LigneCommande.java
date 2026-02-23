@@ -114,8 +114,8 @@ public class LigneCommande {
         this.montantLigne = quantite * prix;
     }
     public void setMontantLigne(double montantLigne) {
-        recalculerMontant();
         this.montantLigne = montantLigne;
+        recalculerMontant();
         
     }
 }
