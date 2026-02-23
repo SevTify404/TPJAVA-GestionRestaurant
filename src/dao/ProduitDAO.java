@@ -120,6 +120,42 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         
         return CrudResult.success(inter);
     }
+    
+    public int recupererStockAvecConnexion(Connection conn, int idProduit)
+        throws SQLException {
+
+    String sql = "SELECT stockActuel FROM Produit WHERE idProduit = ? FOR UPDATE";
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, idProduit);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (!rs.next()) throw new SQLException("Produit introuvable");
+            return rs.getInt("stockActuel");
+        }
+    }
+    
+    
+    }
+    public CrudResult<Boolean> decrementerStockAvecConnexion(
+        Connection conn,
+        int idProduit,
+        int quantite) throws SQLException {
+
+    String sql = "UPDATE Produit SET stockActuel = stockActuel - ? WHERE idProduit = ?";
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, quantite);
+        ps.setInt(2, idProduit);
+
+        int rows = ps.executeUpdate();
+        if (rows == 0)
+            return CrudResult.failure("Produit introuvable");
+
+        return CrudResult.success(true);
+    }
+}
 
     @Override
     public CrudResult<Produit> mettreAJour(Produit unProduit) {
@@ -326,6 +362,53 @@ public class ProduitDAO extends AbstractDAO<Produit> {
                         "JOIN Categorie c ON c.idCat = p.idCategorie " +
                         "LEFT JOIN Users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
                         "where p.deletedAt is null ";
+        PreparedStatement ps = null;
+
+        try {
+            Connection conn = this.toConnect();
+            ps= conn.prepareStatement(requete);
+            ResultSet rs = ps.executeQuery();
+
+
+            while (rs.next()) {
+
+                Categorie categorie = new Categorie(rs.getInt(3), rs.getString(9));
+                Users user = new Users();
+                user.setIdUser(rs.getInt(4));
+                user.setLogin(rs.getString(11));
+                Produit inter = new Produit();
+                inter.setIdProduit(rs.getInt(1));
+                inter.setNom(rs.getString(2));
+                
+                inter.setUser(user);
+                inter.setCategorie(categorie);
+                inter.setPrixDeVente(rs.getDouble(5));
+                inter.setStockActuel(rs.getInt(6));
+                inter.setSeuilAlerte(rs.getInt(7));
+                
+
+                listeProduit.add(inter);
+            }
+            
+            conn.close();
+            ps.close();
+            rs.close();
+
+
+        } catch (SQLException ex) {
+
+            return gererExceptionSQL(ex);
+        }
+        return CrudResult.success(listeProduit);
+    }
+    public CrudResult<List<Produit>> recupererToutDisponible() {
+        List<Produit> listeProduit = new ArrayList<>();
+
+        String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
+                        "from Produit p " +
+                        "JOIN Categorie c ON c.idCat = p.idCategorie " +
+                        "LEFT JOIN Users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
+                        "where p.deletedAt is null AND p.stockActuel > 0";
         PreparedStatement ps = null;
 
         try {

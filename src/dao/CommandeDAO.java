@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
+import java.sql.Timestamp;
 
 /**
  *
@@ -89,7 +89,44 @@ public class CommandeDAO extends AbstractDAO<Commande> {
         } catch (SQLException ex) {
                 return gererExceptionSQL(ex);
         }
-}
+    }
+    public CrudResult<Commande> enregistrerAvecRetourId(Commande commande) {
+        if (commande == null) return CrudResult.failure("Commande null");
+        if (commande.getDateCommande() == null) return CrudResult.failure("Date manquante");
+        if (commande.getEtat() == null) return CrudResult.failure("Etat manquant");
+        if (commande.getTotal() <= 0) return CrudResult.failure("Total invalide");
+        if (commande.getUtilisateur().getIdUser() == 0) return CrudResult.failure("Utilisateur invalide");
+        
+        String sql = "INSERT INTO Commande (dateCommande, etat, total, idUser) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = toConnect();
+             PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(commande.getDateCommande()));
+            ps.setString(2, commande.getEtat().name());
+            ps.setDouble(3, commande.getTotal());
+            ps.setInt(4, commande.getUtilisateur().getIdUser());
+
+            int rows = ps.executeUpdate();
+
+            if (rows == 0) {
+                return CrudResult.failure("Insertion échouée");
+            }
+
+            //RÉCUPÉRATION DE L’ID AUTO_INCREMENT
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (!rs.next()) {
+                    return CrudResult.failure("Impossible de récupérer l'ID généré");
+                }
+                commande.setIdCommande(rs.getInt(1));
+            }
+
+        } catch (SQLException ex) {
+                return gererExceptionSQL(ex);
+        }
+        
+        return CrudResult.success(commande);                       
+    }
         
     @Override
     public CrudResult<Commande> lire(int id) {
@@ -413,9 +450,10 @@ public class CommandeDAO extends AbstractDAO<Commande> {
     }
 
     String sql = """
-        SELECT idLC, idCommande, idProduit, quantite, prixUnitaire, montantLigne
-        FROM LigneCommande
-        WHERE idCommande = ? AND deletedAt IS NULL
+        SELECT lc.idLC, lc.idCommande, lc.idProduit, lc.quantite, lc.prixUnitaire, lc.montantLigne, 
+                 p.prixDeVente, p.stockActuel, p.seuilAlerte, p.nom
+        FROM LigneCommande lc JOIN Produit p ON p.idProduit = lc.idProduit
+         WHERE lc.idCommande = ? AND p.deletedAt IS NULL AND lc.deletedAt IS NULL AND p.stockActuel > lc.quantite
     """;
 
     List<LigneCommande> lignes = new ArrayList<>();
@@ -427,7 +465,14 @@ public class CommandeDAO extends AbstractDAO<Commande> {
 
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                lignes.add(map(rs));
+                LigneCommande laLigne = map(rs);
+                Produit produit = new Produit();
+                produit.setIdProduit(rs.getInt("idProduit"));
+                produit.setNom(rs.getString("nom"));
+                produit.setPrixDeVente(rs.getDouble("prixDeVente"));
+                produit.setStockActuel(rs.getInt("stockActuel"));
+                laLigne.setProduit(produit);
+                lignes.add(laLigne);
             }
         }
 
@@ -475,6 +520,103 @@ public class CommandeDAO extends AbstractDAO<Commande> {
     } catch (SQLException ex) {
         return gererExceptionSQL(ex);
     }
+    }
+    
+    public CrudResult<Commande> enregistrerAvecConnexion(
+        Connection conn,
+        Commande commande) throws SQLException {
+
+    String sql = "INSERT INTO Commande (dateCommande, etat, total, idUser) VALUES (?, ?, ?, ?)";
+
+    try (PreparedStatement ps =
+                 conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+        ps.setTimestamp(1, Timestamp.valueOf(commande.getDateCommande()));
+        ps.setString(2, commande.getEtat().name());
+        ps.setDouble(3, commande.getTotal());
+        ps.setInt(4, commande.getUtilisateur().getIdUser());
+
+        int rows = ps.executeUpdate();
+        if (rows == 0) return CrudResult.failure("Insertion échouée");
+
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (!rs.next())
+                return CrudResult.failure("Impossible de récupérer ID");
+
+            commande.setIdCommande(rs.getInt(1));
+        }
+
+        return CrudResult.success(commande);
+    }
 }
+    
+    public CrudResult<Boolean> creerCommandeAvecLignes(
+        Commande commande,
+        List<LigneCommande> lignes
+    ) {
+
+        if (commande == null || lignes == null || lignes.isEmpty()) {
+            return CrudResult.failure("Commande ou lignes invalides");
+        }
+
+        try (Connection conn = toConnect()) {
+
+            conn.setAutoCommit(false); // 🔥 DEBUT TRANSACTION
+
+
+            CrudResult<Commande> resCommande = enregistrerAvecConnexion(conn, commande);
+
+            if (resCommande.estUneErreur()) {
+                conn.rollback();
+                return CrudResult.failure(resCommande.getErreur());
+            }
+
+            Commande commandePersisted = resCommande.getDonnes();
+            
+            for (LigneCommande ligne : lignes) {
+
+                ligne.setCommande(commandePersisted);
+                ligne.recalculerMontant();
+
+                // 🔥 Vérification stock AVANT update
+                int stockActuel = ProduitDAO.getInstance().recupererStockAvecConnexion(conn, ligne.getIdProduit());
+
+                if (stockActuel < ligne.getQuantite()) {
+                    conn.rollback();
+                    return CrudResult.failure(
+                            "Stock insuffisant pour le produit ID: "
+                                    + ligne.getIdProduit());
+                }
+
+                // 🔥 Décrément stock
+                CrudResult<Boolean> updateStock =
+                        ProduitDAO.getInstance().decrementerStockAvecConnexion(
+                                conn,
+                                ligne.getIdProduit(),
+                                ligne.getQuantite());
+
+                if (updateStock.estUneErreur()) {
+                    conn.rollback();
+                    return updateStock;
+                }
+            }
+
+            // 3️⃣ Insert lignes batch
+            CrudResult<Boolean> resLignes =
+                    LigneCommandeDAO.getInstance()
+                            .enregistrerPlusieursAvecConnexion(conn, lignes);
+
+            if (resLignes.estUneErreur()) {
+                conn.rollback();
+                return resLignes;
+            }
+
+            conn.commit(); // ✅ TOUT EST OK
+            return CrudResult.success(true);
+
+        } catch (SQLException e) {
+            return CrudResult.failure(e.getMessage());
+        }
+    }
 
 }

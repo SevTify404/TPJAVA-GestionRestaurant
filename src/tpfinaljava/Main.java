@@ -5,6 +5,7 @@
 package tpfinaljava;
 //import formulaires.App;
 import com.formdev.flatlaf.FlatLightLaf;
+import dao.UsersDAO;
 import formulaires.App;
 import formulaires.CommandesPanel;
 import formulaires.DashBoardPanel;
@@ -12,6 +13,7 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import utilitaires.AuthentificationManager;
 import utilitaires.VariablesEnvirennement;
 //import utilitaires.VariablesEnvirennement;
 
@@ -28,6 +30,9 @@ public class Main {
      */
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
                 VariablesEnvirennement.checkVariablesEnvironnement();
+                AuthentificationManager.getInstance().connecterUnUtilisateur(
+                    UsersDAO.getInstance().lire(4).getDonnes()
+                );
 
         
          // Force la gestion du DPI pour éviter l'effet "agrandi" sur Windows
