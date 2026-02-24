@@ -4,6 +4,9 @@
  */
 package tpfinaljava;
 import formulaires.App;
+import formulaires.Audit_Log;
+import formulaires.Utilisateurs;
+import javax.swing.JFrame;
 import utilitaires.VariablesEnvirennement;
 
 
@@ -24,6 +27,11 @@ public class Main {
         App application = App.getInstance();
         
         application.lancerApplication();
+//JFrame frame = new JFrame("Test audits");
+//frame.setContentPane(new Audit_Log());
+//frame.pack();
+//frame.setLocationRelativeTo(null);
+//frame.setVisible(true);
     }
 }
     
