@@ -263,10 +263,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         if(unProduit.getPrixDeVente() <= 0){
             return CrudResult.failure("Le prix de vente doit être strictement positif");
         }
-        if (unProduit.getUser().getDeletedAt() != null) {
-            return CrudResult.failure("Cet utilisateur ne peut pas enregistrer");
-            
-        }
+
         if(unProduit.getStockActuel() < 0){
             return CrudResult.failure("Le stock ne peut pas être négatif");
         }
