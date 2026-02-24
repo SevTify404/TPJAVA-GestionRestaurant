@@ -20,6 +20,8 @@ import java.util.Map;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import utilitaires.StatsDto.ProduitCA;
+import utilitaires.StatsDto.ProduitQuantite;
 
 /**
  *
@@ -471,6 +473,117 @@ public class CommandeDAO extends AbstractDAO<Commande> {
             rs.close();
 
             return CrudResult.success(montant);
+
+        } catch (SQLException ex) {
+            return gererExceptionSQL(ex);
+        }
+    }
+    
+    public CrudResult<List<ProduitCA>> chiffreAffaireJourParProduit(LocalDate date) {
+
+        List<ProduitCA> liste = new ArrayList<>();
+
+        String requete = """
+            SELECT 
+                p.idProduit,
+                p.nom,
+                SUM(lc.quantite * lc.prixUnitaire) AS chiffreAffaire
+            FROM LigneCommande lc
+            JOIN Commande c ON c.idCommande = lc.idCommande
+            JOIN Produit p ON p.idProduit = lc.idProduit
+            WHERE c.etat = 'VALIDEE'
+            AND c.deletedAt IS NULL
+            AND lc.deletedAt IS NULL
+            AND c.dateCommande >= ?
+            AND c.dateCommande < ?
+            GROUP BY p.idProduit, p.nom
+            ORDER BY chiffreAffaire DESC
+        """;
+
+        try {
+            Connection conn = this.toConnect();
+            PreparedStatement ps = conn.prepareStatement(requete);
+
+            // Intervalle optimisé
+            LocalDateTime debut = date.atStartOfDay();
+            LocalDateTime fin = date.plusDays(1).atStartOfDay();
+
+            ps.setTimestamp(1, Timestamp.valueOf(debut));
+            ps.setTimestamp(2, Timestamp.valueOf(fin));
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                ProduitCA stat = new ProduitCA();
+                stat.setIdProduit(rs.getInt("idProduit"));
+                stat.setNomProduit(rs.getString("nom"));
+                stat.setChiffreAffaire(rs.getDouble("chiffreAffaire"));
+
+                liste.add(stat);
+            }
+
+            conn.close();
+            ps.close();
+            rs.close();
+
+            return CrudResult.success(liste);
+
+        } catch (SQLException ex) {
+            return gererExceptionSQL(ex);
+        }
+    }
+    
+    public CrudResult<List<ProduitQuantite>> top5ProduitsVendusJour(LocalDate date) {
+
+        List<ProduitQuantite> liste = new ArrayList<>();
+
+        String requete = """
+            SELECT 
+                p.idProduit,
+                p.nom,
+                SUM(lc.quantite) AS totalVendu
+            FROM LigneCommande lc
+            JOIN Commande c ON c.idCommande = lc.idCommande
+            JOIN Produit p ON p.idProduit = lc.idProduit
+            WHERE c.etat = 'VALIDEE'
+            AND c.deletedAt IS NULL
+            AND lc.deletedAt IS NULL
+            AND c.dateCommande >= ?
+            AND c.dateCommande < ?
+            GROUP BY p.idProduit, p.nom
+            ORDER BY totalVendu DESC
+            LIMIT 5
+        """;
+
+        try {
+            Connection conn = this.toConnect();
+            PreparedStatement ps = conn.prepareStatement(requete);
+
+            // Intervalle optimisé
+            LocalDateTime debut = date.atStartOfDay();
+            LocalDateTime fin = date.plusDays(1).atStartOfDay();
+
+            ps.setTimestamp(1, Timestamp.valueOf(debut));
+            ps.setTimestamp(2, Timestamp.valueOf(fin));
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                ProduitQuantite stat = new ProduitQuantite();
+                stat.setIdProduit(rs.getInt("idProduit"));
+                stat.setNomProduit(rs.getString("nom"));
+                stat.setTotalVendu(rs.getInt("totalVendu"));
+
+                liste.add(stat);
+            }
+
+            conn.close();
+            ps.close();
+            rs.close();
+
+            return CrudResult.success(liste);
 
         } catch (SQLException ex) {
             return gererExceptionSQL(ex);

@@ -9,6 +9,7 @@ import dao.UsersDAO;
 import formulaires.App;
 import formulaires.CommandesPanel;
 import formulaires.DashBoardPanel;
+import formulaires.StatistiquePanel;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -56,7 +57,7 @@ public class Main {
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        frame.add(new CommandesPanel(), BorderLayout.CENTER);
+        frame.add(new StatistiquePanel(), BorderLayout.CENTER);
 
         frame.setVisible(true);
     });
