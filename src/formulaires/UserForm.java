@@ -4,7 +4,9 @@
  */
 package formulaires;
 
+import dao.CrudResult;
 import java.awt.HeadlessException;
+import utilitaires.Security;
 
 /**
  *
@@ -207,12 +209,14 @@ public class UserForm extends javax.swing.JDialog {
         }
         
         u.setLogin(loginUser);
-        u.setMotDePasse(password);
+        u.setMotDePasse(Security.crypterMotdePasse(password));
         u.setSexe(C_f.isSelected() ? "F" : "M");
         u.setIsAdmin(oui.isSelected());
 
         dao.UsersDAO daoUser = new dao.UsersDAO();
-        daoUser.enregistrer(u);
+        CrudResult<Boolean> resi= daoUser.enregistrer(u);
+        
+        System.out.println();
 
         // 6. Feedback et fermeture
         javax.swing.JOptionPane.showMessageDialog(this, "Utilisateur ajouté avec succès !");
