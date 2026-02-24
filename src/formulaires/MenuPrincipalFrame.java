@@ -149,7 +149,7 @@ public class MenuPrincipalFrame extends JFrame {
 
         // Simulation des sections
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Produits", new GestionProduitPanel());
+        tabbedPane.addTab("Produits", new GestionProduitCategoriePanel(utislisateurConnecte));
         tabbedPane.addTab("Catégories", new GestionCategoriePanel());
         mainContent.add(new DashBoardPanel(), "DASHBOARD");
         mainContent.add(tabbedPane, "INVENTORY");
@@ -157,7 +157,7 @@ public class MenuPrincipalFrame extends JFrame {
         mainContent.add(new CommandesPanel(), "ORDERS");
         mainContent.add(new StatistiquePanel(), "STATS");
         mainContent.add(new Utilisateurs(), "USERS");
-        mainContent.add(new Audit_Log(), "LOGS"); 
+//        mainContent.add(new Audit_Log(), "LOGS"); 
 
         // TOp Bar là où y'aura un bouton de fermeture de l'application et le 
         // titre de la section courante
