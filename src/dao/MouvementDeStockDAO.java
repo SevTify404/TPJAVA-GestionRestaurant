@@ -21,7 +21,7 @@ import entity.Produit;
 
 public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
 
-    private MouvementDeStockDAO() {
+    public MouvementDeStockDAO() {
     }
     
     public static MouvementDeStockDAO getInstance(){

@@ -12,6 +12,10 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import entity.Categorie;
 import entity.Users;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+
 import utilitaires.VariablesEnvirennement;
 
 
@@ -259,7 +263,6 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         if(unProduit.getPrixDeVente() <= 0){
             return CrudResult.failure("Le prix de vente doit être strictement positif");
         }
-       
         if (unProduit.getUser().getDeletedAt() != null) {
             return CrudResult.failure("Cet utilisateur ne peut pas enregistrer");
             
@@ -432,6 +435,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
                 inter.setPrixDeVente(rs.getDouble(5));
                 inter.setStockActuel(rs.getInt(6));
                 inter.setSeuilAlerte(rs.getInt(7));
+
                 
 
                 listeProduit.add(inter);
@@ -449,7 +453,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         return CrudResult.success(listeProduit);
     }
     
-    
+
 
     
     

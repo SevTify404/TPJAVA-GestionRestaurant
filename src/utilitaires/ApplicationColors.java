@@ -27,6 +27,7 @@ public class ApplicationColors {
     public static final Color SIDEBAR_BG        = Color.decode("#0369a1");
     public static final Color SIDEBAR_HOVER     = new Color(2, 105, 161, 50); // Alpha pour transparence
     public static final Color SIDEBAR_SELECTION = new Color(52, 152, 219);
+
     public static final Color SIDEBAR_TEXT      = new Color(236, 240, 241);
 
     // --- TYPOGRAPHIE ---

@@ -126,7 +126,8 @@ public class MenuPrincipalFrame extends JFrame {
 
         addNavigationButton(menuContainer, "Tableau de Bord", "DASHBOARD");
         addNavigationButton(menuContainer, "Produits", "INVENTORY");
-        addNavigationButton(menuContainer, "Stocks", "STOCKS");
+        //addNavigationButton(menuContainer, "Stocks", "STOCKS");
+        addNavigationButton(menuContainer, "Stocks", "MOUVEMENT_STOCK");
         addNavigationButton(menuContainer, "Commandes", "ORDERS");
         addNavigationButton(menuContainer, "Statistiques", "STATS");
         
@@ -147,6 +148,7 @@ public class MenuPrincipalFrame extends JFrame {
         mainContent.setBackground(ApplicationColors.PANEL_BG);
 
         // Simulation des sections
+
         mainContent.add(new DashBoardPanel(), "DASHBOARD");
         mainContent.add(createViewPlaceholder("INVENTORY - Gestion des stocks"), "INVENTORY");
         mainContent.add(new CommandesPanel(), "ORDERS");
@@ -296,7 +298,7 @@ public class MenuPrincipalFrame extends JFrame {
             cardLayout.show(mainContent, cardName);
         });
 
-        btn.addActionListener(e -> cardLayout.show(mainContent, cardName));
+        /*btn.addActionListener(e -> cardLayout.show(mainContent, cardName));*/
         parent.add(btn);
     }
     
@@ -326,7 +328,34 @@ public class MenuPrincipalFrame extends JFrame {
             this,
             "Etes vous sur de vous deconnecter ?",
             "Déconnexion",
-            JOptionPane.YES_NO_OPTION
+            JOptionPane.YES_NO_OPTION<<<<<<< feature/interface_raven
+152
+ 
+        mainContent.add(createViewPlaceholder("DASHBOARD - Aperçu général"), "DASHBOARD");
+153
+ 
+        //mainContent.add(createViewPlaceholder("INVENTORY - Gestion des stocks"), "INVENTORY");
+154
+ 
+        mainContent.add(new Mouvement_destock_1(), "MOUVEMENT_STOCK");
+155
+ 
+        mainContent.add(createViewPlaceholder("ORDERS - Gestion des commandes"), "ORDERS");
+156
+ 
+        mainContent.add(createViewPlaceholder("STATS - Rapports d'activité"), "STATS");
+157
+ 
+        mainContent.add(createViewPlaceholder (""), "SETTINGS");
+158
+ 
+        //mainContent.add(new MonComptePanel(utislisateurConnecte), "SETTINGS");
+159
+ 
+        //mainContent.add(new MonComptePanel(currentUser), "MON_COMPTE");
+160
+ 
+=======
         );
         
         if (res == JOptionPane.YES_OPTION) {
