@@ -57,7 +57,7 @@ public class Main {
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        frame.add(new StatistiquePanel(), BorderLayout.CENTER);
+        frame.add(new CommandesPanel(), BorderLayout.CENTER);
 
         frame.setVisible(true);
     });

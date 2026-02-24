@@ -18,10 +18,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import utilitaires.StatsDto.ProduitCA;
 import utilitaires.StatsDto.ProduitQuantite;
+import utilitaires.StatsDto.PeriodeStatistique;
 
 /**
  *
@@ -534,6 +536,228 @@ public class CommandeDAO extends AbstractDAO<Commande> {
         }
     }
     
+    private LocalDateTime[] calculerIntervalle(PeriodeStatistique periode) {
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime debut;
+        LocalDateTime fin;
+
+        switch (periode) {
+
+            case SEMAINE_EN_COURS:
+                LocalDate debutSemaine = today.with(DayOfWeek.MONDAY);
+                debut = debutSemaine.atStartOfDay();
+                fin = debut.plusWeeks(1);
+                break;
+
+            case MOIS_EN_COURS:
+                LocalDate debutMois = today.withDayOfMonth(1);
+                debut = debutMois.atStartOfDay();
+                fin = debut.plusMonths(1);
+                break;
+
+            case ANNEE_EN_COURS:
+                LocalDate debutAnnee = today.withDayOfYear(1);
+                debut = debutAnnee.atStartOfDay();
+                fin = debut.plusYears(1);
+                break;
+
+            default:
+                throw new IllegalArgumentException("Période invalide");
+        }
+
+        return new LocalDateTime[]{debut, fin};
+    }
+    
+    public CrudResult<List<ProduitCA>> chiffreAffaireParProduitPeriode(
+        PeriodeStatistique periode) {
+
+    List<ProduitCA> liste = new ArrayList<>();
+
+    String requete = """
+        SELECT 
+            p.idProduit,
+            p.nom,
+            SUM(lc.quantite * lc.prixUnitaire) AS chiffreAffaire
+        FROM LigneCommande lc
+        JOIN Commande c ON c.idCommande = lc.idCommande
+        JOIN Produit p ON p.idProduit = lc.idProduit
+        WHERE c.etat = 'VALIDEE'
+        AND c.deletedAt IS NULL
+        AND lc.deletedAt IS NULL
+        AND p.deletedAt IS NULL
+        AND c.dateCommande >= ?
+        AND c.dateCommande < ?
+        GROUP BY p.idProduit, p.nom
+        ORDER BY chiffreAffaire DESC
+    """;
+
+    try {
+        Connection conn = this.toConnect();
+        PreparedStatement ps = conn.prepareStatement(requete);
+
+        LocalDateTime[] intervalle = calculerIntervalle(periode);
+
+        ps.setTimestamp(1, Timestamp.valueOf(intervalle[0]));
+        ps.setTimestamp(2, Timestamp.valueOf(intervalle[1]));
+
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+
+            ProduitCA stat = new ProduitCA();
+            stat.setIdProduit(rs.getInt("idProduit"));
+            stat.setNomProduit(rs.getString("nom"));
+            stat.setChiffreAffaire(rs.getDouble("chiffreAffaire"));
+
+            liste.add(stat);
+        }
+
+        conn.close();
+        ps.close();
+        rs.close();
+
+        return CrudResult.success(liste);
+
+    } catch (SQLException ex) {
+        return gererExceptionSQL(ex);
+    }
+}
+    
+    public CrudResult<Integer> nombreCommandesJour(LocalDate date) {
+
+    String requete = """
+        SELECT COUNT(*) AS nombreCommandes
+        FROM Commande
+        WHERE etat = 'VALIDEE'
+        AND deletedAt IS NULL
+        AND dateCommande >= ?
+        AND dateCommande < ?
+    """;
+
+    try {
+        Connection conn = this.toConnect();
+        PreparedStatement ps = conn.prepareStatement(requete);
+
+        LocalDateTime debut = date.atStartOfDay();
+        LocalDateTime fin = date.plusDays(1).atStartOfDay();
+
+        ps.setTimestamp(1, Timestamp.valueOf(debut));
+        ps.setTimestamp(2, Timestamp.valueOf(fin));
+
+        ResultSet rs = ps.executeQuery();
+
+        int total = 0;
+        if (rs.next()) {
+            total = rs.getInt("nombreCommandes");
+        }
+
+        conn.close();
+        ps.close();
+        rs.close();
+
+        return CrudResult.success(total);
+
+    } catch (SQLException ex) {
+        return gererExceptionSQL(ex);
+    }
+}
+    public CrudResult<Integer> nombreCommandesPeriode(
+        PeriodeStatistique periode) {
+
+    String requete = """
+        SELECT COUNT(*) AS nombreCommandes
+        FROM Commande
+        WHERE etat = 'VALIDEE'
+        AND deletedAt IS NULL
+        AND dateCommande >= ?
+        AND dateCommande < ?
+    """;
+
+    try {
+        Connection conn = this.toConnect();
+        PreparedStatement ps = conn.prepareStatement(requete);
+
+        LocalDateTime[] intervalle = calculerIntervalle(periode);
+
+        ps.setTimestamp(1, Timestamp.valueOf(intervalle[0]));
+        ps.setTimestamp(2, Timestamp.valueOf(intervalle[1]));
+
+        ResultSet rs = ps.executeQuery();
+
+        int total = 0;
+        if (rs.next()) {
+            total = rs.getInt("nombreCommandes");
+        }
+
+        conn.close();
+        ps.close();
+        rs.close();
+
+        return CrudResult.success(total);
+
+    } catch (SQLException ex) {
+        return gererExceptionSQL(ex);
+    }
+}
+    
+    
+    public CrudResult<List<ProduitQuantite>> top5ProduitsVendusPeriode(
+        PeriodeStatistique periode) {
+
+    List<ProduitQuantite> liste = new ArrayList<>();
+
+    String requete = """
+        SELECT 
+            p.idProduit,
+            p.nom,
+            SUM(lc.quantite) AS totalVendu
+        FROM LigneCommande lc
+        JOIN Commande c ON c.idCommande = lc.idCommande
+        JOIN Produit p ON p.idProduit = lc.idProduit
+        WHERE c.etat = 'VALIDEE'
+        AND c.deletedAt IS NULL
+        AND lc.deletedAt IS NULL
+        AND p.deletedAt IS NULL
+        AND c.dateCommande >= ?
+        AND c.dateCommande < ?
+        GROUP BY p.idProduit, p.nom
+        ORDER BY totalVendu DESC
+        LIMIT 5
+    """;
+
+    try {
+        Connection conn = this.toConnect();
+        PreparedStatement ps = conn.prepareStatement(requete);
+
+        LocalDateTime[] intervalle = calculerIntervalle(periode);
+
+        ps.setTimestamp(1, Timestamp.valueOf(intervalle[0]));
+        ps.setTimestamp(2, Timestamp.valueOf(intervalle[1]));
+
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+
+            ProduitQuantite stat = new ProduitQuantite();
+            stat.setIdProduit(rs.getInt("idProduit"));
+            stat.setNomProduit(rs.getString("nom"));
+            stat.setTotalVendu(rs.getInt("totalVendu"));
+
+            liste.add(stat);
+        }
+
+        conn.close();
+        ps.close();
+        rs.close();
+
+        return CrudResult.success(liste);
+
+    } catch (SQLException ex) {
+        return gererExceptionSQL(ex);
+    }
+}
+    
     public CrudResult<List<ProduitQuantite>> top5ProduitsVendusJour(LocalDate date) {
 
         List<ProduitQuantite> liste = new ArrayList<>();
@@ -837,6 +1061,19 @@ public class CommandeDAO extends AbstractDAO<Commande> {
                     conn.rollback();
                     return updateStock;
                 }
+                String insertMouvementSQL =
+                "INSERT INTO MouvementDeStock (type, idProduit, quantite, dateMouvement, motif) " +
+                "VALUES ('SORTIE', ?, ?, ?, ?)";
+
+            try (PreparedStatement ps = conn.prepareStatement(insertMouvementSQL)) {
+
+                ps.setInt(1, ligne.getIdProduit());
+                ps.setInt(2, ligne.getQuantite());
+                ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+                ps.setString(4, "Commande #" + commandePersisted.getIdCommande());
+
+                ps.executeUpdate();
+            }
             }
 
             // 3️⃣ Insert lignes batch

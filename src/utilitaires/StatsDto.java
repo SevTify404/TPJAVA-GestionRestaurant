@@ -51,7 +51,12 @@ public class StatsDto {
             return chiffreAffaire;
         }
     }
-    
+    public static enum PeriodeStatistique {
+        SEMAINE_EN_COURS,
+        MOIS_EN_COURS,
+        ANNEE_EN_COURS
+        
+    }
     public static class ProduitQuantite {
 
     private int idProduit;
