@@ -9,23 +9,17 @@ import dao.LigneCommandeDAO;
 import dao.ProduitDAO;
 import entity.Commande;
 import entity.LigneCommande;
-import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.util.ArrayList;
 import java.util.List;
 import entity.Produit;
 import entity.enums.ActionType;
-import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import utilitaires.ApplicationColors;
@@ -65,13 +59,7 @@ public class CommandesPanel extends javax.swing.JPanel {
         ajouterEcouteurs();
         jtfRechercheProduit.requestFocus();
         
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentShown(ComponentEvent e) {
-                
-                mettreListeProduitAJour();
-            }
-        });
+        
         
     }
     
@@ -84,6 +72,15 @@ public class CommandesPanel extends javax.swing.JPanel {
     }
     
     private void ajouterEcouteurs(){
+        
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                
+                mettreListeProduitAJour();
+            }
+        });
+        
         jtfRechercheProduit.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
@@ -214,7 +211,7 @@ public class CommandesPanel extends javax.swing.JPanel {
             lignesActuelles.remove(idProduit);
             pannelLignesActuelles.remove(idProduit);
         
-            calculerTotalGlobal(); // N'oublie pas de recalculer le total !
+            calculerTotalGlobal(); 
         }
     }
     
@@ -224,7 +221,7 @@ public class CommandesPanel extends javax.swing.JPanel {
 
         // Parcourt les lignes de commande stockées dans ta Map
         for (LigneCommande ligne : lignesActuelles.values()) {
-            total += (ligne.getPrixUnitaire()* ligne.getQuantite());
+            total += ligne.getMontantLigne();
             nombreTotalProduits += ligne.getQuantite();
         }
 
@@ -240,14 +237,14 @@ public class CommandesPanel extends javax.swing.JPanel {
     
     
         private void mettreAJourLignePanelCommande(LigneCommande ligneCommande, String operation){
-        int idProduit = ligneCommande.getProduit().getIdProduit();
-        if (operation.equals("+")) {
-            incrementerChoix(idProduit);
-        } else if (operation.equals("-")){
-            decrementerChoix(idProduit);
-        }else{
-            supprimerChoix(idProduit);
-        }
+            int idProduit = ligneCommande.getProduit().getIdProduit();
+            if (operation.equals("+")) {
+                incrementerChoix(idProduit);
+            } else if (operation.equals("-")){
+                decrementerChoix(idProduit);
+            }else{
+                supprimerChoix(idProduit);
+            }
     
     }
     
@@ -286,9 +283,14 @@ public class CommandesPanel extends javax.swing.JPanel {
     
     private void chargerCommandesEnAttente() {
         jpConteneurCommandeBrouillon.removeAll();
-
-    // Récupération des commandes via ton DAO
-    CrudResult<List<Commande>> enAttente = CommandeDAO.getInstance().recupererCommandeEnCoursUsers(AuthentificationManager.getInstance().recupererUtilisateurConnecte());
+        
+        CrudResult<List<Commande>> enAttente = CommandeDAO.
+            getInstance().
+            recupererCommandeEnCoursUsers(
+                AuthentificationManager.getInstance().
+                    recupererUtilisateurConnecte()
+            );
+        
         if (enAttente.estUneErreur()) {
             showCustomErreurJOptionPane(enAttente.getErreur());
             return;
@@ -311,17 +313,19 @@ public class CommandesPanel extends javax.swing.JPanel {
             CommandeEnCoursCard card = new CommandeEnCoursCard(
                 cmd,
                 () -> {
-                    jdCommandesEnAttente.dispose(); // Ferme le dialog
+                    jdCommandesEnAttente.dispose(); 
                     chargerCommande(cmd);
                     CommandeDAO.getInstance().suppressionLogique(cmd);
                 },
                 () -> {
                     if (JOptionPane.showConfirmDialog(this, "Supprimer ce brouillon ?") == 0) {
                         CommandeDAO.getInstance().suppressionLogique(cmd);
-                        chargerCommandesEnAttente(); // Rafraîchit la liste
+                        chargerCommandesEnAttente(); 
                     }
                 }
             );
+            
+            // Ce qu'il te manquait 
             jpConteneurCommandeBrouillon.add(card);
             jpConteneurCommandeBrouillon.add(Box.createRigidArea(new Dimension(0, 10)));
         }
@@ -331,11 +335,9 @@ public class CommandesPanel extends javax.swing.JPanel {
     }
     
     public void chargerCommande(Commande cmd) {
-        // 1. Nettoyage complet de l'interface actuelle
+        
         truncateLePanelDeCommande();
 
-        // 2. Reconstruction à partir de la commande chargée
-        // On suppose que ta classe Commande a une méthode getLignes() qui renvoie List<LigneCommande>
         for (LigneCommande ligne : cmd.getLigneCommnandes()) {
             ajouterLigne(ligne); 
         }
@@ -602,15 +604,21 @@ public class CommandesPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jbAnnulerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbAnnulerActionPerformed
-        truncateLePanelDeCommande();
+        int choix = JOptionPane.showConfirmDialog(this, "Suppression Commande", "Voulez vous vraiment renitialiser cette commande ?", JOptionPane.YES_NO_OPTION);
+        
+        if (choix == JOptionPane.YES_OPTION) {
+            truncateLePanelDeCommande();
+        }
     }//GEN-LAST:event_jbAnnulerActionPerformed
     
     
     private void jbBrouillonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbBrouillonActionPerformed
+        
         if (lignesActuelles.isEmpty()) {
             showCustomErreurJOptionPane("Aucune Ligne a enregistre au brouillon");
             return;
         }
+        
         Commande laCommande = new Commande(
             0, LocalDateTime.now(), Commande.EtatCommande.EN_COURS,
             totalPrixCommandeActuel, LocalDateTime.MAX,
@@ -624,6 +632,7 @@ public class CommandesPanel extends javax.swing.JPanel {
             showCustomErreurJOptionPane(resultatAjoutCommande.getErreur());
             return;
         } 
+        
         List<LigneCommande> lignesAEnregistrer = List.copyOf(lignesActuelles.values());
         
         for (LigneCommande ligneCommande : lignesAEnregistrer) {
@@ -664,8 +673,6 @@ public class CommandesPanel extends javax.swing.JPanel {
             return;
             
         }
-        
-        
         
         truncateLePanelDeCommande();
         mettreListeProduitAJour();

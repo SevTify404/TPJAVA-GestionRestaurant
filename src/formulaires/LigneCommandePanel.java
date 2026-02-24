@@ -35,11 +35,11 @@ public class LigneCommandePanel extends RoundedPanel {
     public LigneCommandePanel(LigneCommande laLigne, ActionListener soustraire, ActionListener incrementer, ActionListener supprimer, Runnable onUpdate) {
         super(15);
         this.ligneCommande = laLigne;
-        this.prixUnitaireActuel = laLigne.getPrixUnitaire(); // Assure-toi que ton entité a cette méthode
+        this.prixUnitaireActuel = laLigne.getPrixUnitaire(); 
         this.quantiteActuel = laLigne.getQuantite();
         this.onUpdateCallback = onUpdate;
         
-        setLayout(new BorderLayout(10, 0));
+        setLayout(new BorderLayout(20, 0));
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
 
@@ -48,21 +48,23 @@ public class LigneCommandePanel extends RoundedPanel {
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         controlPanel.setOpaque(false);
         
-        // 1. Label sous-total
+        
         lblSubTotal = new JLabel(String.format("%.0f FCFA", prixUnitaireActuel * quantiteActuel));
         
-        // 2. Champ prix unitaire
+        
         txtPrix = new JTextField(String.format("%.0f", prixUnitaireActuel), 6);
         txtPrix.addActionListener(e -> updatePrix());
         
         // Boutons
         RoundedButton btnMoins = new RoundedButton("-");
+        btnMoins.setBackground(ApplicationColors.PRIMARY);
         btnMoins.addActionListener(soustraire);
         
         lblQty = new JLabel(String.valueOf(quantiteActuel));
         
         RoundedButton btnPlus = new RoundedButton("+");
         btnPlus.addActionListener(incrementer);
+        btnPlus.setBackground(ApplicationColors.PRIMARY);
         
         RoundedButton btnRemove = new RoundedButton("x");
         btnRemove.setBackground(ApplicationColors.ERROR);
@@ -83,6 +85,10 @@ public class LigneCommandePanel extends RoundedPanel {
     private void updatePrix() {
         try {
             double nouveauPrix = Double.parseDouble(txtPrix.getText());
+            if (nouveauPrix<=0) {
+                txtPrix.setText(String.format("%.0f", prixUnitaireActuel));
+                return;
+            }
             this.prixUnitaireActuel = nouveauPrix;
             this.ligneCommande.setPrixUnitaire(nouveauPrix);
             refreshUI();

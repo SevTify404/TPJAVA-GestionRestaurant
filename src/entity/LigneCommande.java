@@ -49,6 +49,7 @@ public class LigneCommande {
     }
 
     public double getMontantLigne() {
+        recalculerMontant();
         return montantLigne;
     }
 

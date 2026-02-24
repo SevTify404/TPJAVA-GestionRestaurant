@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -442,6 +444,129 @@ public class CommandeDAO extends AbstractDAO<Commande> {
         return CrudResult.success(new ArrayList<>(commandeMap.values()));
     }
     
+    public CrudResult<Double> chiffreAffaireParJour(LocalDate date) {
+
+        String requete = """
+            SELECT COALESCE(SUM(total),0) AS chiffreAffaire
+            FROM Commande
+            WHERE DATE(dateCommande) = ?
+            AND etat = 'VALIDEE'
+            AND deletedAt IS NULL
+        """;
+
+        try {
+            Connection conn = this.toConnect();
+            PreparedStatement ps = conn.prepareStatement(requete);
+            ps.setDate(1, java.sql.Date.valueOf(date));
+
+            ResultSet rs = ps.executeQuery();
+
+            double montant = 0;
+            if (rs.next()) {
+                montant = rs.getDouble("chiffreAffaire");
+            }
+
+            conn.close();
+            ps.close();
+            rs.close();
+
+            return CrudResult.success(montant);
+
+        } catch (SQLException ex) {
+            return gererExceptionSQL(ex);
+        }
+    }
+    
+    public CrudResult<Double> chiffreAffairePeriode(LocalDateTime debut, LocalDateTime fin) {
+
+        String requete = """
+            SELECT COALESCE(SUM(total),0) AS chiffreAffaire
+            FROM Commande
+            WHERE dateCommande BETWEEN ? AND ?
+            AND etat = 'VALIDEE'
+            AND deletedAt IS NULL
+        """;
+
+        try {
+            Connection conn = this.toConnect();
+            PreparedStatement ps = conn.prepareStatement(requete);
+
+            ps.setTimestamp(1, Timestamp.valueOf(debut));
+            ps.setTimestamp(2, Timestamp.valueOf(fin));
+
+            ResultSet rs = ps.executeQuery();
+
+            double montant = 0;
+            if (rs.next()) {
+                montant = rs.getDouble("chiffreAffaire");
+            }
+
+            conn.close();
+            ps.close();
+            rs.close();
+
+            return CrudResult.success(montant);
+
+        } catch (SQLException ex) {
+            return gererExceptionSQL(ex);
+        }
+    }
+    
+    public CrudResult<List<Produit>> topProduitsPeriode(
+        LocalDateTime debut,
+        LocalDateTime fin,
+        int limit) {
+
+        List<Produit> liste = new ArrayList<>();
+
+        String requete = """
+            SELECT 
+                p.idProduit,
+                p.nom,
+                SUM(lc.quantite) AS totalVendu
+            FROM LigneCommande lc
+            JOIN Commande c ON c.idCommande = lc.idCommande
+            JOIN Produit p ON p.idProduit = lc.idProduit
+            WHERE c.etat = 'VALIDEE'
+            AND c.deletedAt IS NULL
+            AND lc.deletedAt IS NULL
+            AND c.dateCommande BETWEEN ? AND ?
+            GROUP BY p.idProduit, p.nom
+            ORDER BY totalVendu DESC
+            LIMIT ?
+        """;
+
+        try {
+            Connection conn = this.toConnect();
+            PreparedStatement ps = conn.prepareStatement(requete);
+
+            ps.setTimestamp(1, Timestamp.valueOf(debut));
+            ps.setTimestamp(2, Timestamp.valueOf(fin));
+            ps.setInt(3, limit);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Produit p = new Produit();
+                p.setIdProduit(rs.getInt("idProduit"));
+                p.setNom(rs.getString("nom"));
+                
+                p.setStockActuel(rs.getInt("totalVendu"));
+
+                liste.add(p);
+            }
+
+            conn.close();
+            ps.close();
+            rs.close();
+
+            return CrudResult.success(liste);
+
+        } catch (SQLException ex) {
+            return gererExceptionSQL(ex);
+        }
+    }
+
     
     public CrudResult<List<LigneCommande>> recupererLignes(int idCommande) {
 
