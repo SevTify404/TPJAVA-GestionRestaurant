@@ -7,14 +7,7 @@ package tpfinaljava;
 import com.formdev.flatlaf.FlatLightLaf;
 import dao.UsersDAO;
 import formulaires.App;
-import formulaires.CommandesPanel;
-import formulaires.DashBoardPanel;
-import formulaires.StatistiquePanel;
-import java.awt.BorderLayout;
-import javax.swing.JFrame;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import utilitaires.AuthentificationManager;
+
 import utilitaires.VariablesEnvirennement;
 //import utilitaires.VariablesEnvirennement;
 
@@ -36,31 +29,13 @@ public class Main {
                 );
 
         
-         // Force la gestion du DPI pour éviter l'effet "agrandi" sur Windows
-                System.setProperty("flatlaf.useWindowDecorations", "true");
-                System.setProperty("flatlaf.uiScale.enabled", "true");
+        application.lancerApplication();
+//JFrame frame = new JFrame("Test audits");
+//frame.setContentPane(new Audit_Log());
+//frame.pack();
+//frame.setLocationRelativeTo(null);
+//frame.setVisible(true);
 
-                // Optionnel : force une échelle spécifique si tu veux que ce soit identique partout
-                System.setProperty("flatlaf.uiScale", "1.0"); 
-
-                com.formdev.flatlaf.FlatLightLaf.setup();
-                UIManager.setLookAndFeel(new FlatLightLaf());
-                System.out.println("Installation de flatlad réussie");
-//        
-//                App appl = App.getInstance();
-//                appl.lancerApplication();
-       java.awt.EventQueue.invokeLater(() -> {
-           JFrame frame = new JFrame("Test Dashboard");
-           
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1200, 800);
-        frame.setLocationRelativeTo(null);
-        frame.setLayout(new BorderLayout());
-
-        frame.add(new CommandesPanel(), BorderLayout.CENTER);
-
-        frame.setVisible(true);
-    });
     }
 }
     

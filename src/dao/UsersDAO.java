@@ -69,7 +69,7 @@ public class UsersDAO extends AbstractDAO<Users> {
     @Override
     public CrudResult<Users> lire(int idUser) {
         Users inter = null;
-        String requete = "SELECT idUser, login, isAdmin, sexe from Users where idUser = ? and deletedAt is NULL";
+        String requete = "SELECT idUser, login, motDePasse, isAdmin, sexe from Users where idUser = ? and deletedAt is NULL";
         PreparedStatement ps = null;
         
         try {
@@ -81,12 +81,13 @@ public class UsersDAO extends AbstractDAO<Users> {
            ResultSet rs = null;
            rs = ps.executeQuery();
            if(rs.next()){
-               inter = new Users();
-               inter.setIdUser(rs.getInt(1));
-               inter.setLogin(rs.getString(2));
-               inter.setIsAdmin(rs.getBoolean(3));
-               inter.setSexe(rs.getString(4));
-           }
+           inter = new Users();
+           inter.setIdUser(rs.getInt(1));
+           inter.setLogin(rs.getString(2));
+           inter.setMotDePasse(rs.getString(3)); 
+           inter.setIsAdmin(rs.getBoolean(4));   
+           inter.setSexe(rs.getString(5));       
+}
            rs.close();
            ps.close();
            conn.close();
@@ -248,10 +249,9 @@ public class UsersDAO extends AbstractDAO<Users> {
 
                 Unuser.setIdUser(rs.getInt("idUser"));
                 Unuser.setLogin(rs.getString("login"));
-
                 Unuser.setMotDePasse(rs.getString("motDePasse"));
                 Unuser.setIsAdmin(rs.getBoolean("isAdmin"));
-
+                Unuser.setSexe(rs.getString("sexe"));
                 listeUsers.add(Unuser);
             }
 
