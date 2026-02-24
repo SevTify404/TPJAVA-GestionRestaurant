@@ -72,6 +72,7 @@ public class App {
         AuthentificationManager.getInstance().connecterUnUtilisateur(utilisateur);
         
         menuPrincipal = new MenuPrincipalFrame();
+        System.out.println("ok");
         
         menuPrincipal.setVisible(true);   
     }

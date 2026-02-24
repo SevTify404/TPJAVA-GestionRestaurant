@@ -289,7 +289,7 @@ public class CommandeDAO extends AbstractDAO<Commande> {
         String sql = """
                          SELECT c.idCommande, c.dateCommande, c.etat, c.total, u.idUser, u.login, u.isAdmin, u.sexe
                          FROM Commande c
-                         LEFT JOIN Users u ON u.idUser = c.idUser AND u.deletedAt IS NULL WHERE c.deletedAt IS NULL""";
+                         LEFT JOIN Users u ON u.idUser = c.idUser AND u.deletedAt IS NULL WHERE c.deletedAt IS NULL ORDER BY c.idCommande DESC""";
 
         List<Commande> commandes = new ArrayList<>();
 

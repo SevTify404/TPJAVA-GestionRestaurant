@@ -37,7 +37,7 @@ public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
             return CrudResult.failure(validation.getErreur());
 
         String sql = """
-            INSERT INTO mouvementdestock(type, quantite, dateMouvement, idProduit, motif, deletedAt)
+            INSERT INTO MouvementDeStock(type, quantite, dateMouvement, idProduit, motif, deletedAt)
             VALUES (?, ?, ?, ?, ?, NULL)
         """;
 
@@ -191,8 +191,8 @@ public class MouvementDeStockDAO extends AbstractDAO<MouvementDeStock> {
     @Override
     public CrudResult<List<MouvementDeStock>> recupererTout() {
 
-        String sql = "select m.*, p.idProduit, P.nom, P.prixDeVente "
-                + "from MouvementDestock m join produit p on m.idProduit = p.idProduit "
+        String sql = "select m.*, p.idProduit, p.nom, p.prixDeVente "
+                + "from MouvementDeStock m join Produit p on m.idProduit = p.idProduit "
                 + "where m.deletedAt is null";
         List<MouvementDeStock> liste = new ArrayList<>();
 

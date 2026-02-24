@@ -27,6 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import utilitaires.ApplicationColors;
 import utilitaires.AuthentificationManager;
@@ -126,8 +127,7 @@ public class MenuPrincipalFrame extends JFrame {
 
         addNavigationButton(menuContainer, "Tableau de Bord", "DASHBOARD");
         addNavigationButton(menuContainer, "Produits", "INVENTORY");
-        //addNavigationButton(menuContainer, "Stocks", "STOCKS");
-        addNavigationButton(menuContainer, "Stocks", "MOUVEMENT_STOCK");
+        addNavigationButton(menuContainer, "Stocks", "STOCKS");
         addNavigationButton(menuContainer, "Commandes", "ORDERS");
         addNavigationButton(menuContainer, "Statistiques", "STATS");
         
@@ -148,9 +148,12 @@ public class MenuPrincipalFrame extends JFrame {
         mainContent.setBackground(ApplicationColors.PANEL_BG);
 
         // Simulation des sections
-
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Produits", new GestionProduitCategoriePanel(utislisateurConnecte));
+        tabbedPane.addTab("Catégories", new GestionCategoriePanel());
         mainContent.add(new DashBoardPanel(), "DASHBOARD");
-        mainContent.add(createViewPlaceholder("INVENTORY - Gestion des stocks"), "INVENTORY");
+        mainContent.add(tabbedPane, "INVENTORY");
+        mainContent.add(new Mouvement_destock_1(), "STOCKS");
         mainContent.add(new CommandesPanel(), "ORDERS");
         mainContent.add(new StatistiquePanel(), "STATS");
         mainContent.add(new Utilisateurs(), "USERS");
@@ -328,34 +331,7 @@ public class MenuPrincipalFrame extends JFrame {
             this,
             "Etes vous sur de vous deconnecter ?",
             "Déconnexion",
-            JOptionPane.YES_NO_OPTION<<<<<<< feature/interface_raven
-152
- 
-        mainContent.add(createViewPlaceholder("DASHBOARD - Aperçu général"), "DASHBOARD");
-153
- 
-        //mainContent.add(createViewPlaceholder("INVENTORY - Gestion des stocks"), "INVENTORY");
-154
- 
-        mainContent.add(new Mouvement_destock_1(), "MOUVEMENT_STOCK");
-155
- 
-        mainContent.add(createViewPlaceholder("ORDERS - Gestion des commandes"), "ORDERS");
-156
- 
-        mainContent.add(createViewPlaceholder("STATS - Rapports d'activité"), "STATS");
-157
- 
-        mainContent.add(createViewPlaceholder (""), "SETTINGS");
-158
- 
-        //mainContent.add(new MonComptePanel(utislisateurConnecte), "SETTINGS");
-159
- 
-        //mainContent.add(new MonComptePanel(currentUser), "MON_COMPTE");
-160
- 
-=======
+            JOptionPane.YES_NO_OPTION
         );
         
         if (res == JOptionPane.YES_OPTION) {
