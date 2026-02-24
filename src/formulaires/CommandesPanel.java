@@ -14,14 +14,21 @@ import java.awt.Dimension;
 import java.util.List;
 import entity.Produit;
 import entity.enums.ActionType;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import utilitaires.ApplicationColors;
 import utilitaires.AuthentificationManager;
 /**
@@ -56,6 +63,8 @@ public class CommandesPanel extends javax.swing.JPanel {
         mettreListeProduitAJour();
         jdCommandesEnAttente.setSize(600, 500);
         jdCommandesEnAttente.setLocationRelativeTo(this);
+        jdCommandes.setSize(600, 500);
+        jdCommandes.setLocationRelativeTo(this);
         ajouterEcouteurs();
         jtfRechercheProduit.requestFocus();
         
@@ -281,6 +290,18 @@ public class CommandesPanel extends javax.swing.JPanel {
         jpLigneCommandes.repaint();
     }
     
+    private void chargerToutesLesCommandes(){
+        CrudResult<List<Commande>> rsultatDao = CommandeDAO.getInstance().recupererTout();
+        
+        if (rsultatDao.estUneErreur()) {
+            showCustomErreurJOptionPane(rsultatDao.getErreur());           
+            return;
+        }
+        
+        configurerEtRemplirTableau(jtCommandes, rsultatDao.getDonnes());
+    
+    
+    }
     private void chargerCommandesEnAttente() {
         jpConteneurCommandeBrouillon.removeAll();
         
@@ -366,6 +387,13 @@ public class CommandesPanel extends javax.swing.JPanel {
         jpCommandeBruillons = new javax.swing.JPanel();
         jspCommandesBrouillons = new javax.swing.JScrollPane();
         jpConteneurCommandeBrouillon = new javax.swing.JPanel();
+        jdCommandes = new javax.swing.JDialog();
+        jpDialogConteneurCommandes = new javax.swing.JPanel();
+        jpDialogTopbar1 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jpCommandeList = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jtCommandes = new javax.swing.JTable();
         jpTopbarCommandes = new javax.swing.JPanel();
         jlLabelDuPanneau = new javax.swing.JLabel();
         jbAncienneCommande = new javax.swing.JButton();
@@ -425,6 +453,46 @@ public class CommandesPanel extends javax.swing.JPanel {
         jpDialogConteneur.add(jpCommandeBruillons, java.awt.BorderLayout.CENTER);
 
         jdCommandesEnAttente.getContentPane().add(jpDialogConteneur, java.awt.BorderLayout.CENTER);
+
+        jdCommandes.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        jdCommandes.setTitle("Commandes Broouillons");
+        jdCommandes.setModal(true);
+
+        jpDialogConteneurCommandes.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        jpDialogConteneurCommandes.setLayout(new java.awt.BorderLayout(20, 0));
+
+        jpDialogTopbar1.setLayout(new java.awt.BorderLayout());
+
+        jLabel3.setBackground(ApplicationColors.BORDER);
+        jLabel3.setFont(new Font("Segoe UI", Font.BOLD, 33));
+        jLabel3.setForeground(ApplicationColors.TEXT_PRIMARY);
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel3.setText("COMMANDES EN BROUILLONS");
+        jpDialogTopbar1.add(jLabel3, java.awt.BorderLayout.CENTER);
+
+        jpDialogConteneurCommandes.add(jpDialogTopbar1, java.awt.BorderLayout.NORTH);
+
+        jpCommandeList.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        jpCommandeList.setLayout(new java.awt.BorderLayout());
+
+        jtCommandes.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(jtCommandes);
+
+        jpCommandeList.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        jpDialogConteneurCommandes.add(jpCommandeList, java.awt.BorderLayout.CENTER);
+
+        jdCommandes.getContentPane().add(jpDialogConteneurCommandes, java.awt.BorderLayout.CENTER);
 
         setBackground(ApplicationColors.BACKGROUND);
         setLayout(new java.awt.BorderLayout());
@@ -653,6 +721,60 @@ public class CommandesPanel extends javax.swing.JPanel {
         
     }//GEN-LAST:event_jbBrouillonActionPerformed
 
+    public void configurerEtRemplirTableau(JTable table, List<Commande> commandes) {
+        // 1. Définition des colonnes
+        String[] colonnes = {"ID", "Date", "Utilisateur", "Total", "État"};
+            DefaultTableModel model = new DefaultTableModel(colonnes, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+
+        // 2. Remplissage des données
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        for (Commande c : commandes) {
+            model.addRow(new Object[]{
+                c.getIdCommande(),
+                c.getDateCommande().format(dtf),
+                c.getUtilisateur() != null ? c.getUtilisateur().getLogin(): "N/A",
+                String.format("%.2f FCFA", c.getTotal()),
+                c.getEtat()
+            });
+        }
+        table.setModel(model);
+
+        table.getTableHeader().setBackground(ApplicationColors.PRIMARY);
+        table.getTableHeader().setForeground(ApplicationColors.TEXT_LIGHT);
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        table.getTableHeader().setPreferredSize(new Dimension(table.getWidth(), 40));
+
+
+        table.setRowHeight(35);
+        table.setGridColor(ApplicationColors.BORDER);
+        table.setSelectionBackground(ApplicationColors.SIDEBAR_SELECTION);
+        table.setSelectionForeground(ApplicationColors.TEXT_LIGHT);
+
+
+            DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, 
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? ApplicationColors.PANEL_BG : new Color(240, 240, 240));
+                }
+                c.setForeground(ApplicationColors.TEXT_PRIMARY);
+                setHorizontalAlignment(SwingConstants.CENTER);
+                return c;
+            }
+        };
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(renderer);
+        }
+    }
+    
     private void jbValiderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbValiderActionPerformed
         // TODO add your handling code here:
         if (lignesActuelles.isEmpty()) {
@@ -693,10 +815,13 @@ public class CommandesPanel extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton jbAncienneCommande;
     private javax.swing.JButton jbAnnuler;
     private javax.swing.JButton jbBrouillon;
     private javax.swing.JButton jbValider;
+    private javax.swing.JDialog jdCommandes;
     private javax.swing.JDialog jdCommandesEnAttente;
     private javax.swing.JLabel jlLabelDuPanneau;
     private javax.swing.JLabel jlLogoRecherche;
@@ -708,6 +833,7 @@ public class CommandesPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jpCatalogueProduit;
     private javax.swing.JPanel jpCommandeBruillons;
     private javax.swing.JPanel jpCommandeEnCours;
+    private javax.swing.JPanel jpCommandeList;
     private javax.swing.JPanel jpConteneurCartesProduits;
     private javax.swing.JPanel jpConteneurCatalogueProduit;
     private javax.swing.JPanel jpConteneurCommandeBrouillon;
@@ -716,7 +842,9 @@ public class CommandesPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jpContenuPrincipalCommandes;
     private javax.swing.JPanel jpDetailsCommande;
     private javax.swing.JPanel jpDialogConteneur;
+    private javax.swing.JPanel jpDialogConteneurCommandes;
     private javax.swing.JPanel jpDialogTopbar;
+    private javax.swing.JPanel jpDialogTopbar1;
     private javax.swing.JPanel jpLigneCommandes;
     private javax.swing.JPanel jpRechercheProduit;
     private javax.swing.JPanel jpResumeCommande;
@@ -726,6 +854,7 @@ public class CommandesPanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane jspCartesProduits;
     private javax.swing.JScrollPane jspCommandesBrouillons;
     private javax.swing.JScrollPane jspLigneCommandes;
+    private javax.swing.JTable jtCommandes;
     private javax.swing.JTextField jtfRechercheProduit;
     // End of variables declaration//GEN-END:variables
 }
