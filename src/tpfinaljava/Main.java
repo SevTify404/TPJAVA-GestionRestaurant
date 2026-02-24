@@ -3,11 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package tpfinaljava;
+//import formulaires.App;
+import com.formdev.flatlaf.FlatLightLaf;
+import dao.UsersDAO;
 import formulaires.App;
-import formulaires.Audit_Log;
-import formulaires.Utilisateurs;
-import javax.swing.JFrame;
+
 import utilitaires.VariablesEnvirennement;
+//import utilitaires.VariablesEnvirennement;
 
 
 
@@ -20,11 +22,12 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        
-        VariablesEnvirennement.checkVariablesEnvironnement();
-        
-        App application = App.getInstance();
+    public static void main(String[] args) throws UnsupportedLookAndFeelException {
+                VariablesEnvirennement.checkVariablesEnvironnement();
+                AuthentificationManager.getInstance().connecterUnUtilisateur(
+                    UsersDAO.getInstance().lire(4).getDonnes()
+                );
+
         
         application.lancerApplication();
 //JFrame frame = new JFrame("Test audits");
@@ -32,6 +35,7 @@ public class Main {
 //frame.pack();
 //frame.setLocationRelativeTo(null);
 //frame.setVisible(true);
+
     }
 }
     

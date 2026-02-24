@@ -39,6 +39,8 @@ public final class Messages {
     
     public static final String CBD_FK_AUDIT_USER = "Utilisateur associé à l'audit introuvable.";
     
+    public static final String CBD_FK_USERS_IDUSER = "Utilisateur associé à la commande introuvable.";
+    
     public static final String CBD_FK_LIGNE_COMMANDE = "Commande inexistante.";
     
     public static final String CBD_FK_LIGNE_PRODUIT = "Produit inexistant.";

@@ -24,6 +24,10 @@ import java.time.LocalDateTime;
 
 public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
     
+    public static LigneCommandeDAO getInstance(){
+        return new LigneCommandeDAO();
+    }
+    
     
     
     private CrudResult<Boolean> validerLigneCommande(LigneCommande ligne) {
@@ -103,6 +107,81 @@ public class LigneCommandeDAO extends AbstractDAO<LigneCommande>{
                 }
             }
 
+            return CrudResult.success(true);
+
+        } catch (SQLException e) {
+            return gererExceptionSQL(e);
+        }
+    }
+    
+    public CrudResult<Boolean> enregistrerPlusieursAvecConnexion(
+        Connection conn,
+        List<LigneCommande> lignes) throws SQLException {
+
+    String sql = "INSERT INTO LigneCommande (idCommande, idProduit, quantite, prixUnitaire, montantLigne) VALUES (?, ?, ?, ?, ?)";
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        for (LigneCommande ligne : lignes) {
+
+            ps.setInt(1, ligne.getIdCommande());
+            ps.setInt(2, ligne.getIdProduit());
+            ps.setInt(3, ligne.getQuantite());
+            ps.setDouble(4, ligne.getPrixUnitaire());
+            ps.setDouble(5, ligne.getMontantLigne());
+
+            ps.addBatch();
+        }
+
+        ps.executeBatch();
+        return CrudResult.success(true);
+    }
+}
+    public CrudResult<Boolean> enregistrerPlusieurs(List<LigneCommande> lignes) {
+
+        if (lignes == null || lignes.isEmpty()) {
+            return CrudResult.failure("Aucune ligne à enregistrer");
+        }
+
+        String sql = "INSERT INTO LigneCommande (idCommande, idProduit, quantite, prixUnitaire, montantLigne) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = toConnect();
+             PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+            conn.setAutoCommit(false); // 🔥 transaction manuelle
+
+            for (LigneCommande ligne : lignes) {
+
+                CrudResult<Boolean> validation = validerPourInsert(ligne);
+                if (!validation.estUnSucces()) {
+                    conn.rollback();
+                    return validation;
+                }
+
+                ligne.recalculerMontant();
+
+                ps.setInt(1, ligne.getIdCommande());
+                ps.setInt(2, ligne.getIdProduit());
+                ps.setInt(3, ligne.getQuantite());
+                ps.setDouble(4, ligne.getPrixUnitaire());
+                ps.setDouble(5, ligne.getMontantLigne());
+
+                ps.addBatch(); // 💥 ajout au batch
+            }
+
+            int[] results = ps.executeBatch(); 
+
+            
+            for (int r : results) {
+                if (r == PreparedStatement.EXECUTE_FAILED) {
+                    conn.rollback();
+                    return CrudResult.failure("Une des insertions a échouéeeeee ogbooooo");
+                }
+            }
+
+            
+
+            conn.commit(); 
             return CrudResult.success(true);
 
         } catch (SQLException e) {

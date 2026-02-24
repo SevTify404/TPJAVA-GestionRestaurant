@@ -38,6 +38,7 @@ public abstract class AbstractDAO<TypeDesEntity> implements InterfaceDAO<TypeDes
         Map.entry("fk_produit_user", Messages.CBD_FK_PRODUIT_USER),
         Map.entry("Produit_chk_1", Messages.CBD_PRODUIT_CHK_1),
         Map.entry("Produit_chk_2", Messages.CBD_PRODUIT_CHK_2),
+        Map.entry("fk_Users_idUser", Messages.CBD_FK_USERS_IDUSER),
         Map.entry("login", Messages.CBD_LOGIN)
     );
     
