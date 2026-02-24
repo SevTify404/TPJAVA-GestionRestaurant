@@ -134,8 +134,6 @@ public class MenuPrincipalFrame extends JFrame {
             addNavigationButton(menuContainer, "Utilisateurs", "USERS");
             addNavigationButton(menuContainer, "Audit & Logs", "LOGS");
         }
-            
-        addNavigationButton(menuContainer, "Mon Compte", "SETTINGS");
 
         sideBar.add(menuContainer, BorderLayout.CENTER);
 
@@ -149,11 +147,10 @@ public class MenuPrincipalFrame extends JFrame {
         mainContent.setBackground(ApplicationColors.PANEL_BG);
 
         // Simulation des sections
-        mainContent.add(createViewPlaceholder("DASHBOARD - Aperçu général"), "DASHBOARD");
+        mainContent.add(new DashBoardPanel(), "DASHBOARD");
         mainContent.add(createViewPlaceholder("INVENTORY - Gestion des stocks"), "INVENTORY");
-        mainContent.add(createViewPlaceholder("ORDERS - Gestion des commandes"), "ORDERS");
-        mainContent.add(createViewPlaceholder("STATS - Rapports d'activité"), "STATS");
-        mainContent.add(createViewPlaceholder("SETTINGS - Configuration système"), "SETTINGS");
+        mainContent.add(new CommandesPanel(), "ORDERS");
+        mainContent.add(new StatistiquePanel(), "STATS");
         mainContent.add(new Utilisateurs(), "USERS");
         mainContent.add(new Audit_Log(), "LOGS"); 
 

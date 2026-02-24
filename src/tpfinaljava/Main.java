@@ -22,19 +22,10 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws UnsupportedLookAndFeelException {
-                VariablesEnvirennement.checkVariablesEnvironnement();
-                AuthentificationManager.getInstance().connecterUnUtilisateur(
-                    UsersDAO.getInstance().lire(4).getDonnes()
-                );
-
-        
+    public static void main(String[] args) {
+        VariablesEnvirennement.checkVariablesEnvironnement();
+        App application = App.getInstance();
         application.lancerApplication();
-//JFrame frame = new JFrame("Test audits");
-//frame.setContentPane(new Audit_Log());
-//frame.pack();
-//frame.setLocationRelativeTo(null);
-//frame.setVisible(true);
 
     }
 }

@@ -660,6 +660,7 @@ public class DashBoardPanel extends javax.swing.JPanel {
         jspCommandes.setViewportView(null);
 
         jpContenuCommandes.setBackground(ApplicationColors.BACKGROUND);
+        jpContenuCommandes.setPreferredSize(new java.awt.Dimension(500, 1000));
         jpContenuCommandes.setLayout(new javax.swing.BoxLayout(jpContenuCommandes, javax.swing.BoxLayout.Y_AXIS));
         jspCommandes.setViewportView(jpContenuCommandes);
 
