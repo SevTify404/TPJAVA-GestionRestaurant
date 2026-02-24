@@ -107,7 +107,8 @@ public class MenuPrincipalFrame extends JFrame {
 
         addNavigationButton(menuContainer, "Tableau de Bord", "DASHBOARD");
         addNavigationButton(menuContainer, "Produits", "INVENTORY");
-        addNavigationButton(menuContainer, "Stocks", "STOCKS");
+        //addNavigationButton(menuContainer, "Stocks", "STOCKS");
+        addNavigationButton(menuContainer, "Stocks", "MOUVEMENT_STOCK");
         addNavigationButton(menuContainer, "Commandes", "ORDERS");
         addNavigationButton(menuContainer, "Statistiques", "STATS");
         
@@ -116,7 +117,7 @@ public class MenuPrincipalFrame extends JFrame {
             addNavigationButton(menuContainer, "Audit & Logs", "LOGS");
         }
             
-        addNavigationButton(menuContainer, "Mon Compte", "SETTINGS");
+        addNavigationButton(menuContainer, "Mon Compte", "MON_COMPTE");
 
         sideBar.add(menuContainer, BorderLayout.CENTER);
 
@@ -131,10 +132,13 @@ public class MenuPrincipalFrame extends JFrame {
 
         // Simulation des sections
         mainContent.add(createViewPlaceholder("DASHBOARD - Aperçu général"), "DASHBOARD");
-        mainContent.add(createViewPlaceholder("INVENTORY - Gestion des stocks"), "INVENTORY");
+        //mainContent.add(createViewPlaceholder("INVENTORY - Gestion des stocks"), "INVENTORY");
+        mainContent.add(new Mouvement_destock_1(), "MOUVEMENT_STOCK");
         mainContent.add(createViewPlaceholder("ORDERS - Gestion des commandes"), "ORDERS");
         mainContent.add(createViewPlaceholder("STATS - Rapports d'activité"), "STATS");
-        mainContent.add(createViewPlaceholder("SETTINGS - Configuration système"), "SETTINGS");
+        mainContent.add(createViewPlaceholder (""), "SETTINGS");
+        //mainContent.add(new MonComptePanel(utislisateurConnecte), "SETTINGS");
+        //mainContent.add(new MonComptePanel(currentUser), "MON_COMPTE");
 
         // TOp Bar là où y'aura un bouton de fermeture de l'application et le 
         // titre de la section courante
@@ -276,7 +280,7 @@ public class MenuPrincipalFrame extends JFrame {
             cardLayout.show(mainContent, cardName);
         });
 
-        btn.addActionListener(e -> cardLayout.show(mainContent, cardName));
+        /*btn.addActionListener(e -> cardLayout.show(mainContent, cardName));*/
         parent.add(btn);
     }
     

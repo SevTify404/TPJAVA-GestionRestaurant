@@ -336,6 +336,10 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         //System.out.println(rr.getDonnes().Afficher());
     }
 
+    public Iterable<Produit> findAll() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
 
 
     

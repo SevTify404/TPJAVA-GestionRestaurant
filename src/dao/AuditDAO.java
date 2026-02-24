@@ -191,5 +191,9 @@ public class AuditDAO extends AbstractDAO<Audit>{
         
         return CrudResult.success(listeDesAudits);
     }
+
+    public void log(String login, String mouvement, String stock, String string) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
     
 }

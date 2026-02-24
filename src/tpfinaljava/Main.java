@@ -27,7 +27,7 @@ public class Main {
         // Je verifie si le fiechier .env existe
         VariablesEnvirennement.checkVariablesEnvironnement();
           // 🔹 1. Récupérer un produit existant
-        ProduitDAO produitDAO = ProduitDAO.getInstance();
+        /*ProduitDAO produitDAO = ProduitDAO.getInstance();
         Produit produit = produitDAO.lire(1).getDonnes(); // ID existant dans ta BD
 
         if (produit == null) {
@@ -51,12 +51,12 @@ public class Main {
             System.out.println("Mouvement enregistré avec ID : " + mouvement.getID());
         } else {
             System.out.println("Erreur : " + resultat.getErreur());
-        }
-        //App application = App.getInstance();
+        }*/
+        App application = App.getInstance();
       
-        //application.lancerApplication();
+        application.lancerApplication();
         
-        var liste = dao.recupererTout();
+        /*var liste = dao.recupererTout();
 
         if (liste.estUnSucces()) {
             liste.getDonnes().forEach(m ->
@@ -87,7 +87,7 @@ public class Main {
 
     } else {
         System.out.println("Erreur : " + resultat.getErreur());
-    }
+    }*/
 
     }
 }

@@ -24,4 +24,5 @@ public class ApplicationColors {
     public static final Color SIDEBAR_BG = Color.decode("#0369a1");
     public static final Color SIDEBAR_HOVER = new Color(52, 73, 94);
     public static final Color SIDEBAR_SELECTION = new Color(52, 152, 219);
+    public static Color BORDER;
 }
