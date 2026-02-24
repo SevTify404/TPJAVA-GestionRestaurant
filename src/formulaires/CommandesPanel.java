@@ -61,9 +61,9 @@ public class CommandesPanel extends javax.swing.JPanel {
         jspLigneCommandes.getVerticalScrollBar().setUnitIncrement(16);
         jspCommandesBrouillons.getVerticalScrollBar().setUnitIncrement(16);
         mettreListeProduitAJour();
-        jdCommandesEnAttente.setSize(600, 500);
+        jdCommandesEnAttente.setSize(800, 700);
         jdCommandesEnAttente.setLocationRelativeTo(this);
-        jdCommandes.setSize(600, 500);
+        jdCommandes.setSize(800, 700);
         jdCommandes.setLocationRelativeTo(this);
         ajouterEcouteurs();
         jtfRechercheProduit.requestFocus();
@@ -395,8 +395,8 @@ public class CommandesPanel extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         jtCommandes = new javax.swing.JTable();
         jpTopbarCommandes = new javax.swing.JPanel();
-        jlLabelDuPanneau = new javax.swing.JLabel();
         jbAncienneCommande = new javax.swing.JButton();
+        jbVoirCommandes = new javax.swing.JButton();
         jpContenuPrincipalCommandes = new javax.swing.JPanel();
         jpConteneurCatalogueProduit = new javax.swing.JPanel();
         jpCatalogueProduit = new javax.swing.JPanel();
@@ -455,7 +455,7 @@ public class CommandesPanel extends javax.swing.JPanel {
         jdCommandesEnAttente.getContentPane().add(jpDialogConteneur, java.awt.BorderLayout.CENTER);
 
         jdCommandes.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        jdCommandes.setTitle("Commandes Broouillons");
+        jdCommandes.setTitle("Toutes Les Commandes");
         jdCommandes.setModal(true);
 
         jpDialogConteneurCommandes.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -467,7 +467,7 @@ public class CommandesPanel extends javax.swing.JPanel {
         jLabel3.setFont(new Font("Segoe UI", Font.BOLD, 33));
         jLabel3.setForeground(ApplicationColors.TEXT_PRIMARY);
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("COMMANDES EN BROUILLONS");
+        jLabel3.setText("TOUTES LES COMMANDES");
         jpDialogTopbar1.add(jLabel3, java.awt.BorderLayout.CENTER);
 
         jpDialogConteneurCommandes.add(jpDialogTopbar1, java.awt.BorderLayout.NORTH);
@@ -500,15 +500,6 @@ public class CommandesPanel extends javax.swing.JPanel {
         jpTopbarCommandes.setBorder(javax.swing.BorderFactory.createEmptyBorder(25, 10, 10, 10));
         jpTopbarCommandes.setLayout(new java.awt.BorderLayout(50, 0));
 
-        jlLabelDuPanneau.setBackground(ApplicationColors.BACKGROUND
-        );
-        jlLabelDuPanneau.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        jlLabelDuPanneau.setForeground(ApplicationColors.TEXT_PRIMARY);
-        jlLabelDuPanneau.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jlLabelDuPanneau.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/store.png"))); // NOI18N
-        jlLabelDuPanneau.setText("Pannel Des Commandes");
-        jpTopbarCommandes.add(jlLabelDuPanneau, java.awt.BorderLayout.CENTER);
-
         jbAncienneCommande.setBackground(ApplicationColors.SUCCESS);
         jbAncienneCommande.setFont(new Font("Segoe UI", Font.BOLD, 20));
         jbAncienneCommande.setForeground(ApplicationColors.TEXT_LIGHT);
@@ -517,6 +508,14 @@ public class CommandesPanel extends javax.swing.JPanel {
         jbAncienneCommande.setFocusPainted(false);
         jbAncienneCommande.addActionListener(this::jbAncienneCommandeActionPerformed);
         jpTopbarCommandes.add(jbAncienneCommande, java.awt.BorderLayout.EAST);
+
+        jbVoirCommandes.setBackground(ApplicationColors.PRIMARY);
+        jbVoirCommandes.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        jbVoirCommandes.setForeground(ApplicationColors.TEXT_LIGHT);
+        jbVoirCommandes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/store-white-xl.png"))); // NOI18N
+        jbVoirCommandes.setText("VOIR LES COMMANDES");
+        jbVoirCommandes.addActionListener(this::jbVoirCommandesActionPerformed);
+        jpTopbarCommandes.add(jbVoirCommandes, java.awt.BorderLayout.CENTER);
 
         add(jpTopbarCommandes, java.awt.BorderLayout.NORTH);
 
@@ -809,6 +808,11 @@ public class CommandesPanel extends javax.swing.JPanel {
         chargerCommandesEnAttente();
         jdCommandesEnAttente.setVisible(true);
     }//GEN-LAST:event_jbAncienneCommandeActionPerformed
+
+    private void jbVoirCommandesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbVoirCommandesActionPerformed
+        chargerToutesLesCommandes();
+        jdCommandes.setVisible(true);
+    }//GEN-LAST:event_jbVoirCommandesActionPerformed
     
     
 
@@ -821,9 +825,9 @@ public class CommandesPanel extends javax.swing.JPanel {
     private javax.swing.JButton jbAnnuler;
     private javax.swing.JButton jbBrouillon;
     private javax.swing.JButton jbValider;
+    private javax.swing.JButton jbVoirCommandes;
     private javax.swing.JDialog jdCommandes;
     private javax.swing.JDialog jdCommandesEnAttente;
-    private javax.swing.JLabel jlLabelDuPanneau;
     private javax.swing.JLabel jlLogoRecherche;
     private javax.swing.JLabel jlNombreProduit;
     private javax.swing.JLabel jlProduitsDispo;
