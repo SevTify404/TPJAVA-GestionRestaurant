@@ -157,7 +157,7 @@ public class MenuPrincipalFrame extends JFrame {
         mainContent.add(new CommandesPanel(), "ORDERS");
         mainContent.add(new StatistiquePanel(), "STATS");
         mainContent.add(new Utilisateurs(), "USERS");
-//        mainContent.add(new Audit_Log(), "LOGS"); 
+        mainContent.add(new Audit_Log(), "LOGS"); 
 
         // TOp Bar là où y'aura un bouton de fermeture de l'application et le 
         // titre de la section courante
