@@ -4,6 +4,8 @@
  */
 package entity;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -15,6 +17,9 @@ public class Commande {
     private EtatCommande etat;
     private double total;
     private LocalDateTime deletedAt;
+    private Users utilisateur;
+    private List<LigneCommande> ligneCommnandes = new ArrayList<>(); // tres souvent null, j'ai ajouté pour pouvoir faire Dashboard
+    
 
     public enum EtatCommande {
         EN_COURS,
@@ -25,18 +30,28 @@ public class Commande {
     public Commande() {
     }
 
-    public Commande(int idCommande, LocalDateTime dateCommande, EtatCommande etat, double total, LocalDateTime deletedAt) {
+    public Commande(int idCommande, LocalDateTime dateCommande, EtatCommande etat, double total, LocalDateTime deletedAt, Users utilisateur) {
         this.idCommande = idCommande;
         this.dateCommande = dateCommande;
         this.etat = etat;
         this.total = total;
         this.deletedAt = deletedAt;
+        this.utilisateur = utilisateur;
     }
-
+    
     public int getIdCommande() {
         return idCommande;
     }
 
+    public void setLigneCommnandes(List<LigneCommande> ligneCommnandes) {
+        this.ligneCommnandes = ligneCommnandes;
+    }
+
+    public List<LigneCommande> getLigneCommnandes() {
+        return ligneCommnandes;
+    }
+    
+    
     public LocalDateTime getDateCommande() {
         return dateCommande;
     }
@@ -51,6 +66,12 @@ public class Commande {
     public LocalDateTime getDeletedAt() {
         return deletedAt;
     }
+
+    public Users getUtilisateur() {
+        return utilisateur;
+    }
+    
+    
     public void setIdCommande(int idCommande) {
         this.idCommande = idCommande;
     }
@@ -63,6 +84,11 @@ public class Commande {
     public void setTotal(double total) {
         this.total = total;
     }
+
+    public void setUtilisateur(Users utilisateur) {
+        this.utilisateur = utilisateur;
+    }
+    
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
     }

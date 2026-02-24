@@ -32,7 +32,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
         if (validation.estUneErreur())
             return CrudResult.failure(validation.getErreur());
 
-        String sql = "INSERT INTO categorie(libelle) VALUES (?)";
+        String sql = "INSERT INTO Categorie(libelle) VALUES (?)";
 
         try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -48,14 +48,14 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.success(true);
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
     @Override
     public CrudResult<Categorie> lire(int id) {
 
-        String sql = "SELECT * FROM categorie WHERE idCat = ? AND deleteAt IS NULL";
+        String sql = "SELECT * FROM Categorie WHERE idCat = ? AND deleteAt IS NULL";
 
         try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -70,7 +70,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.failure("Catégorie introuvable");
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -81,7 +81,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
         if (validation.estUneErreur())
             return CrudResult.failure(validation.getErreur());
 
-        String sql = "UPDATE categorie SET libelle = ? WHERE idCat = ? AND deleteAt IS NULL";
+        String sql = "UPDATE Categorie SET libelle = ? WHERE idCat = ? AND deleteAt IS NULL";
 
         try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -97,14 +97,14 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.failure("Aucune modification effectuée");
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
     @Override
     public CrudResult<Boolean> suppressionDefinitive(Categorie categorie) {
 
-        String sql = "DELETE FROM categorie WHERE idCat = ?";
+        String sql = "DELETE FROM Categorie WHERE idCat = ?";
 
         try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -113,14 +113,14 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.success(ps.executeUpdate() > 0);
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
     @Override
     public CrudResult<Boolean> suppressionLogique(Categorie categorie) {
 
-        String sql = "UPDATE categorie SET deleteAt = NOW() WHERE idCat = ?";
+        String sql = "UPDATE Categorie SET deleteAt = NOW() WHERE idCat = ?";
 
         try (Connection conn = toConnect();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -129,7 +129,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.success(ps.executeUpdate() > 0);
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 
@@ -148,7 +148,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
     @Override
     public CrudResult<List<Categorie>> recupererTout() {
 
-        String sql = "SELECT * FROM categorie WHERE deleteAt IS NULL";
+        String sql = "SELECT * FROM Categorie WHERE deleteAt IS NULL";
         List<Categorie> liste = new ArrayList<>();
 
         try (Connection conn = toConnect();
@@ -162,7 +162,7 @@ public class CategorieDAO extends AbstractDAO <Categorie>{
             return CrudResult.success(liste);
 
         } catch (SQLException e) {
-            return CrudResult.failure(e.getMessage());
+            return gererExceptionSQL(e);
         }
     }
 

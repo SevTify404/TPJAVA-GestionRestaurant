@@ -12,8 +12,10 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import entity.Categorie;
 import entity.Users;
+
 import java.sql.Timestamp;
 import java.time.Instant;
+
 import utilitaires.VariablesEnvirennement;
 
 
@@ -56,12 +58,13 @@ public class ProduitDAO extends AbstractDAO<Produit> {
                 ps.close();
                 conn.close();
             } catch (SQLException ex) {
-                return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+                return gererExceptionSQL(ex);
             }
 
             if (inter == 0) {
                 return CrudResult.failure("Une erreur est survenue");
             }
+            
 
             return CrudResult.success(true);
         }
@@ -71,8 +74,8 @@ public class ProduitDAO extends AbstractDAO<Produit> {
     public CrudResult<Produit> lire(int idProduit) {
         Produit inter = new Produit();
         String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
-                        "from produit p " +
-                        "JOIN categorie c on c.idCat = p.idCategorie " +
+                        "from Produit p " +
+                        "JOIN Categorie c on c.idCat = p.idCategorie " +
                         "LEFT JOIN users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
                         "where idProduit = ? and p.deletedAt is null ";
         PreparedStatement ps = null;
@@ -106,10 +109,13 @@ public class ProduitDAO extends AbstractDAO<Produit> {
                 conn.close();
                 
             }
+            conn.close();
+            ps.close();
+            rs.close();
             
             
         }catch(SQLException ex) {
-            return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+            return gererExceptionSQL(ex);
 
         }
         if (inter == null) {
@@ -117,9 +123,43 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         }
         
         return CrudResult.success(inter);
-        
-        
     }
+    
+    public int recupererStockAvecConnexion(Connection conn, int idProduit)
+        throws SQLException {
+
+    String sql = "SELECT stockActuel FROM Produit WHERE idProduit = ? FOR UPDATE";
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, idProduit);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (!rs.next()) throw new SQLException("Produit introuvable");
+            return rs.getInt("stockActuel");
+        }
+    }
+    
+    
+    }
+    public CrudResult<Boolean> decrementerStockAvecConnexion(
+        Connection conn,
+        int idProduit,
+        int quantite) throws SQLException {
+
+    String sql = "UPDATE Produit SET stockActuel = stockActuel - ? WHERE idProduit = ?";
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, quantite);
+        ps.setInt(2, idProduit);
+
+        int rows = ps.executeUpdate();
+        if (rows == 0)
+            return CrudResult.failure("Produit introuvable");
+
+        return CrudResult.success(true);
+    }
+}
 
     @Override
     public CrudResult<Produit> mettreAJour(Produit unProduit) {
@@ -149,7 +189,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             conn.close();
             
         } catch (SQLException ex) {
-            return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         
         if (inter == 0) {
@@ -177,7 +217,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             conn.close();
             
         } catch (SQLException ex) {
-           return CrudResult.failure("Une Erreur Bd est survenue : "+ ex.getMessage());
+           return gererExceptionSQL(ex);
         }
         if (inter == 0) {
             return CrudResult.failure("Une erreur est survenue");
@@ -205,12 +245,14 @@ public class ProduitDAO extends AbstractDAO<Produit> {
             if (lignes > 0) {
                 return CrudResult.success(true);
             }
+            conn.close();
+            ps.close();
 
             return CrudResult.failure("Produit non trouvé");
 
         } catch (SQLException ex) {
 
-            return CrudResult.failure("Erreur BD : " + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         
     }
@@ -221,7 +263,6 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         if(unProduit.getPrixDeVente() <= 0){
             return CrudResult.failure("Le prix de vente doit être strictement positif");
         }
-        System.out.println(unProduit.getUser().getDeletedAt());
         if (unProduit.getUser().getDeletedAt() != null) {
             return CrudResult.failure("Cet utilisateur ne peut pas enregistrer");
             
@@ -237,15 +278,92 @@ public class ProduitDAO extends AbstractDAO<Produit> {
           
     }
     
+    public CrudResult<Integer> recupererNombreDeProduits(){
+        int nombreDeProduit = 0;
+
+        String requete = "SELECT COUNT(*) FROM Produit WHERE deletedAt IS NULL";
+        PreparedStatement ps = null;
+
+        try {
+            Connection conn = this.toConnect();
+            ps= conn.prepareStatement(requete);
+            ResultSet rs = ps.executeQuery();
+
+
+            if (rs.next()) {
+                nombreDeProduit = rs.getInt(1);
+            }
+            conn.close();
+            ps.close();
+            rs.close();
+
+        } catch (SQLException ex) {
+
+            return gererExceptionSQL(ex);
+        }
+        
+        return CrudResult.success(nombreDeProduit);
+        
+    }
+    
+    public CrudResult<List<Produit>> recupererProduitsEnDessousDeSeuil(){
+        List<Produit> listeProduit = new ArrayList<>();
+
+        String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
+                        "from Produit p " +
+                        "JOIN Categorie c ON c.idCat = p.idCategorie " +
+                        "LEFT JOIN Users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
+                        "where p.deletedAt is null AND p.stockActuel <= p.seuilAlerte";
+        
+        PreparedStatement ps = null;
+
+        try {
+            Connection conn = this.toConnect();
+            ps= conn.prepareStatement(requete);
+            ResultSet rs = ps.executeQuery();
+
+
+            while (rs.next()) {
+
+                Categorie categorie = new Categorie(rs.getInt(3), rs.getString(9));
+                Users user = new Users();
+                user.setIdUser(rs.getInt(4));
+                user.setLogin(rs.getString(11));
+                Produit inter = new Produit();
+                inter.setIdProduit(rs.getInt(1));
+                inter.setNom(rs.getString(2));
+                
+                inter.setUser(user);
+                inter.setCategorie(categorie);
+                inter.setPrixDeVente(rs.getDouble(5));
+                inter.setStockActuel(rs.getInt(6));
+                inter.setSeuilAlerte(rs.getInt(7));
+                
+
+                listeProduit.add(inter);
+            }
+            conn.close();
+            ps.close();
+            rs.close();
+
+
+        } catch (SQLException ex) {
+
+            return gererExceptionSQL(ex);
+        }
+        return CrudResult.success(listeProduit);
+    
+    }
+    
     
     @Override
     public CrudResult<List<Produit>> recupererTout() {
         List<Produit> listeProduit = new ArrayList<>();
 
         String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
-                        "from produit p " +
-                        "JOIN categorie c ON c.idCat = p.idCategorie " +
-                        "LEFT JOIN users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
+                        "from Produit p " +
+                        "JOIN Categorie c ON c.idCat = p.idCategorie " +
+                        "LEFT JOIN Users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
                         "where p.deletedAt is null ";
         PreparedStatement ps = null;
 
@@ -274,14 +392,70 @@ public class ProduitDAO extends AbstractDAO<Produit> {
 
                 listeProduit.add(inter);
             }
+            
+            conn.close();
+            ps.close();
+            rs.close();
 
 
         } catch (SQLException ex) {
 
-            return CrudResult.failure("Erreur BD : " + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         return CrudResult.success(listeProduit);
     }
+    public CrudResult<List<Produit>> recupererToutDisponible() {
+        List<Produit> listeProduit = new ArrayList<>();
+
+        String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
+                        "from Produit p " +
+                        "JOIN Categorie c ON c.idCat = p.idCategorie " +
+                        "LEFT JOIN Users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
+                        "where p.deletedAt is null AND p.stockActuel > 0";
+        PreparedStatement ps = null;
+
+        try {
+            Connection conn = this.toConnect();
+            ps= conn.prepareStatement(requete);
+            ResultSet rs = ps.executeQuery();
+
+
+            while (rs.next()) {
+
+                Categorie categorie = new Categorie(rs.getInt(3), rs.getString(9));
+                Users user = new Users();
+                user.setIdUser(rs.getInt(4));
+                user.setLogin(rs.getString(11));
+                Produit inter = new Produit();
+                inter.setIdProduit(rs.getInt(1));
+                inter.setNom(rs.getString(2));
+                
+                inter.setUser(user);
+                inter.setCategorie(categorie);
+                inter.setPrixDeVente(rs.getDouble(5));
+                inter.setStockActuel(rs.getInt(6));
+                inter.setSeuilAlerte(rs.getInt(7));
+
+                
+
+                listeProduit.add(inter);
+            }
+            
+            conn.close();
+            ps.close();
+            rs.close();
+
+
+        } catch (SQLException ex) {
+
+            return gererExceptionSQL(ex);
+        }
+        return CrudResult.success(listeProduit);
+    }
+    
+
+
+    
     
     public CrudResult<List<Produit>> recupererProduitsCategorie(Categorie categorie){
         List<Produit> liste_Produit_Categorie = new ArrayList<>();
@@ -316,9 +490,13 @@ public class ProduitDAO extends AbstractDAO<Produit> {
                 inter.setSeuilAlerte(rs.getInt(7));
                 liste_Produit_Categorie.add(inter);
             }
+            
+            conn.close();
+            ps.close();
+            rs.close();
         }catch (SQLException ex) {
 
-            return CrudResult.failure("Erreur BD : " + ex.getMessage());
+            return gererExceptionSQL(ex);
         }
         return CrudResult.success(liste_Produit_Categorie);
                 
@@ -334,10 +512,6 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         CrudResult<List<Produit>> rr = getInstance().recupererProduitsCategorie(new Categorie(1, ""));
         System.err.println(rr.getDonnes());
         //System.out.println(rr.getDonnes().Afficher());
-    }
-
-    public Iterable<Produit> findAll() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
 
