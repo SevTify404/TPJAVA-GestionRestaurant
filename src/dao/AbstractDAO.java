@@ -20,27 +20,65 @@ public abstract class AbstractDAO<TypeDesEntity> implements InterfaceDAO<TypeDes
     // J'ai ajouté la méthode de connexion ici pour qu'on ai plus a faire des 
     // import dans les DAO meme donc chaque DAO vien déja avec sa 
     
-    
     private final Map<String, String> dicoDesContraitesBD = Map.ofEntries(
-        Map.entry("fk_audit_user", Messages.CBD_FK_AUDIT_USER),
-        Map.entry("libelle", Messages.CBD_LIBELLE),
-        Map.entry("check_total_commande", Messages.CBD_CHECK_TOTAL_COMMANDE),
-        Map.entry("LigneCommande_index_12", Messages.CBD_LIGNECOMMANDE_INDEX_12),
-        Map.entry("fk_ligne_commande", Messages.CBD_FK_LIGNE_COMMANDE),
-        Map.entry("fk_ligne_produit", Messages.CBD_FK_LIGNE_PRODUIT),
-        Map.entry("LigneCommande_chk_1", Messages.CBD_LIGNECOMMANDE_CHK_1),
-        Map.entry("LigneCommande_chk_2", Messages.CBD_LIGNECOMMANDE_CHK_2),
-        Map.entry("fk_mouvement_produit", Messages.CBD_FK_MOUVEMENT_PRODUIT),
-        Map.entry("MouvementDeStock_chk_1", Messages.CBD_MOUVEMENTDESTOCK_CHK_1),
-        Map.entry("nom", Messages.CBD_NOM),
-        Map.entry("Produit_index_0", Messages.CBD_PRODUIT_INDEX_0),
-        Map.entry("fk_produit_categorie", Messages.CBD_FK_PRODUIT_CATEGORIE),
-        Map.entry("fk_produit_user", Messages.CBD_FK_PRODUIT_USER),
-        Map.entry("Produit_chk_1", Messages.CBD_PRODUIT_CHK_1),
-        Map.entry("Produit_chk_2", Messages.CBD_PRODUIT_CHK_2),
-        Map.entry("fk_Users_idUser", Messages.CBD_FK_USERS_IDUSER),
-        Map.entry("login", Messages.CBD_LOGIN)
-    );
+
+
+    Map.entry("fk_audit_user", Messages.CBD_FK_AUDIT_USER),
+    Map.entry("Audit.fk_audit_user", Messages.CBD_FK_AUDIT_USER),
+
+    Map.entry("fk_produit_categorie", Messages.CBD_FK_PRODUIT_CATEGORIE),
+    Map.entry("Produit.fk_produit_categorie", Messages.CBD_FK_PRODUIT_CATEGORIE),
+
+    Map.entry("fk_produit_user", Messages.CBD_FK_PRODUIT_USER),
+    Map.entry("Produit.fk_produit_user", Messages.CBD_FK_PRODUIT_USER),
+
+    Map.entry("fk_mouvement_produit", Messages.CBD_FK_MOUVEMENT_PRODUIT),
+    Map.entry("MouvementDeStock.fk_mouvement_produit", Messages.CBD_FK_MOUVEMENT_PRODUIT),
+
+    Map.entry("fk_ligne_commande", Messages.CBD_FK_LIGNE_COMMANDE),
+    Map.entry("LigneCommande.fk_ligne_commande", Messages.CBD_FK_LIGNE_COMMANDE),
+
+    Map.entry("fk_ligne_produit", Messages.CBD_FK_LIGNE_PRODUIT),
+    Map.entry("LigneCommande.fk_ligne_produit", Messages.CBD_FK_LIGNE_PRODUIT),
+
+    Map.entry("fk_Users_idUser", Messages.CBD_FK_USERS_IDUSER),
+    Map.entry("Commande.fk_Users_idUser", Messages.CBD_FK_USERS_IDUSER),
+
+
+    Map.entry("libelle", Messages.CBD_LIBELLE),
+    Map.entry("Categorie.libelle", Messages.CBD_LIBELLE),
+
+    Map.entry("Produit.nom", Messages.CBD_NOM),
+    Map.entry("nom", Messages.CBD_NOM),
+
+    Map.entry("login", Messages.CBD_LOGIN),
+    Map.entry("Users.login", Messages.CBD_LOGIN),
+
+    Map.entry("Produit_index_0", Messages.CBD_PRODUIT_INDEX_0),
+    Map.entry("Produit.Produit_index_0", Messages.CBD_PRODUIT_INDEX_0),
+
+    Map.entry("LigneCommande_index_12", Messages.CBD_LIGNECOMMANDE_INDEX_12),
+    Map.entry("LigneCommande.LigneCommande_index_12", Messages.CBD_LIGNECOMMANDE_INDEX_12),
+
+
+    Map.entry("check_total_commande", Messages.CBD_CHECK_TOTAL_COMMANDE),
+
+    Map.entry("Produit_chk_1", Messages.CBD_PRODUIT_CHK_1),
+    Map.entry("Produit.Produit_chk_1", Messages.CBD_PRODUIT_CHK_1),
+
+    Map.entry("Produit_chk_2", Messages.CBD_PRODUIT_CHK_2),
+    Map.entry("Produit.Produit_chk_2", Messages.CBD_PRODUIT_CHK_2),
+
+    Map.entry("LigneCommande_chk_1", Messages.CBD_LIGNECOMMANDE_CHK_1),
+    Map.entry("LigneCommande.LigneCommande_chk_1", Messages.CBD_LIGNECOMMANDE_CHK_1),
+
+    Map.entry("LigneCommande_chk_2", Messages.CBD_LIGNECOMMANDE_CHK_2),
+    Map.entry("LigneCommande.LigneCommande_chk_2", Messages.CBD_LIGNECOMMANDE_CHK_2),
+
+    Map.entry("MouvementDeStock_chk_1", Messages.CBD_MOUVEMENTDESTOCK_CHK_1),
+    Map.entry("MouvementDeStock.MouvementDeStock_chk_1", Messages.CBD_MOUVEMENTDESTOCK_CHK_1)
+
+);
     
     
 
@@ -74,6 +112,7 @@ public abstract class AbstractDAO<TypeDesEntity> implements InterfaceDAO<TypeDes
         if (contrainte == null) {
             return CrudResult.failure(erreurSimple);
         }
+        System.out.println(contrainte);
         
         String resultat = dicoDesContraitesBD.get(contrainte);
         
