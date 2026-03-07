@@ -76,7 +76,7 @@ public class ProduitDAO extends AbstractDAO<Produit> {
         String requete = "SELECT p.* , c.libelle ,u.idUser, u.login " +
                         "from Produit p " +
                         "JOIN Categorie c on c.idCat = p.idCategorie " +
-                        "LEFT JOIN users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
+                        "LEFT JOIN Users u on p.idUser = u.idUser AND u.deletedAt IS NULL " +
                         "where idProduit = ? and p.deletedAt is null ";
         PreparedStatement ps = null;
         

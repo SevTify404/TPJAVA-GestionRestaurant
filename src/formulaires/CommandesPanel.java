@@ -27,6 +27,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import utilitaires.ApplicationColors;
@@ -130,17 +131,27 @@ public class CommandesPanel extends javax.swing.JPanel {
     }
     
     
-    private void mettreListeProduitAJour(){
-        CrudResult<List<Produit>> produits = ProduitDAO.getInstance().recupererToutDisponible();
-        
-        if (produits.estUneErreur()) {
-            showCustomErreurJOptionPane("Erreur lors du chargement des produit : " + produits.getErreur());            
-        }
-        
-        tousLesProduits = produits.getDonnes();
-        
-        afficherProduits(tousLesProduits);
-    
+    private void mettreListeProduitAJour() {
+        new SwingWorker<List<Produit>, Void>() {
+            @Override
+            protected List<Produit> doInBackground() throws Exception {
+                CrudResult<List<Produit>> produits = ProduitDAO.getInstance().recupererToutDisponible();
+                if (produits.estUneErreur()) {
+                    throw new Exception(produits.getErreur());
+                }
+                return produits.getDonnes();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    tousLesProduits = get();
+                    afficherProduits(tousLesProduits);
+                } catch (Exception ex) {
+                    showCustomErreurJOptionPane("Erreur lors du chargement des produits : " + ex.getMessage());
+                }
+            }
+        }.execute();
     }
     
     private void showCustomErreurJOptionPane(String message){
@@ -290,69 +301,94 @@ public class CommandesPanel extends javax.swing.JPanel {
         jpLigneCommandes.repaint();
     }
     
-    private void chargerToutesLesCommandes(){
-        CrudResult<List<Commande>> rsultatDao = CommandeDAO.getInstance().recupererTout();
-        
-        if (rsultatDao.estUneErreur()) {
-            showCustomErreurJOptionPane(rsultatDao.getErreur());           
-            return;
-        }
-        
-        configurerEtRemplirTableau(jtCommandes, rsultatDao.getDonnes());
-    
-    
+    private void chargerToutesLesCommandes() {
+        new SwingWorker<List<Commande>, Void>() {
+            @Override
+            protected List<Commande> doInBackground() throws Exception {
+                CrudResult<List<Commande>> resultatDao = CommandeDAO.getInstance().recupererTout();
+                if (resultatDao.estUneErreur()) {
+                    throw new Exception(resultatDao.getErreur());
+                }
+                return resultatDao.getDonnes();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    configurerEtRemplirTableau(jtCommandes, get());
+                } catch (Exception ex) {
+                    showCustomErreurJOptionPane(ex.getMessage());
+                }
+            }
+        }.execute();
     }
     private void chargerCommandesEnAttente() {
         jpConteneurCommandeBrouillon.removeAll();
-        
-        CrudResult<List<Commande>> enAttente = CommandeDAO.
-            getInstance().
-            recupererCommandeEnCoursUsers(
-                AuthentificationManager.getInstance().
-                    recupererUtilisateurConnecte()
-            );
-        
-        if (enAttente.estUneErreur()) {
-            showCustomErreurJOptionPane(enAttente.getErreur());
-            return;
-        }
-        
-        List<Commande> listeCommandes = enAttente.getDonnes();
-        
-        for (Commande c : listeCommandes) {
-            List<LigneCommande> lignes = CommandeDAO.getInstance().recupererLignes(c.getIdCommande()).getDonnes();
-            
-            if (lignes == null || lignes.isEmpty()) {
-                continue;
-            } else {
-                c.setLigneCommnandes(lignes);
-            }
-        }
-        
-        
-        for (Commande cmd : listeCommandes) {
-            CommandeEnCoursCard card = new CommandeEnCoursCard(
-                cmd,
-                () -> {
-                    jdCommandesEnAttente.dispose(); 
-                    chargerCommande(cmd);
-                    CommandeDAO.getInstance().suppressionLogique(cmd);
-                },
-                () -> {
-                    if (JOptionPane.showConfirmDialog(this, "Supprimer ce brouillon ?") == 0) {
-                        CommandeDAO.getInstance().suppressionLogique(cmd);
-                        chargerCommandesEnAttente(); 
-                    }
-                }
-            );
-            
-            // Ce qu'il te manquait 
-            jpConteneurCommandeBrouillon.add(card);
-            jpConteneurCommandeBrouillon.add(Box.createRigidArea(new Dimension(0, 10)));
-        }
-
         jpConteneurCommandeBrouillon.revalidate();
         jpConteneurCommandeBrouillon.repaint();
+
+        new SwingWorker<List<Commande>, Void>() {
+            @Override
+            protected List<Commande> doInBackground() throws Exception {
+                CrudResult<List<Commande>> enAttente = CommandeDAO.getInstance()
+                    .recupererCommandeEnCoursUsers(
+                        AuthentificationManager.getInstance().recupererUtilisateurConnecte()
+                    );
+
+                if (enAttente.estUneErreur()) {
+                    throw new Exception(enAttente.getErreur());
+                }
+
+                List<Commande> listeCommandes = enAttente.getDonnes();
+
+                for (Commande c : listeCommandes) {
+                    List<LigneCommande> lignes = CommandeDAO.getInstance()
+                        .recupererLignes(c.getIdCommande()).getDonnes();
+                    if (lignes != null && !lignes.isEmpty()) {
+                        c.setLigneCommnandes(lignes);
+                    }
+                }
+
+                return listeCommandes;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<Commande> listeCommandes = get();
+
+                    for (Commande cmd : listeCommandes) {
+                        if (cmd.getLigneCommnandes() == null || cmd.getLigneCommnandes().isEmpty()) {
+                            continue;
+                        }
+
+                        CommandeEnCoursCard card = new CommandeEnCoursCard(
+                            cmd,
+                            () -> {
+                                jdCommandesEnAttente.dispose();
+                                chargerCommande(cmd);
+                                CommandeDAO.getInstance().suppressionLogique(cmd);
+                            },
+                            () -> {
+                                if (JOptionPane.showConfirmDialog(CommandesPanel.this, "Supprimer ce brouillon ?") == 0) {
+                                    CommandeDAO.getInstance().suppressionLogique(cmd);
+                                    chargerCommandesEnAttente();
+                                }
+                            }
+                        );
+
+                        jpConteneurCommandeBrouillon.add(card);
+                        jpConteneurCommandeBrouillon.add(Box.createRigidArea(new Dimension(0, 10)));
+                    }
+
+                    jpConteneurCommandeBrouillon.revalidate();
+                    jpConteneurCommandeBrouillon.repaint();
+
+                } catch (Exception ex) {
+                    showCustomErreurJOptionPane(ex.getMessage());
+                }
+            }
+        }.execute();
     }
     
     public void chargerCommande(Commande cmd) {

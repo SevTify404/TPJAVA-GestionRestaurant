@@ -364,7 +364,7 @@ public class CommandeDAO extends AbstractDAO<Commande> {
                              COUNT(*) AS nbCommandesValidees,
                              COALESCE(SUM(total), 0) AS chiffreAffaireJour
                          FROM Commande
-                         WHERE etat = 'VALIDE'
+                         WHERE etat = 'VALIDEE'
                          AND dateCommande >= CURDATE()
                          AND dateCommande < CURDATE() + INTERVAL 1 DAY;""";
 
